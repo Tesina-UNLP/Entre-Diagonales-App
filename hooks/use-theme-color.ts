@@ -1,6 +1,6 @@
 // hooks/useThemeColors.ts
 import { useColorScheme } from 'react-native';
-import Colors, { ThemeName, TOKENS } from '../constants/Colors';
+import Colors, { ThemeName, TOKENS } from '../constants/colors';
 
 export function useThemeName(): ThemeName {
   const scheme = useColorScheme();

@@ -1,10 +1,10 @@
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedText } from "@/components/themed-text";
 
-export default function HomeScreen() {
+export default function RankingScreen() {
   return (
     <ThemedBackground>
-      <ThemedText>Home</ThemedText>
+      <ThemedText>Scanner</ThemedText>
     </ThemedBackground>
   );
 }

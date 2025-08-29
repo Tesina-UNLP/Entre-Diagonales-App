@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "app-entre-diagonales",
-    "slug": "app-entre-diagonales",
+    "name": "Entre Diagonales",
+    "slug": "entre-diagonales",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "appentrediagonales",
+    "scheme": "entrediagonales",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -14,7 +14,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#004643"
       },
       "edgeToEdgeEnabled": true
     },
@@ -30,8 +30,7 @@
         {
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "resizeMode": "contain"
         }
       ]
     ],
