@@ -1,10 +1,10 @@
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedText } from "@/components/themed-text";
 
-export default function HomeScreen() {
+export default function ProfileScreen() {
   return (
     <ThemedBackground>
-      <ThemedText>Home</ThemedText>
+      <ThemedText>Profile</ThemedText>
     </ThemedBackground>
   );
 }
