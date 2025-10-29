@@ -1,4 +1,3 @@
-
 # App móvil de Entre Diagonales 👋
 
 Este es un proyecto de [Expo](https://expo.dev) creado con [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).

@@ -1,10 +1,10 @@
 // hooks/useThemeColors.ts
-import { useColorScheme } from 'react-native';
-import Colors, { ThemeName, TOKENS } from '../constants/colors';
+import { useColorScheme } from "react-native";
+import Colors, { ThemeName, TOKENS } from "../constants/colors";
 
 export function useThemeName(): ThemeName {
   const scheme = useColorScheme();
-  return (scheme === 'dark' ? 'dark' : 'light') as ThemeName;
+  return (scheme === "dark" ? "dark" : "light") as ThemeName;
 }
 
 export function useThemeColor() {

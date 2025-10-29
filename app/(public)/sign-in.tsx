@@ -1,0 +1,297 @@
+import LogoWhite from "@/components/icons/logo-white";
+import { ThemedBackground } from "@/components/themed-background";
+import { ThemedButton } from "@/components/themed-button";
+import { ThemedText } from "@/components/themed-text";
+import { TOKENS } from "@/constants/colors";
+import { useAuth } from "@/hooks/use-auth";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { router } from "expo-router";
+import React, { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { z } from "zod";
+
+const loginSchema = z.object({
+  email: z
+    .string()
+    .min(1, "El email es requerido")
+    .email("Ingresa un email válido"),
+  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
+
+const SignIn = () => {
+  const { login } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema as any),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const handleSignIn = () => {
+    setIsSubmitting(true);
+    login("demo@example.com", "password");
+    router.replace("/(tabs)");
+    setIsSubmitting(false);
+  };
+
+  // const handleGoogleSignIn = async () => {
+  //   try {
+  //     await loginWithGoogle();
+  //     // onSuccess?.();
+  //   } catch (error: any) {
+  //     const errorMessage =
+  //       error.message || "Error al iniciar sesión con Google";
+  //     // onError?.(errorMessage);
+  //     Alert.alert("Error", errorMessage);
+  //   }
+  // };
+
+  return (
+    <ThemedBackground style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.keyboardView}
+      >
+        <View style={styles.header}>
+          <LogoWhite />
+          <ThemedText type="subtitle">Entre Diagonales</ThemedText>
+        </View>
+        <View style={styles.titleContainer}>
+          <ThemedText type="title">Ingresa a tu cuenta</ThemedText>
+          <View style={styles.subtitleWrapper}>
+            <ThemedText type="muted">
+              Empieza a explorar la ciudad de una forma diferente
+            </ThemedText>
+          </View>
+        </View>
+        {/* form */}
+        <View style={styles.formContainer}>
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                style={[styles.input, errors.email && styles.inputError]}
+                placeholder="email@email.com"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+                placeholderTextColor={TOKENS.text}
+              />
+            )}
+          />
+          {errors.email && (
+            <ThemedText style={styles.errorText}>
+              {errors.email.message}
+            </ThemedText>
+          )}
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  placeholder="Contraseña"
+                  style={[
+                    styles.passwordInput,
+                    errors.password && styles.inputError,
+                  ]}
+                  placeholderTextColor={TOKENS.text}
+                  secureTextEntry={!showPassword}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                />
+                <TouchableOpacity
+                  onPress={() => setShowPassword(!showPassword)}
+                  style={styles.eyeButton}
+                >
+                  <Ionicons
+                    name={showPassword ? "eye-off-outline" : "eye-outline"}
+                    size={18}
+                    color={TOKENS.muted}
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
+          />
+          {errors.password && (
+            <ThemedText style={styles.errorText}>
+              {errors.password.message}
+            </ThemedText>
+          )}
+          <View style={styles.forgotPasswordContainer}>
+            <ThemedText
+              type="link"
+              onPress={() => router.push("/(public)/forgot-password")}
+            >
+              Olvidaste tu contrasena?
+            </ThemedText>
+          </View>
+
+          <View style={styles.signInButtonContainer}>
+            <ThemedButton
+              variant="primary"
+              onPress={handleSubmit(handleSignIn)}
+              disabled={isSubmitting}
+            >
+              Iniciar Sesion
+            </ThemedButton>
+          </View>
+        </View>
+        <View style={styles.divider} />
+
+        <View style={styles.googleButtonContainer}>
+          <ThemedButton variant="secondary" onPress={handleSignIn}>
+            <View style={styles.googleButtonContent}>
+              <FontAwesome name="google" size={24} color={TOKENS.primary} />
+              <ThemedText
+                type="defaultSemiBold"
+                style={styles.googleButtonText}
+              >
+                Continuar con Google
+              </ThemedText>
+            </View>
+          </ThemedButton>
+        </View>
+        <ThemedText type="muted">
+          No tienes una cuenta?{" "}
+          <ThemedText
+            type="link"
+            onPress={() => router.push("/(public)/sign-up")}
+          >
+            Registrate
+          </ThemedText>
+        </ThemedText>
+      </KeyboardAvoidingView>
+    </ThemedBackground>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: "center",
+    justifyContent: "flex-start",
+    marginTop: 24,
+    gap: 20,
+  },
+  keyboardView: {
+    flex: 1,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    gap: 20,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    gap: 10,
+  },
+  titleContainer: {
+    width: "100%",
+    flexDirection: "column",
+    gap: 10,
+  },
+  subtitleWrapper: {
+    maxWidth: 300,
+  },
+  formContainer: {
+    flexDirection: "column",
+    gap: 12,
+    alignItems: "center",
+    width: "100%",
+  },
+  input: {
+    width: "100%",
+    height: 50,
+    borderColor: TOKENS.tabBarInactive,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    color: TOKENS.text,
+  },
+  passwordContainer: {
+    width: "100%",
+    position: "relative",
+  },
+  passwordInput: {
+    width: "100%",
+    height: 50,
+    borderColor: TOKENS.tabBarInactive,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingRight: 50,
+    color: TOKENS.text,
+  },
+  eyeButton: {
+    position: "absolute",
+    right: 12,
+    top: 13,
+    padding: 4,
+  },
+  forgotPasswordContainer: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    width: "100%",
+  },
+  signInButtonContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingBottom: 10,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: TOKENS.tabBarInactive,
+    width: "100%",
+    marginBottom: 10,
+  },
+  googleButtonContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingBottom: 20,
+  },
+  googleButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  googleButtonText: {
+    color: TOKENS.primary,
+    fontSize: 16,
+  },
+  errorText: {
+    color: TOKENS.error,
+    alignSelf: "flex-start",
+    marginTop: -8,
+    marginBottom: 8,
+  },
+  inputError: {
+    borderColor: TOKENS.error,
+  },
+});
+
+export default SignIn;

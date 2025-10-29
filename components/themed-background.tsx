@@ -9,7 +9,7 @@ interface ThemedBackgroundProps {
 
 export function ThemedBackground({ children, style }: ThemedBackgroundProps) {
   return (
-    <View style={[styles.container, style]}>
+    <View style={[styles.container]}>
       {/* Base color */}
       <View style={[StyleSheet.absoluteFill, { backgroundColor: "#004643" }]} />
 
@@ -50,9 +50,7 @@ export function ThemedBackground({ children, style }: ThemedBackgroundProps) {
       </Svg>
 
       {/* Content */}
-      <View style={{ flex: 1, paddingInline: 16, paddingTop: 30 }}>
-        {children}
-      </View>
+      <View style={[styles.content, style]}>{children}</View>
     </View>
   );
 }
@@ -61,4 +59,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  content: { flex: 1, paddingInline: 24, paddingTop: 30 },
 });
