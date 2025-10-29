@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import { Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 
 import { z } from "zod";
 
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     justifyContent: "flex-start",
-    marginTop: 24,
+    marginTop: Platform.OS === "ios" ? 40 : 24,
     gap: 20,
   },
   header: {

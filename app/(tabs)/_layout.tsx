@@ -8,7 +8,7 @@ import { HapticTab } from "@/components/tab-bar/haptic-tab";
 import Colors from "@/constants/colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Tabs } from "expo-router";
-import { Text } from "react-native";
+import { Platform, Text } from "react-native";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -25,10 +25,10 @@ export default function TabLayout() {
           position: "absolute",
           backgroundColor: "transparent",
           borderColor: "transparent",
-          height: 70,
+          height: Platform.OS === "ios" ? 75 : 70,
           elevation: 0,
           shadowOpacity: 0,
-          paddingTop: 5,
+          paddingTop: Platform.OS === "ios" ? 2 : 5,
         },
       }}
     >

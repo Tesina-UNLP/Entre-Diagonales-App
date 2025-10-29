@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router } from "expo-router";
 import React from "react";
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Image, Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 
 const npcImages: { [key: number]: any } = {
   1: require("../../assets/images/onboarding/npcs/emilia.png"),
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   navigationContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingBottom: 20,
+    paddingBottom: Platform.OS === "ios" ? 30 : 20,
   },
   progressBarContainer: {
     width: 100,

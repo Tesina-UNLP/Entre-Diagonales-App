@@ -5,7 +5,7 @@ import { TOKENS } from "@/constants/colors";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Image, Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 
 interface PresentationStep {
   id: number;
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
   navigationContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingBottom: 20,
+    paddingBottom: Platform.OS === "ios" ? 30 : 20,
   },
   nextButton: {
     backgroundColor: TOKENS.primary,

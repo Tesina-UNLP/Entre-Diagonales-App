@@ -45,7 +45,7 @@ export default function RootLayout() {
       <AuthProvider>
         <Slot screenOptions={{ animation: "fade" }} />
       </AuthProvider>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
     </ThemeProvider>
   );
 }

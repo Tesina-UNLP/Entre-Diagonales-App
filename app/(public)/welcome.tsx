@@ -5,7 +5,7 @@ import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
 import { router } from "expo-router";
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 
 const Welcome = () => {
   return (
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   description: {
     color: TOKENS.muted,
     textAlign: "center",
-    maxWidth: 240,
+    maxWidth: Platform.OS === "ios" ? 300 : 240,
     marginTop: 5,
   },
   buttonsContainer: {
