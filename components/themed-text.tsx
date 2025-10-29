@@ -1,11 +1,18 @@
 import { StyleSheet, Text, type TextProps } from "react-native";
 
+import { TOKENS } from "@/constants/colors";
 import { useThemeColor } from "@/hooks/use-theme-color";
 
 export type ThemedTextProps = TextProps & {
   lightColor?: string;
   darkColor?: string;
-  type?: "default" | "title" | "defaultSemiBold" | "subtitle" | "link";
+  type?:
+    | "default"
+    | "title"
+    | "defaultSemiBold"
+    | "subtitle"
+    | "link"
+    | "muted";
 };
 
 export function ThemedText({
@@ -26,6 +33,7 @@ export function ThemedText({
         type === "defaultSemiBold" ? styles.defaultSemiBold : undefined,
         type === "subtitle" ? styles.subtitle : undefined,
         type === "link" ? styles.link : undefined,
+        type === "muted" ? styles.muted : undefined,
         style,
       ]}
       {...rest}
@@ -37,24 +45,32 @@ const styles = StyleSheet.create({
   default: {
     fontSize: 16,
     lineHeight: 24,
+    fontFamily: "ClashDisplay",
   },
   defaultSemiBold: {
     fontSize: 16,
     lineHeight: 24,
-    fontWeight: "600",
+    fontFamily: "ClashDisplaySemiBold",
   },
   title: {
     fontSize: 32,
-    fontWeight: "bold",
-    lineHeight: 32,
+    lineHeight: 40,
+    fontFamily: "ClashDisplayBold",
   },
   subtitle: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontFamily: "ClashDisplayBold",
   },
   link: {
     lineHeight: 30,
     fontSize: 16,
-    color: "#0a7ea4",
+    color: TOKENS.tabBarInactive,
+    fontFamily: "ClashDisplay",
+  },
+  muted: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: TOKENS.muted,
+    fontFamily: "ClashDisplay",
   },
 });

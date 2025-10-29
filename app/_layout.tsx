@@ -4,12 +4,13 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 
+import { AuthProvider } from "@/contexts/auth";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Slot } from "expo-router";
 import { useEffect } from "react";
 
 SplashScreen.setOptions({
@@ -23,7 +24,10 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-    ClashDisplay: require("../assets/fonts/ClashDisplay-Variable.ttf"),
+    ClashDisplay: require("../assets/fonts/ClashDisplay-Regular.otf"),
+    ClashDisplayBold: require("../assets/fonts/ClashDisplay-Bold.otf"),
+    ClashDisplaySemiBold: require("../assets/fonts/ClashDisplay-Semibold.otf"),
+    ClashDisplayMedium: require("../assets/fonts/ClashDisplay-Medium.otf"),
   });
 
   useEffect(() => {
@@ -38,11 +42,10 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
+      <AuthProvider>
+        <Slot screenOptions={{ animation: "fade" }} />
+      </AuthProvider>
+      <StatusBar style="light" />
     </ThemeProvider>
   );
 }
