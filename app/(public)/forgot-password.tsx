@@ -9,7 +9,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Platform,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Toast } from "react-native-toast-message/lib/src/Toast";
 
 import { z } from "zod";
@@ -35,7 +41,7 @@ const ForgotPassword = () => {
         text1: "Solicitud de restablecimiento de contraseña enviada",
         text2: "Revisa tu correo para más instrucciones",
       });
-    } catch (error: any) {
+    } catch () {
       const message = "Error al enviar solicitud";
       Toast.show({
         type: "error",
@@ -121,13 +127,9 @@ const ForgotPassword = () => {
           no recibes el email en 5 minutos, revisa tu carpeta de spam.
         </ThemedText>
       </View>
-      { /* @ts-ignore: Ignorar error de tipos del path generado por expo-router */}
+      {/* @ts-ignore: Ignorar error de tipos del path generado por expo-router */}
       <ExternalLink href={process.env.EXPO_PUBLIC_WEB_FRONTEND + "/help"}>
-        <ThemedText
-          type="default"
-        >
-          Necesitas ayuda?
-        </ThemedText>
+        <ThemedText type="default">Necesitas ayuda?</ThemedText>
       </ExternalLink>
     </ThemedBackground>
   );

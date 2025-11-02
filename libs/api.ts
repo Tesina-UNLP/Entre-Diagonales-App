@@ -1,5 +1,5 @@
-
-const apiBaseUrl = process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000/api";
+const apiBaseUrl =
+  process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000/api";
 
 export type CharacterApiResponse = {
   id: number;
@@ -21,7 +21,11 @@ export const api = {
     const data = await response.json().catch(() => null);
     if (!response.ok) {
       const message =
-        data?.error || data?.message || data?.detail || response.statusText || "Login failed";
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Login failed";
       throw new Error(message);
     }
     return data;
@@ -38,32 +42,52 @@ export const api = {
     const data = await response.json().catch(() => null);
     if (!response.ok) {
       const message =
-        data?.error || data?.message || data?.detail || response.statusText || "Google login failed";
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Google login failed";
       throw new Error(message);
     }
     return data;
   },
 
   // register
-  register: async (email: string, password: string, confirmPassword: string) => {
+  register: async (
+    email: string,
+    password: string,
+    confirmPassword: string,
+  ) => {
     const response = await fetch(`${apiBaseUrl}/auth/register/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, password, confirm_password: confirmPassword }),
+      body: JSON.stringify({
+        email,
+        password,
+        confirm_password: confirmPassword,
+      }),
     });
     const data = await response.json().catch(() => null);
     if (!response.ok) {
       const message =
-        data?.error || data?.message || data?.detail || response.statusText || "Registration failed";
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Registration failed";
       throw new Error(message);
     }
     return data;
   },
 
   // completar onboarding
-  completeOnboarding: async (token: string, character_id: number, notification_token: string) => {
+  completeOnboarding: async (
+    token: string,
+    character_id: number,
+    notification_token: string,
+  ) => {
     const response = await fetch(`${apiBaseUrl}/onboarding/`, {
       method: "POST",
       headers: {
@@ -75,7 +99,11 @@ export const api = {
     const data = await response.json().catch(() => null);
     if (!response.ok) {
       const message =
-        data?.error || data?.message || data?.detail || response.statusText || "Onboarding completion failed";
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Onboarding completion failed";
       throw new Error(message);
     }
     return data;
@@ -92,7 +120,11 @@ export const api = {
     const data = await response.json().catch(() => null);
     if (!response.ok) {
       const message =
-        data?.error || data?.message || data?.detail || response.statusText || "Forgot password request failed";
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Forgot password request failed";
       throw new Error(message);
     }
     return data;
@@ -108,7 +140,11 @@ export const api = {
     const data = await response.json().catch(() => null);
     if (!response.ok) {
       const message =
-        data?.error || data?.message || data?.detail || response.statusText || "Fetching profile failed";
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Fetching profile failed";
       throw new Error(message);
     }
     return data;
@@ -125,9 +161,13 @@ export const api = {
     const data = await response.json().catch(() => null);
     if (!response.ok) {
       const message =
-        data?.error || data?.message || data?.detail || response.statusText || "Fetching characters failed";
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Fetching characters failed";
       throw new Error(message);
     }
     return data as CharacterApiResponse[];
-  }
+  },
 };

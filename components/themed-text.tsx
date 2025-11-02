@@ -7,12 +7,12 @@ export type ThemedTextProps = TextProps & {
   lightColor?: string;
   darkColor?: string;
   type?:
-  | "default"
-  | "title"
-  | "defaultSemiBold"
-  | "subtitle"
-  | "link"
-  | "muted";
+    | "default"
+    | "title"
+    | "defaultSemiBold"
+    | "subtitle"
+    | "link"
+    | "muted";
 };
 
 export function ThemedText({
