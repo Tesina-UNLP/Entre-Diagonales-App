@@ -9,7 +9,8 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.entrediagonales.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -17,7 +18,7 @@
         "backgroundColor": "#004643"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.entrediagonales.entrediagonales"
+      "package": "com.entrediagonales.app"
     },
     "web": {
       "bundler": "metro",
@@ -40,6 +41,13 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "owner": "entre-diagonales",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "d8afb0e4-db66-480e-800f-b4d06f1368aa"
+      }
     }
   }
 }

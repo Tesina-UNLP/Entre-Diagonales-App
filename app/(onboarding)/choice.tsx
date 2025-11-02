@@ -3,37 +3,34 @@ import { ThemedButton } from "@/components/themed-button";
 import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
+import { api, CharacterApiResponse } from "@/libs/api";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Image, Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 
-const npcImages: { [key: number]: any } = {
-  1: require("../../assets/images/onboarding/npcs/emilia.png"),
-  2: require("../../assets/images/onboarding/npcs/roberta.png"),
-  3: require("../../assets/images/onboarding/npcs/julio.png"),
-  4: require("../../assets/images/onboarding/npcs/juan.png"),
-  5: require("../../assets/images/onboarding/npcs/jose.png"),
-  6: require("../../assets/images/onboarding/npcs/noelia.png"),
-};
-
-const npcNames: { [key: number]: string } = {
-  1: "Emilia",
-  2: "Roberta",
-  3: "Julio",
-  4: "Juan",
-  5: "Jose",
-  6: "Noelia",
-};
 
 const xThinkingImage = require("../../assets/images/onboarding/choice.png");
 
 const Choice = () => {
-  const { completeOnboarding } = useAuth();
-  const [selectedNpc, setSelectedNpc] = React.useState<number | null>(null);
+  const { completeOnboarding, user } = useAuth();
+  const [npcs, setNpcs] = useState<CharacterApiResponse[]>([]);
+  const [selectedNpc, setSelectedNpc] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchNpcs = async () => {
+      const token = user?.access;
+      if (!token) return;
+      const data = await api.getCharacters(token);
+      setNpcs(data);
+    };
+
+    fetchNpcs();
+  }, [user]);
 
   const complete = () => {
-    completeOnboarding();
+    if (!selectedNpc) return;
+    completeOnboarding({ characterId: selectedNpc });
     router.replace("/(tabs)");
   };
 
@@ -64,7 +61,7 @@ const Choice = () => {
         </ThemedText>
 
         <View style={styles.grid}>
-          {Object.entries(npcImages).map(([id, source]) => (
+          {npcs?.map(({ id, name, image_url }: any) => (
             <TouchableOpacity
               key={id}
               onPress={() => setSelectedNpc(Number(id))}
@@ -79,13 +76,13 @@ const Choice = () => {
                 }}
               >
                 <Image
-                  source={source}
+                  source={{ uri: image_url }}
                   style={styles.personImage}
                   resizeMode="contain"
                 />
               </View>
               <ThemedText type="muted" style={styles.personName}>
-                {npcNames[Number(id)]}
+                {name}
               </ThemedText>
             </TouchableOpacity>
           ))}

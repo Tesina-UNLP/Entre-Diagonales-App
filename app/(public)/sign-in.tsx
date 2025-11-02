@@ -18,6 +18,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -25,13 +26,13 @@ const loginSchema = z.object({
     .string()
     .min(1, "El email es requerido")
     .email("Ingresa un email válido"),
-  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
+  password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const SignIn = () => {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
@@ -46,11 +47,30 @@ const SignIn = () => {
     },
   });
 
-  const handleSignIn = () => {
-    setIsSubmitting(true);
-    login("demo@example.com", "password");
-    router.replace("/(tabs)");
-    setIsSubmitting(false);
+  const handleSignIn = async (data: LoginFormData) => {
+    try {
+      setIsSubmitting(true);
+      const profileUser = await login(data.email, data.password);
+      Toast.show({
+        type: "success",
+        text1: "Inicio de sesión exitoso",
+        text2: "Bienvenido",
+      });
+      if (profileUser?.on_boarding_completed_at) {
+        router.replace("/(tabs)");
+      } else {
+        router.replace("/(onboarding)/presentation");
+      }
+    } catch (error: any) {
+      const message = error?.message || "Error al iniciar sesión";
+      Toast.show({
+        type: "error",
+        text1: "Error al iniciar sesión",
+        text2: message,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // const handleGoogleSignIn = async () => {
@@ -164,7 +184,7 @@ const SignIn = () => {
         <View style={styles.divider} />
 
         <View style={styles.googleButtonContainer}>
-          <ThemedButton variant="secondary" onPress={handleSignIn}>
+          <ThemedButton variant="secondary" onPress={() => { }}>
             <View style={styles.googleButtonContent}>
               <FontAwesome name="google" size={24} color={TOKENS.primary} />
               <ThemedText

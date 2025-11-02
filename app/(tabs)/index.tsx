@@ -9,7 +9,7 @@ export default function HomeScreen() {
     <ThemedBackground style={styles.container}>
       <ThemedText>Home</ThemedText>
       {user ? (
-        <ThemedText>Welcome, {user.name || user.email}!</ThemedText>
+        <ThemedText>Welcome, {user.display_name || user.username}!</ThemedText>
       ) : (
         <ThemedText>Please log in.</ThemedText>
       )}
