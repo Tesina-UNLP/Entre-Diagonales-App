@@ -17,7 +17,7 @@ const Index = () => {
   }
 
   if (user) {
-    if (!user.hasCompletedOnboarding) {
+    if (!user.on_boarding_completed_at) {
       return <Redirect href="/(onboarding)/presentation" />;
     }
     return <Redirect href="/(tabs)" />;

@@ -7,12 +7,12 @@ export type ThemedTextProps = TextProps & {
   lightColor?: string;
   darkColor?: string;
   type?:
-    | "default"
-    | "title"
-    | "defaultSemiBold"
-    | "subtitle"
-    | "link"
-    | "muted";
+  | "default"
+  | "title"
+  | "defaultSemiBold"
+  | "subtitle"
+  | "link"
+  | "muted";
 };
 
 export function ThemedText({
@@ -66,6 +66,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: TOKENS.tabBarInactive,
     fontFamily: "ClashDisplay",
+    textDecorationLine: "underline",
   },
   muted: {
     fontSize: 16,

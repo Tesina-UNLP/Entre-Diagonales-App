@@ -1,3 +1,4 @@
+import { TOKENS } from "@/constants/colors";
 import {
   DarkTheme,
   DefaultTheme,
@@ -7,6 +8,7 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
+import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
 
 import { AuthProvider } from "@/contexts/auth";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -40,11 +42,32 @@ export default function RootLayout() {
     return null;
   }
 
+  const toastConfig = {
+    success: (props: any) => (
+      <BaseToast
+        {...props}
+        style={{ borderLeftColor: TOKENS.success, backgroundColor: TOKENS.tabBarBackground }}
+        contentContainerStyle={{ paddingHorizontal: 15 }}
+        text1Style={{ fontSize: 15, fontWeight: "400", color: TOKENS.text }}
+        text2Style={{ fontSize: 13, color: TOKENS.muted }}
+      />
+    ),
+    error: (props: any) => (
+      <ErrorToast
+        {...props}
+        style={{ borderLeftColor: TOKENS.error, backgroundColor: TOKENS.tabBarBackground }}
+        text1Style={{ fontSize: 17, color: TOKENS.text }}
+        text2Style={{ fontSize: 15, color: TOKENS.muted }}
+      />
+    ),
+  };
+
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <AuthProvider>
         <Slot screenOptions={{ animation: "fade" }} />
       </AuthProvider>
+      <Toast config={toastConfig} />
       <StatusBar style="light" />
     </ThemeProvider>
   );

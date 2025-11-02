@@ -1,13 +1,16 @@
+import { ExternalLink } from "@/components/external-link";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedButton } from "@/components/themed-button";
 import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
+import { api } from "@/libs/api";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Platform, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import { Toast } from "react-native-toast-message/lib/src/Toast";
 
 import { z } from "zod";
 
@@ -23,10 +26,25 @@ type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 const ForgotPassword = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleForgotPassword = () => {
-    setIsSubmitting(true);
-    router.replace("/(onboarding)/presentation");
-    setIsSubmitting(false);
+  const handleForgotPassword = async (data: ForgotPasswordFormData) => {
+    try {
+      setIsSubmitting(true);
+      await api.forgotPassword(data.email);
+      Toast.show({
+        type: "success",
+        text1: "Solicitud de restablecimiento de contraseña enviada",
+        text2: "Revisa tu correo para más instrucciones",
+      });
+    } catch (error: any) {
+      const message = "Error al enviar solicitud";
+      Toast.show({
+        type: "error",
+        text1: "Error al enviar solicitud",
+        text2: message,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const back = () => {
@@ -103,12 +121,14 @@ const ForgotPassword = () => {
           no recibes el email en 5 minutos, revisa tu carpeta de spam.
         </ThemedText>
       </View>
-      <ThemedText
-        type="default"
-        onPress={() => router.push("/(public)/sign-in")}
-      >
-        Necesitas ayuda?
-      </ThemedText>
+      { /* @ts-ignore: Ignorar error de tipos del path generado por expo-router */}
+      <ExternalLink href={process.env.EXPO_PUBLIC_WEB_FRONTEND + "/help"}>
+        <ThemedText
+          type="default"
+        >
+          Necesitas ayuda?
+        </ThemedText>
+      </ExternalLink>
     </ThemedBackground>
   );
 };

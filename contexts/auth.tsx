@@ -1,40 +1,59 @@
-// import {
-//   GoogleSignin
-// } from "@react-native-google-signin/google-signin";
+import { api } from "@/libs/api";
+import { isTokenExpired } from "@/libs/jwt";
 import { getSession, removeSession, storeSession } from "@/libs/store-session";
+import {
+  GoogleSignin
+} from "@react-native-google-signin/google-signin";
 import React, { createContext, useEffect, useState } from "react";
-
-interface AppUser {
+import Toast from "react-native-toast-message";
+export type AppUser = {
   id: string;
   email: string;
-  name?: string;
-  photo?: string;
-  idToken?: string;
-  hasCompletedOnboarding?: boolean;
+  access: string;
+  refresh: string;
+  on_boarding_completed_at?: boolean;
+  experience: number;
+  gems: number;
+  coins: number;
+  character?: {
+    id: number;
+    name: string;
+    description: string;
+    image_url: string;
+  };
+  level?: {
+    id: number;
+    name: string;
+    description: string;
+    xp_required: number;
+    image_url: string;
+  };
+  display_name: string;
+  username: string;
 }
 
 interface AuthContextType {
   user: AppUser | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<AppUser | null>;
   register: (
     email: string,
     password: string,
     confirmPassword: string,
   ) => Promise<void>;
   logout: () => void;
-  loginWithGoogle: () => Promise<void>;
-  completeOnboarding: () => void;
+  loginWithGoogle: () => Promise<AppUser | null>;
+  completeOnboarding: (args: { characterId: number }) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoading: false,
-  login: async () => {},
-  register: async () => {},
-  logout: async () => {},
-  loginWithGoogle: async () => {},
-  completeOnboarding: async () => {},
+  login: async () => { return null; },
+  register: async () => { },
+  logout: async () => { },
+  loginWithGoogle: async () => { return null; },
+  completeOnboarding: async ({ characterId }: { characterId: number }) => { },
 });
 
 interface AuthProviderProps {
@@ -45,72 +64,67 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AppUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Configurar Google Sign-in
-    // GoogleSignin.configure({
-    //   webClientId:
-    //     "550141460093-e8cakfe22t1kr9b56ca7ue5g91pnptto.apps.googleusercontent.com",
-    //   offlineAccess: true,
-    //   hostedDomain: "",
-    //   forceCodeForRefreshToken: true,
-    //   profileImageSize: 150,
-    // });
-    const checkAuthState = async () => {
-      try {
-        setIsLoading(true);
-        const session = await getSession();
-        if (session) {
-          setUser(session);
-        }
+  const initProfile = async (session: { access: string, refresh: string }): Promise<AppUser> => {
+    const profileData = await api.getProfile(session.access);
 
-        // const hasPreviousSignIn = GoogleSignin.hasPreviousSignIn();
-        // if (hasPreviousSignIn) {
-        // const userInfo = GoogleSignin.getCurrentUser();
-        // if (userInfo) {
-        //   const userData: AppUser = {
-        //     id: userInfo.user.id,
-        //     email: userInfo.user.email,
-        //     name: userInfo.user.name || undefined,
-        //     photo: userInfo.user.photo || undefined,
-        //     idToken: userInfo.idToken || undefined,
-        //     hasCompletedOnboarding: true, // Usuario que ya tenÃ­a sesiÃ³n activa
-        //   };
-        //   setUser(userData);
-        // }
-        // }
-
-        // timeout de 2 segundos para simular carga
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-      } catch (error) {
-        console.error("Error checking auth state:", error);
-      } finally {
-        setIsLoading(false);
-      }
+    const updatedUser = {
+      ...profileData,
+      access: session.access,
+      refresh: session.refresh,
     };
 
+    setUser(updatedUser);
+    await storeSession(updatedUser);
+
+    return updatedUser;
+  };
+
+  const checkAuthState = async () => {
+    try {
+      setIsLoading(true);
+      const session = await getSession();
+      if (session?.access && !isTokenExpired(session.access)) {
+        await initProfile(session);
+        return user;
+      } else {
+        await removeSession();
+        setUser(null);
+        return;
+      }
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Error al verificar",
+        text2: "Por favor, intente nuevamente más tarde.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID || "",
+      offlineAccess: true,
+      hostedDomain: "",
+      forceCodeForRefreshToken: true,
+      profileImageSize: 150,
+    });
     checkAuthState();
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<AppUser | null> => {
     try {
       setIsLoading(true);
 
-      // SimulaciÃ³n de login - aquÃ­ harÃ­as la llamada real a tu API
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      if (email === "demo@example.com" && password === "password") {
-        const userData: AppUser = {
-          id: "1",
-          email: email,
-          name: "Usuario Demo",
-          hasCompletedOnboarding: true, // Usuario demo ha completado onboarding
-        };
-        setUser(userData);
-
-        await storeSession(userData);
-      } else {
-        throw new Error("Credenciales invÃ¡lidas");
+      const userData = await api.login(email, password);
+      if (!userData) {
+        return null;
       }
+
+      const userProfile = await initProfile(userData);
+
+      return userProfile;
     } catch (error) {
       throw error;
     } finally {
@@ -127,20 +141,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
 
       if (password !== confirmPassword) {
-        throw new Error("Las contraseÃ±as no coinciden");
+        throw new Error("Las contraseñas no coinciden");
       }
 
-      // SimulaciÃ³n de registro - aquÃ­ harÃ­as la llamada real a tu API
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const userData = await api.register(email, password, confirmPassword);
 
-      const userData: AppUser = {
-        id: Math.random().toString(36).substr(2, 9),
-        email: email,
-        name: "Usuario Nuevo",
-        hasCompletedOnboarding: false, // Nuevo usuario necesita onboarding
-      };
-      setUser(userData);
-      await storeSession(userData);
+      initProfile(userData);
     } catch (error) {
       throw error;
     } finally {
@@ -150,78 +156,57 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async () => {
     try {
-      // Cerrar sesiÃ³n de Google si hay una sesiÃ³n activa
-      // const hasPreviousSignIn = GoogleSignin.hasPreviousSignIn();
-      // if (hasPreviousSignIn) {
-      //   await GoogleSignin.revokeAccess();
-      //   await GoogleSignin.signOut();
-      // }
       setUser(null);
       await removeSession();
     } catch (error) {
-      console.error("Error al cerrar sesiÃ³n:", error);
+      console.error("Error al cerrar sesión:", error);
       // Incluso si hay error, limpiamos el estado local
       setUser(null);
     }
   };
 
   const loginWithGoogle = async () => {
-    // try {
-    //   setIsLoading(true);
-    //   // Verificar si Google Play Services estÃ¡n disponibles (solo Android)
-    //   await GoogleSignin.hasPlayServices();
-    //   // Iniciar sesiÃ³n con Google
-    //   const response = await GoogleSignin.signIn();
-    //   if (response.type === "success") {
-    //     const userInfo = response.data;
-    //     // Obtener los tokens
-    //     const tokens = await GoogleSignin.getTokens();
-    //     const userData: AppUser = {
-    //       id: userInfo.user.id,
-    //       email: userInfo.user.email,
-    //       name: userInfo.user.name || undefined,
-    //       photo: userInfo.user.photo || undefined,
-    //       idToken: tokens.idToken,
-    //       hasCompletedOnboarding: false, // Google signin tambiÃ©n necesita onboarding
-    //     };
-    //     setUser(userData);
-    //     await storeSession(userData);
-    //     // AquÃ­ puedes enviar el idToken a tu backend para validaciÃ³n
-    //     console.log("Google ID Token:", tokens.idToken);
-    //   } else {
-    //     // El usuario cancelÃ³ el proceso de login
-    //     throw new Error("Login cancelado por el usuario");
-    //   }
-    // } catch (error: any) {
-    //   console.error("Error en login con Google:", error);
-    //   if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-    //     throw new Error("Login cancelado por el usuario");
-    //   } else if (error.code === statusCodes.IN_PROGRESS) {
-    //     throw new Error("Login en progreso");
-    //   } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-    //     throw new Error("Google Play Services no disponible");
-    //   } else {
-    //     throw new Error(
-    //       "Error al iniciar sesiÃ³n con Google: " + error.message
-    //     );
-    //   }
-    // } finally {
-    //   setIsLoading(false);
-    // }
+    try {
+      setIsLoading(true);
+
+      // Verificar si Google Play Services están disponibles (solo Android)
+      await GoogleSignin.hasPlayServices();
+
+      // Iniciar sesión con Google
+      const response = await GoogleSignin.signIn();
+
+      if (response.type === "success") {
+        // Obtener los tokens
+        const tokens = await GoogleSignin.getTokens();
+
+        const token = tokens.idToken;
+
+        const userData = await api.loginWithGoogle(token);
+
+        const userProfile = await initProfile(userData);
+
+        return userProfile;
+      } else {
+        // El usuario canceló el proceso de login
+        throw new Error("Login cancelado por el usuario");
+      }
+    } catch (error: any) {
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const completeOnboarding = () => {
+  const completeOnboarding = async ({ characterId }: { characterId: number }) => {
     if (user) {
-      setUser({
-        ...user,
-        hasCompletedOnboarding: true,
-      });
 
-      // ActualizaciÃ³n de sesiÃ³n en almacenamiento seguro
-      storeSession({
-        ...user,
-        hasCompletedOnboarding: true,
-      });
+      const onboardingData = await api.completeOnboarding(user?.access, characterId, "");
+
+      if (!onboardingData) {
+        throw new Error("Onboarding completion failed");
+      }
+
+      initProfile({ access: user.access, refresh: user.refresh });
     }
   };
 

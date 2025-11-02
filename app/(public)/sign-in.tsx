@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { statusCodes } from "@react-native-google-signin/google-signin";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -18,6 +19,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -25,13 +27,13 @@ const loginSchema = z.object({
     .string()
     .min(1, "El email es requerido")
     .email("Ingresa un email válido"),
-  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
+  password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const SignIn = () => {
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
@@ -46,24 +48,59 @@ const SignIn = () => {
     },
   });
 
-  const handleSignIn = () => {
-    setIsSubmitting(true);
-    login("demo@example.com", "password");
-    router.replace("/(tabs)");
-    setIsSubmitting(false);
+  const handleSignIn = async (data: LoginFormData) => {
+    try {
+      setIsSubmitting(true);
+      const profileUser = await login(data.email, data.password);
+      Toast.show({
+        type: "success",
+        text1: "Inicio de sesión exitoso",
+        text2: "Bienvenido",
+      });
+      if (profileUser?.on_boarding_completed_at) {
+        router.replace("/(tabs)");
+      } else {
+        router.replace("/(onboarding)/presentation");
+      }
+    } catch (error: any) {
+      const message = error?.message || "Error al iniciar sesión";
+      Toast.show({
+        type: "error",
+        text1: "Error al iniciar sesión",
+        text2: message,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  // const handleGoogleSignIn = async () => {
-  //   try {
-  //     await loginWithGoogle();
-  //     // onSuccess?.();
-  //   } catch (error: any) {
-  //     const errorMessage =
-  //       error.message || "Error al iniciar sesión con Google";
-  //     // onError?.(errorMessage);
-  //     Alert.alert("Error", errorMessage);
-  //   }
-  // };
+  const handleGoogleSignIn = async () => {
+    try {
+      const profileUser = await loginWithGoogle();
+      if (profileUser?.on_boarding_completed_at) {
+        router.replace("/(tabs)");
+      } else {
+        router.replace("/(onboarding)/presentation");
+      }
+    } catch (error: any) {
+      let errorMessage = "";
+
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        errorMessage = "Inicio de sesión cancelado por el usuario";
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        errorMessage = "Login en progreso";
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        errorMessage = "Google Play Services no disponible";
+      } else {
+        errorMessage = error?.message || "Error desconocido";
+      }
+      Toast.show({
+        type: "error",
+        text1: "Error al iniciar sesión con Google",
+        text2: errorMessage,
+      });
+    }
+  };
 
   return (
     <ThemedBackground style={styles.container}>
@@ -164,7 +201,7 @@ const SignIn = () => {
         <View style={styles.divider} />
 
         <View style={styles.googleButtonContainer}>
-          <ThemedButton variant="secondary" onPress={handleSignIn}>
+          <ThemedButton variant="secondary" onPress={handleGoogleSignIn}>
             <View style={styles.googleButtonContent}>
               <FontAwesome name="google" size={24} color={TOKENS.primary} />
               <ThemedText

@@ -1,13 +1,5 @@
+import { AppUser } from "@/contexts/auth";
 import * as SecureStore from "expo-secure-store";
-
-interface AppUser {
-  id: string;
-  email: string;
-  name?: string;
-  photo?: string;
-  idToken?: string;
-  hasCompletedOnboarding?: boolean;
-}
 
 const key = () => "user_session";
 
