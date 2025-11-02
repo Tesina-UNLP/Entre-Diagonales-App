@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { statusCodes } from "@react-native-google-signin/google-signin";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -32,7 +33,7 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const SignIn = () => {
-  const { login, user } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
@@ -73,17 +74,33 @@ const SignIn = () => {
     }
   };
 
-  // const handleGoogleSignIn = async () => {
-  //   try {
-  //     await loginWithGoogle();
-  //     // onSuccess?.();
-  //   } catch (error: any) {
-  //     const errorMessage =
-  //       error.message || "Error al iniciar sesión con Google";
-  //     // onError?.(errorMessage);
-  //     Alert.alert("Error", errorMessage);
-  //   }
-  // };
+  const handleGoogleSignIn = async () => {
+    try {
+      const profileUser = await loginWithGoogle();
+      if (profileUser?.on_boarding_completed_at) {
+        router.replace("/(tabs)");
+      } else {
+        router.replace("/(onboarding)/presentation");
+      }
+    } catch (error: any) {
+      let errorMessage = "";
+
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        errorMessage = "Inicio de sesión cancelado por el usuario";
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        errorMessage = "Login en progreso";
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        errorMessage = "Google Play Services no disponible";
+      } else {
+        errorMessage = error?.message || "Error desconocido";
+      }
+      Toast.show({
+        type: "error",
+        text1: "Error al iniciar sesión con Google",
+        text2: errorMessage,
+      });
+    }
+  };
 
   return (
     <ThemedBackground style={styles.container}>
@@ -184,7 +201,7 @@ const SignIn = () => {
         <View style={styles.divider} />
 
         <View style={styles.googleButtonContainer}>
-          <ThemedButton variant="secondary" onPress={() => { }}>
+          <ThemedButton variant="secondary" onPress={handleGoogleSignIn}>
             <View style={styles.googleButtonContent}>
               <FontAwesome name="google" size={24} color={TOKENS.primary} />
               <ThemedText

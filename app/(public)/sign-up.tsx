@@ -1,3 +1,4 @@
+import { ExternalLink } from "@/components/external-link";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedButton } from "@/components/themed-button";
 import { ThemedText } from "@/components/themed-text";
@@ -41,7 +42,7 @@ const registerSchema = z
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 const SignUp = () => {
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -64,6 +65,25 @@ const SignUp = () => {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const profileUser = await loginWithGoogle();
+      if (profileUser?.on_boarding_completed_at) {
+        router.replace("/(tabs)");
+      } else {
+        router.replace("/(onboarding)/presentation");
+      }
+    } catch (error: any) {
+      const errorMessage =
+        error.message || "Error al iniciar sesión con Google";
+      Toast.show({
+        type: "error",
+        text1: "Error al iniciar sesión con Google",
+        text2: errorMessage,
+      });
     }
   };
 
@@ -209,14 +229,21 @@ const SignUp = () => {
         <View style={styles.termsContainer}>
           <ThemedText type="muted" style={styles.termsText}>
             Al continuar estaras de acuerdo con los{" "}
-            <ThemedText type="link">Terminos y Condiciones</ThemedText> y{" "}
-            <ThemedText type="link">Politica de Privacidad</ThemedText>.
+            { /* @ts-ignore: Ignorar error de tipos del path generado por expo-router */}
+            <ExternalLink href={process.env.EXPO_PUBLIC_WEB_FRONTEND + "/terms"}>
+              <ThemedText type="link">Terminos y Condiciones</ThemedText>
+            </ExternalLink>{" "}
+            y la{" "}
+            { /* @ts-ignore: Ignorar error de tipos del path generado por expo-router */}
+            <ExternalLink href={process.env.EXPO_PUBLIC_WEB_FRONTEND + "/privacy"}>
+              <ThemedText type="link">Politica de Privacidad</ThemedText>.
+            </ExternalLink>
           </ThemedText>
         </View>
         <View style={styles.divider} />
 
         <View style={styles.googleButtonContainer}>
-          <ThemedButton variant="secondary" onPress={() => { }}>
+          <ThemedButton variant="secondary" onPress={handleGoogleSignIn}>
             <View style={styles.googleButtonContent}>
               <FontAwesome name="google" size={24} color={TOKENS.primary} />
               <ThemedText

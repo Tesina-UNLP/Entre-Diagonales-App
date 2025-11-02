@@ -1,5 +1,5 @@
 
-const apiBaseUrl = "https://grain-sponsor-execute-examines.trycloudflare.com/api";
+const apiBaseUrl = process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000/api";
 
 export type CharacterApiResponse = {
   id: number;
@@ -22,6 +22,23 @@ export const api = {
     if (!response.ok) {
       const message =
         data?.error || data?.message || data?.detail || response.statusText || "Login failed";
+      throw new Error(message);
+    }
+    return data;
+  },
+
+  loginWithGoogle: async (token: string) => {
+    const response = await fetch(`${apiBaseUrl}/auth/google/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ token }),
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        data?.error || data?.message || data?.detail || response.statusText || "Google login failed";
       throw new Error(message);
     }
     return data;

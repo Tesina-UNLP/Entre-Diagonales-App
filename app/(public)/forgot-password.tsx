@@ -1,3 +1,4 @@
+import { ExternalLink } from "@/components/external-link";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedButton } from "@/components/themed-button";
 import { ThemedText } from "@/components/themed-text";
@@ -120,12 +121,14 @@ const ForgotPassword = () => {
           no recibes el email en 5 minutos, revisa tu carpeta de spam.
         </ThemedText>
       </View>
-      <ThemedText
-        type="default"
-        onPress={() => router.push("/(public)/sign-in")}
-      >
-        Necesitas ayuda?
-      </ThemedText>
+      { /* @ts-ignore: Ignorar error de tipos del path generado por expo-router */}
+      <ExternalLink href={process.env.EXPO_PUBLIC_WEB_FRONTEND + "/help"}>
+        <ThemedText
+          type="default"
+        >
+          Necesitas ayuda?
+        </ThemedText>
+      </ExternalLink>
     </ThemedBackground>
   );
 };

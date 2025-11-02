@@ -8,7 +8,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Image, Platform, StyleSheet, TouchableOpacity, View } from "react-native";
-
+import Toast from "react-native-toast-message";
 
 const xThinkingImage = require("../../assets/images/onboarding/choice.png");
 
@@ -29,9 +29,18 @@ const Choice = () => {
   }, [user]);
 
   const complete = () => {
-    if (!selectedNpc) return;
-    completeOnboarding({ characterId: selectedNpc });
-    router.replace("/(tabs)");
+    try {
+      if (!selectedNpc) return;
+      completeOnboarding({ characterId: selectedNpc });
+      router.replace("/(tabs)");
+    } catch (error: any) {
+      const message = error?.message || "Error desconocido";
+      Toast.show({
+        type: "error",
+        text1: "Error al completar el onboarding",
+        text2: message,
+      });
+    }
   };
 
   const back = () => {

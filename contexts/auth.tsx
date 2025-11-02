@@ -1,10 +1,11 @@
-// import {
-//   GoogleSignin
-// } from "@react-native-google-signin/google-signin";
 import { api } from "@/libs/api";
 import { isTokenExpired } from "@/libs/jwt";
 import { getSession, removeSession, storeSession } from "@/libs/store-session";
+import {
+  GoogleSignin
+} from "@react-native-google-signin/google-signin";
 import React, { createContext, useEffect, useState } from "react";
+import Toast from "react-native-toast-message";
 export type AppUser = {
   id: string;
   email: string;
@@ -41,7 +42,7 @@ interface AuthContextType {
     confirmPassword: string,
   ) => Promise<void>;
   logout: () => void;
-  loginWithGoogle: () => Promise<void>;
+  loginWithGoogle: () => Promise<AppUser | null>;
   completeOnboarding: (args: { characterId: number }) => Promise<void>;
 }
 
@@ -51,7 +52,7 @@ export const AuthContext = createContext<AuthContextType>({
   login: async () => { return null; },
   register: async () => { },
   logout: async () => { },
-  loginWithGoogle: async () => { },
+  loginWithGoogle: async () => { return null; },
   completeOnboarding: async ({ characterId }: { characterId: number }) => { },
 });
 
@@ -91,13 +92,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
     } catch (error) {
-      console.error("Error checking auth state:", error);
+      Toast.show({
+        type: "error",
+        text1: "Error al verificar",
+        text2: "Por favor, intente nuevamente más tarde.",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID || "",
+      offlineAccess: true,
+      hostedDomain: "",
+      forceCodeForRefreshToken: true,
+      profileImageSize: 150,
+    });
     checkAuthState();
   }, []);
 
@@ -147,14 +159,42 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(null);
       await removeSession();
     } catch (error) {
-      console.error("Error al cerrar sesiÃ³n:", error);
+      console.error("Error al cerrar sesión:", error);
       // Incluso si hay error, limpiamos el estado local
       setUser(null);
     }
   };
 
   const loginWithGoogle = async () => {
-    // future
+    try {
+      setIsLoading(true);
+
+      // Verificar si Google Play Services están disponibles (solo Android)
+      await GoogleSignin.hasPlayServices();
+
+      // Iniciar sesión con Google
+      const response = await GoogleSignin.signIn();
+
+      if (response.type === "success") {
+        // Obtener los tokens
+        const tokens = await GoogleSignin.getTokens();
+
+        const token = tokens.idToken;
+
+        const userData = await api.loginWithGoogle(token);
+
+        const userProfile = await initProfile(userData);
+
+        return userProfile;
+      } else {
+        // El usuario canceló el proceso de login
+        throw new Error("Login cancelado por el usuario");
+      }
+    } catch (error: any) {
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const completeOnboarding = async ({ characterId }: { characterId: number }) => {
