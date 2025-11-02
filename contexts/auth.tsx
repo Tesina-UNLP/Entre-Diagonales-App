@@ -1,9 +1,7 @@
 import { api } from "@/libs/api";
 import { isTokenExpired } from "@/libs/jwt";
 import { getSession, removeSession, storeSession } from "@/libs/store-session";
-import {
-  GoogleSignin
-} from "@react-native-google-signin/google-signin";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import React, { createContext, useEffect, useState } from "react";
 import Toast from "react-native-toast-message";
 export type AppUser = {
@@ -30,7 +28,7 @@ export type AppUser = {
   };
   display_name: string;
   username: string;
-}
+};
 
 interface AuthContextType {
   user: AppUser | null;
@@ -49,11 +47,15 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoading: false,
-  login: async () => { return null; },
-  register: async () => { },
-  logout: async () => { },
-  loginWithGoogle: async () => { return null; },
-  completeOnboarding: async ({ characterId }: { characterId: number }) => { },
+  login: async () => {
+    return null;
+  },
+  register: async () => {},
+  logout: async () => {},
+  loginWithGoogle: async () => {
+    return null;
+  },
+  completeOnboarding: async ({ characterId }: { characterId: number }) => {},
 });
 
 interface AuthProviderProps {
@@ -64,7 +66,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AppUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const initProfile = async (session: { access: string, refresh: string }): Promise<AppUser> => {
+  const initProfile = async (session: {
+    access: string;
+    refresh: string;
+  }): Promise<AppUser> => {
     const profileData = await api.getProfile(session.access);
 
     const updatedUser = {
@@ -113,7 +118,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkAuthState();
   }, []);
 
-  const login = async (email: string, password: string): Promise<AppUser | null> => {
+  const login = async (
+    email: string,
+    password: string,
+  ): Promise<AppUser | null> => {
     try {
       setIsLoading(true);
 
@@ -197,10 +205,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const completeOnboarding = async ({ characterId }: { characterId: number }) => {
+  const completeOnboarding = async ({
+    characterId,
+  }: {
+    characterId: number;
+  }) => {
     if (user) {
-
-      const onboardingData = await api.completeOnboarding(user?.access, characterId, "");
+      const onboardingData = await api.completeOnboarding(
+        user?.access,
+        characterId,
+        "",
+      );
 
       if (!onboardingData) {
         throw new Error("Onboarding completion failed");

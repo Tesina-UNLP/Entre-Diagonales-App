@@ -56,7 +56,7 @@ const SignUp = () => {
         text2: "Bienvenido",
       });
       router.replace("/(onboarding)/presentation");
-    } catch (error: any) {
+    } catch {
       const message = "Error al registrarse";
       Toast.show({
         type: "error",
@@ -229,13 +229,17 @@ const SignUp = () => {
         <View style={styles.termsContainer}>
           <ThemedText type="muted" style={styles.termsText}>
             Al continuar estaras de acuerdo con los{" "}
-            { /* @ts-ignore: Ignorar error de tipos del path generado por expo-router */}
-            <ExternalLink href={process.env.EXPO_PUBLIC_WEB_FRONTEND + "/terms"}>
+            {/* @ts-ignore: Ignorar error de tipos del path generado por expo-router */}
+            <ExternalLink
+              href={process.env.EXPO_PUBLIC_WEB_FRONTEND + "/terms"}
+            >
               <ThemedText type="link">Terminos y Condiciones</ThemedText>
             </ExternalLink>{" "}
             y la{" "}
-            { /* @ts-ignore: Ignorar error de tipos del path generado por expo-router */}
-            <ExternalLink href={process.env.EXPO_PUBLIC_WEB_FRONTEND + "/privacy"}>
+            {/* @ts-ignore: Ignorar error de tipos del path generado por expo-router */}
+            <ExternalLink
+              href={process.env.EXPO_PUBLIC_WEB_FRONTEND + "/privacy"}
+            >
               <ThemedText type="link">Politica de Privacidad</ThemedText>.
             </ExternalLink>
           </ThemedText>

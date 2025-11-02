@@ -46,7 +46,10 @@ export default function RootLayout() {
     success: (props: any) => (
       <BaseToast
         {...props}
-        style={{ borderLeftColor: TOKENS.success, backgroundColor: TOKENS.tabBarBackground }}
+        style={{
+          borderLeftColor: TOKENS.success,
+          backgroundColor: TOKENS.tabBarBackground,
+        }}
         contentContainerStyle={{ paddingHorizontal: 15 }}
         text1Style={{ fontSize: 15, fontWeight: "400", color: TOKENS.text }}
         text2Style={{ fontSize: 13, color: TOKENS.muted }}
@@ -55,7 +58,10 @@ export default function RootLayout() {
     error: (props: any) => (
       <ErrorToast
         {...props}
-        style={{ borderLeftColor: TOKENS.error, backgroundColor: TOKENS.tabBarBackground }}
+        style={{
+          borderLeftColor: TOKENS.error,
+          backgroundColor: TOKENS.tabBarBackground,
+        }}
         text1Style={{ fontSize: 17, color: TOKENS.text }}
         text2Style={{ fontSize: 15, color: TOKENS.muted }}
       />

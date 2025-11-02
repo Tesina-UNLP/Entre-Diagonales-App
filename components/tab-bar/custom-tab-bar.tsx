@@ -7,7 +7,7 @@ const { width } = Dimensions.get("window");
 export function CustomTabBar() {
   const HEIGHT = Platform.OS === "ios" ? 112 : 100;
   return (
-    <View style={[styles.container, { height: HEIGHT }]}> 
+    <View style={[styles.container, { height: HEIGHT }]}>
       {/* SVG Background con la forma personalizada */}
       <Svg
         width={width}

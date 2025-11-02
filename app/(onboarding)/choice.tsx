@@ -7,7 +7,13 @@ import { api, CharacterApiResponse } from "@/libs/api";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Image, Platform, StyleSheet, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Toast from "react-native-toast-message";
 
 const xThinkingImage = require("../../assets/images/onboarding/choice.png");
