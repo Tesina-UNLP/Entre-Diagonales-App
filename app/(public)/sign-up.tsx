@@ -277,7 +277,6 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     justifyContent: "flex-start",
-    marginTop: Platform.OS === "ios" ? 40 : 24,
     gap: 20,
   },
   keyboardView: {

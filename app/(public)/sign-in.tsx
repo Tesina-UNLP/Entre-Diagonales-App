@@ -7,7 +7,6 @@ import { useAuth } from "@/hooks/use-auth";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { statusCodes } from "@react-native-google-signin/google-signin";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -82,18 +81,18 @@ const SignIn = () => {
       } else {
         router.replace("/(onboarding)/presentation");
       }
-    } catch (error: any) {
+    } catch {
       let errorMessage = "";
 
-      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        errorMessage = "Inicio de sesión cancelado por el usuario";
-      } else if (error.code === statusCodes.IN_PROGRESS) {
-        errorMessage = "Login en progreso";
-      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        errorMessage = "Google Play Services no disponible";
-      } else {
-        errorMessage = error?.message || "Error desconocido";
-      }
+      // if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+      //   errorMessage = "Inicio de sesión cancelado por el usuario";
+      // } else if (error.code === statusCodes.IN_PROGRESS) {
+      //   errorMessage = "Login en progreso";
+      // } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+      //   errorMessage = "Google Play Services no disponible";
+      // } else {
+      //   errorMessage = error?.message || "Error desconocido";
+      // }
       Toast.show({
         type: "error",
         text1: "Error al iniciar sesión con Google",
@@ -231,7 +230,6 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     justifyContent: "flex-start",
-    marginTop: Platform.OS === "ios" ? 40 : 24,
     gap: 20,
   },
   keyboardView: {

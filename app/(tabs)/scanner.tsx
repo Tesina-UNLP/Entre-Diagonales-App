@@ -1,6 +1,6 @@
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedText } from "@/components/themed-text";
-import { Platform, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 
 export default function ScannerScreen() {
   return (
@@ -13,6 +13,5 @@ export default function ScannerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: Platform.OS === "android" ? 40 : 80,
   },
 });

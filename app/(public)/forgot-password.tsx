@@ -9,13 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import {
-  Platform,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { Toast } from "react-native-toast-message/lib/src/Toast";
 
 import { z } from "zod";
@@ -41,7 +35,7 @@ const ForgotPassword = () => {
         text1: "Solicitud de restablecimiento de contraseña enviada",
         text2: "Revisa tu correo para más instrucciones",
       });
-    } catch () {
+    } catch {
       const message = "Error al enviar solicitud";
       Toast.show({
         type: "error",
@@ -139,7 +133,6 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     justifyContent: "flex-start",
-    marginTop: Platform.OS === "ios" ? 40 : 24,
     gap: 20,
   },
   header: {
