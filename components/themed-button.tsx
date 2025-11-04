@@ -10,7 +10,14 @@ import {
 import { ThemedText } from "./themed-text";
 
 export type ThemedButtonProps = TouchableOpacityProps & {
-  variant?: "primary" | "secondary" | "gold" | "outline" | "ghost" | "danger";
+  variant?:
+    | "primary"
+    | "secondary"
+    | "gold"
+    | "outline"
+    | "ghost"
+    | "danger"
+    | "accent";
   size?: "small" | "medium" | "large";
   loading?: boolean;
   children: React.ReactNode;
@@ -35,7 +42,8 @@ export function ThemedButton({
           color={
             variant === "outline" ||
             variant === "ghost" ||
-            variant === "secondary"
+            variant === "secondary" ||
+            variant === "accent"
               ? TOKENS.primary
               : TOKENS.text
           }
@@ -50,6 +58,7 @@ export function ThemedButton({
             variant === "outline" && styles.outlineText,
             variant === "ghost" && styles.ghostText,
             variant === "danger" && styles.dangerText,
+            variant === "accent" && styles.accentText,
             size === "small" && styles.smallText,
             size === "large" && styles.largeText,
             isDisabled && styles.disabledText,
@@ -110,6 +119,7 @@ export function ThemedButton({
         variant === "outline" && styles.outlineButton,
         variant === "ghost" && styles.ghostButton,
         variant === "danger" && styles.dangerButton,
+        variant === "accent" && styles.accentButton,
         size === "small" && styles.smallButton,
         size === "large" && styles.largeButton,
         isDisabled && styles.disabled,
@@ -220,5 +230,11 @@ const styles = StyleSheet.create({
   },
   loader: {
     marginRight: 8,
+  },
+  accentText: {
+    color: TOKENS.background,
+  },
+  accentButton: {
+    backgroundColor: TOKENS.accent,
   },
 });

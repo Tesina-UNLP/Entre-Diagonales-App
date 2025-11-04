@@ -4,8 +4,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { TourApiResponse } from "@/libs/api";
 import { capitalizeFirstLetter } from "@/libs/utils";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { Link } from "expo-router";
 import React from "react";
-import { Image, StyleSheet, View } from "react-native";
+import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 
 const ActiveTour = ({
   currentRoute,
@@ -20,61 +21,69 @@ const ActiveTour = ({
         <ThemedText type="subtitle" style={styles.subtitleMarginTop}>
           Ruta actual
         </ThemedText>
-        <View style={styles.currentRouteCard}>
-          <View style={styles.currentRouteHeaderRow}>
-            <View style={styles.currentRouteLeftRow}>
-              <MaterialIcons
-                name="route"
-                size={24}
-                color={TOKENS.tabBarInactive}
-              />
-              <ThemedText type="defaultSemiBold">
-                {currentRoute.name}
-              </ThemedText>
-            </View>
-            {/* badge */}
-            <View style={styles.badge}>
-              <ThemedText type="default">
-                {capitalizeFirstLetter(currentRoute.tag || "General")}
-              </ThemedText>
-            </View>
-          </View>
-          <ThemedText type="default">{currentRoute.description}</ThemedText>
-          {/* Progress bar simple  */}
-          <View style={styles.simpleProgressBar}>
-            <View
-              style={[
-                styles.simpleProgressBarFill,
-                { width: `${Number(currentRoute.progress) || 0}%` },
-              ]}
-            />
-          </View>
-
-          {currentRoute.number_of_people_completed > 0 ? (
-            <View style={styles.completedRow}>
-              <View style={styles.completedAvatarsRow}>
-                {[1, 2, 3].map((item, i) => (
-                  <Image
-                    key={item}
-                    source={{ uri: user?.character?.image_url }}
-                    style={[
-                      styles.overlapAvatarBase,
-                      { marginLeft: i === 0 ? 0 : -6 },
-                    ]}
-                  />
-                ))}
+        <Link
+          href={{
+            pathname: "/(tabs)/tours/[id]",
+            params: { id: currentRoute.id.toString() },
+          }}
+          asChild
+        >
+          <TouchableOpacity style={styles.currentRouteCard}>
+            <View style={styles.currentRouteHeaderRow}>
+              <View style={styles.currentRouteLeftRow}>
+                <MaterialIcons
+                  name="route"
+                  size={24}
+                  color={TOKENS.tabBarInactive}
+                />
+                <ThemedText type="defaultSemiBold">
+                  {currentRoute.name}
+                </ThemedText>
               </View>
-              <ThemedText type="muted">
-                {currentRoute.number_of_people_completed} personas lo
-                completaron!
-              </ThemedText>
+              {/* badge */}
+              <View style={styles.badge}>
+                <ThemedText type="default">
+                  {capitalizeFirstLetter(currentRoute.tag || "General")}
+                </ThemedText>
+              </View>
             </View>
-          ) : (
-            <ThemedText type="muted">
-              Puedes ser el primero en completarla!
-            </ThemedText>
-          )}
-        </View>
+            <ThemedText type="default">{currentRoute.description}</ThemedText>
+            {/* Progress bar simple  */}
+            <View style={styles.simpleProgressBar}>
+              <View
+                style={[
+                  styles.simpleProgressBarFill,
+                  { width: `${Number(currentRoute.progress) || 0}%` },
+                ]}
+              />
+            </View>
+
+            {currentRoute.number_of_people_completed > 0 ? (
+              <View style={styles.completedRow}>
+                <View style={styles.completedAvatarsRow}>
+                  {[1, 2, 3].map((item, i) => (
+                    <Image
+                      key={item}
+                      source={{ uri: user?.character?.image_url }}
+                      style={[
+                        styles.overlapAvatarBase,
+                        { marginLeft: i === 0 ? 0 : -6 },
+                      ]}
+                    />
+                  ))}
+                </View>
+                <ThemedText type="muted">
+                  {currentRoute.number_of_people_completed} personas lo
+                  completaron!
+                </ThemedText>
+              </View>
+            ) : (
+              <ThemedText type="muted">
+                Puedes ser el primero en completarla!
+              </ThemedText>
+            )}
+          </TouchableOpacity>
+        </Link>
       </View>
     )
   );
@@ -86,7 +95,7 @@ const styles = StyleSheet.create({
   currentRouteCard: {
     flexDirection: "column",
     gap: 10,
-    backgroundColor: "rgba(146, 146, 146, 0.07)",
+    backgroundColor: TOKENS.cardBackground,
     padding: 16,
     borderRadius: 18,
   },

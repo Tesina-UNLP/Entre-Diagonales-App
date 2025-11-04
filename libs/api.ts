@@ -22,14 +22,7 @@ export type TourApiResponse = {
   description: string | null;
   tag: string | null; // maxLength: 50
   active: boolean;
-  spots: Array<{
-    id: number;
-    name: string;
-    description: string | null;
-    image_urls: string[];
-    latitude: number;
-    longitude: number;
-  }>;
+  readonly spots: number;
   readonly progress: string;
   readonly completed_at: string | null;
   readonly started: string;
