@@ -1,25 +1,70 @@
 import { ThemedBackground } from "@/components/themed-background";
-import { ThemedText } from "@/components/themed-text";
 import { useAuth } from "@/hooks/use-auth";
-import { Platform, StyleSheet } from "react-native";
+import { useMessageOfTheDay } from "@/hooks/use-message-of-the-day";
+import { useWeather } from "@/hooks/use-weather";
+import { api, TourApiResponse } from "@/libs/api";
+import ActiveTour from "@/views/home/active-tour";
+import HeaderHome from "@/views/home/header-home";
+import HorizontalTourList from "@/views/home/horizontal-tours-list";
+import MessageOfTheDay from "@/views/home/message-of-the-day";
+import ProgressionLevel from "@/views/home/progression-level";
+import { useEffect, useState } from "react";
+import { StyleSheet, View } from "react-native";
+import Toast from "react-native-toast-message";
 
 export default function HomeScreen() {
-  const { user } = useAuth();
+  const { user, checkAuthState } = useAuth();
+  const { fetchWeather } = useWeather();
+  const { refreshMessage } = useMessageOfTheDay();
+  const [routes, setRoutes] = useState<Array<TourApiResponse>>([]);
+  const [currentRoute, setCurrentRoute] = useState<TourApiResponse | null>(null);
+
+  const handleGetRoutes = async () => {
+    try {
+      const response = await api.getRoutes(user?.access || "");
+      const current = response.find(route => route.started);
+      setRoutes(response);
+      setCurrentRoute(current || null);
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Error al obtener las rutas",
+        text2: "Por favor, intente nuevamente más tarde.",
+      });
+      return [];
+    }
+  }
+
+  const refreshAll = async () => {
+    await Promise.all([
+      handleGetRoutes(),
+      fetchWeather(),
+      refreshMessage(),
+      checkAuthState ? checkAuthState() : Promise.resolve(),
+    ]);
+  }
+
+  useEffect(() => {
+    handleGetRoutes();
+  }, [user]);
+
+
   return (
-    <ThemedBackground style={styles.container}>
-      <ThemedText>Home</ThemedText>
-      {user ? (
-        <ThemedText>Welcome, {user.display_name || user.username}!</ThemedText>
-      ) : (
-        <ThemedText>Please log in.</ThemedText>
-      )}
-    </ThemedBackground>
+    <ThemedBackground style={styles.container} scrollable onRefresh={refreshAll}>
+      <HeaderHome />
+      <MessageOfTheDay />
+      <ProgressionLevel />
+      <ActiveTour currentRoute={currentRoute} />
+      <HorizontalTourList routes={routes} />
+      <View style={styles.bottomSpacer}></View>
+    </ThemedBackground >
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: Platform.OS === "android" ? 40 : 80,
+    gap: 20,
   },
+  bottomSpacer: { height: 120 },
 });

@@ -45,8 +45,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     gap: 24,
-    paddingTop: 80,
-    paddingBottom: 80,
   },
   logoContainer: {
     justifyContent: "center",

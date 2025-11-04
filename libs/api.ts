@@ -8,6 +8,34 @@ export type CharacterApiResponse = {
   image_url: string;
 };
 
+export type LevelApiResponse = {
+  id: number;
+  name: string;
+  description: string;
+  image_url: string;
+  xp_required: number;
+};
+
+export type TourApiResponse = {
+  id: number;
+  name: string; // minLength: 1, maxLength: 100
+  description: string | null;
+  tag: string | null; // maxLength: 50
+  active: boolean;
+  spots: Array<{
+    id: number;
+    name: string;
+    description: string | null;
+    image_urls: string[];
+    latitude: number;
+    longitude: number;
+  }>;
+  readonly progress: string;
+  readonly completed_at: string | null;
+  readonly started: string;
+  readonly number_of_people_completed: number;
+};
+
 export const api = {
   // login
   login: async (email: string, password: string) => {
@@ -170,4 +198,44 @@ export const api = {
     }
     return data as CharacterApiResponse[];
   },
+
+  getLevels: async (token: string): Promise<LevelApiResponse[]> => {
+    const response = await fetch(`${apiBaseUrl}/levels/`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Fetching levels failed";
+      throw new Error(message);
+    }
+    return data as LevelApiResponse[];
+  },
+
+  getRoutes: async (token: string): Promise<TourApiResponse[]> => {
+    const response = await fetch(`${apiBaseUrl}/tours/`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Fetching routes failed";
+      throw new Error(message);
+    }
+    return data as TourApiResponse[];
+  }
 };

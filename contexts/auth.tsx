@@ -1,7 +1,6 @@
 import { api } from "@/libs/api";
 import { isTokenExpired } from "@/libs/jwt";
 import { getSession, removeSession, storeSession } from "@/libs/store-session";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import React, { createContext, useEffect, useState } from "react";
 import Toast from "react-native-toast-message";
 export type AppUser = {
@@ -28,6 +27,13 @@ export type AppUser = {
   };
   display_name: string;
   username: string;
+  next_level?: {
+    id: number;
+    name: string;
+    description: string;
+    xp_required: number;
+    image_url: string;
+  };
 };
 
 interface AuthContextType {
@@ -40,6 +46,7 @@ interface AuthContextType {
     confirmPassword: string,
   ) => Promise<void>;
   logout: () => void;
+  checkAuthState?: () => Promise<void>;
   loginWithGoogle: () => Promise<AppUser | null>;
   completeOnboarding: (args: { characterId: number }) => Promise<void>;
 }
@@ -50,12 +57,13 @@ export const AuthContext = createContext<AuthContextType>({
   login: async () => {
     return null;
   },
-  register: async () => {},
-  logout: async () => {},
+  register: async () => { },
+  logout: async () => { },
   loginWithGoogle: async () => {
     return null;
   },
-  completeOnboarding: async ({ characterId }: { characterId: number }) => {},
+  checkAuthState: async () => { },
+  completeOnboarding: async ({ characterId }: { characterId: number }) => { },
 });
 
 interface AuthProviderProps {
@@ -90,11 +98,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const session = await getSession();
       if (session?.access && !isTokenExpired(session.access)) {
         await initProfile(session);
-        return user;
       } else {
         await removeSession();
         setUser(null);
-        return;
       }
     } catch (error) {
       Toast.show({
@@ -108,13 +114,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    GoogleSignin.configure({
-      webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID || "",
-      offlineAccess: true,
-      hostedDomain: "",
-      forceCodeForRefreshToken: true,
-      profileImageSize: 150,
-    });
+    // GoogleSignin.configure({
+    //   webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID || "",
+    //   offlineAccess: true,
+    //   hostedDomain: "",
+    //   forceCodeForRefreshToken: true,
+    //   profileImageSize: 150,
+    // });
     checkAuthState();
   }, []);
 
@@ -178,26 +184,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
 
       // Verificar si Google Play Services están disponibles (solo Android)
-      await GoogleSignin.hasPlayServices();
+      // await GoogleSignin.hasPlayServices();
 
-      // Iniciar sesión con Google
-      const response = await GoogleSignin.signIn();
+      // // Iniciar sesión con Google
+      // const response = await GoogleSignin.signIn();
 
-      if (response.type === "success") {
-        // Obtener los tokens
-        const tokens = await GoogleSignin.getTokens();
+      // if (response.type === "success") {
+      //   // Obtener los tokens
+      //   const tokens = await GoogleSignin.getTokens();
 
-        const token = tokens.idToken;
+      //   const token = tokens.idToken;
 
-        const userData = await api.loginWithGoogle(token);
+      //   const userData = await api.loginWithGoogle(token);
 
-        const userProfile = await initProfile(userData);
+      //   const userProfile = await initProfile(userData);
 
-        return userProfile;
-      } else {
-        // El usuario canceló el proceso de login
-        throw new Error("Login cancelado por el usuario");
-      }
+      //   return userProfile;
+      // } else {
+      //   // El usuario canceló el proceso de login
+      //   throw new Error("Login cancelado por el usuario");
+      // }
+      return null;
     } catch (error: any) {
       throw error;
     } finally {
@@ -232,6 +239,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     register,
     logout,
     loginWithGoogle,
+    checkAuthState,
     completeOnboarding,
   };
 

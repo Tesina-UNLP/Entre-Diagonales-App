@@ -131,7 +131,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     paddingHorizontal: 20,
-    paddingTop: 40,
   },
   actionBack: { flex: 1, height: 24 },
   content: {
