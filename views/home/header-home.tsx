@@ -1,13 +1,12 @@
-import { ThemedText } from '@/components/themed-text';
-import { TOKENS } from '@/constants/colors';
-import { useAuth } from '@/hooks/use-auth';
-import { useWeather } from '@/hooks/use-weather';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import React from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import { ThemedText } from "@/components/themed-text";
+import { TOKENS } from "@/constants/colors";
+import { useAuth } from "@/hooks/use-auth";
+import { useWeather } from "@/hooks/use-weather";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import React from "react";
+import { Image, StyleSheet, View } from "react-native";
 
 const HeaderHome = () => {
-
   const { user } = useAuth();
   const { weather, isLoading } = useWeather();
 
@@ -20,28 +19,35 @@ const HeaderHome = () => {
         />
         <View style={styles.headerLeftTextContainer}>
           <View style={styles.headerLocation}>
-            <MaterialIcons name="location-on" size={16} color={TOKENS.navActive} />
+            <MaterialIcons
+              name="location-on"
+              size={16}
+              color={TOKENS.navActive}
+            />
             <ThemedText type="default">La Plata</ThemedText>
           </View>
-          <ThemedText type="defaultSemiBold">Hola {user?.display_name || user?.username}</ThemedText>
+          <ThemedText type="defaultSemiBold">
+            Hola {user?.display_name || user?.username}
+          </ThemedText>
         </View>
       </View>
 
       <View style={styles.headerRight}>
-        {isLoading ? null :
+        {isLoading ? null : (
           <>
             <View style={styles.headerRightWeather}>
               {weather?.wm.icon}
-              <ThemedText type="defaultSemiBold">{weather?.temperature}°C</ThemedText>
+              <ThemedText type="defaultSemiBold">
+                {weather?.temperature}°C
+              </ThemedText>
             </View>
             <ThemedText type="default">{weather?.wm.label}</ThemedText>
           </>
-        }
+        )}
       </View>
-
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   header: {
@@ -71,7 +77,7 @@ const styles = StyleSheet.create({
   headerRightWeather: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4
+    gap: 4,
   },
   avatar: {
     width: 48,

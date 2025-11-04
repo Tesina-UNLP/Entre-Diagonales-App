@@ -237,5 +237,5 @@ export const api = {
       throw new Error(message);
     }
     return data as TourApiResponse[];
-  }
+  },
 };

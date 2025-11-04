@@ -57,13 +57,13 @@ export const AuthContext = createContext<AuthContextType>({
   login: async () => {
     return null;
   },
-  register: async () => { },
-  logout: async () => { },
+  register: async () => {},
+  logout: async () => {},
   loginWithGoogle: async () => {
     return null;
   },
-  checkAuthState: async () => { },
-  completeOnboarding: async ({ characterId }: { characterId: number }) => { },
+  checkAuthState: async () => {},
+  completeOnboarding: async ({ characterId }: { characterId: number }) => {},
 });
 
 interface AuthProviderProps {

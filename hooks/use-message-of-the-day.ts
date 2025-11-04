@@ -23,7 +23,7 @@ export function useMessageOfTheDay() {
   const refreshMessage = () => {
     const randomIndex = Math.floor(Math.random() * messages.length);
     setMessageOfTheDay(messages[randomIndex]);
-  }
+  };
 
   useEffect(() => {
     refreshMessage();

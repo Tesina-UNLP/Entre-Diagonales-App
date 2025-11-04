@@ -1,7 +1,13 @@
 // components/ThemedBackground.tsx
 import { TOKENS } from "@/constants/colors";
 import { useState } from "react";
-import { RefreshControl, ScrollView, StyleSheet, View, ViewStyle } from "react-native";
+import {
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  View,
+  ViewStyle,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Defs, RadialGradient, Rect, Stop } from "react-native-svg";
 
@@ -12,7 +18,12 @@ interface ThemedBackgroundProps {
   onRefresh?: () => void | Promise<void>;
 }
 
-export function ThemedBackground({ children, style, scrollable = false, onRefresh }: ThemedBackgroundProps) {
+export function ThemedBackground({
+  children,
+  style,
+  scrollable = false,
+  onRefresh,
+}: ThemedBackgroundProps) {
   const [refreshing, setRefreshing] = useState(false);
   const ContentWrapper = scrollable ? ScrollView : View;
 
@@ -81,7 +92,7 @@ export function ThemedBackground({ children, style, scrollable = false, onRefres
               progressBackgroundColor={TOKENS.primary}
               colors={[TOKENS.navActive]}
             />
-          ) : undefined
+          ) : undefined,
         })}
       >
         {children}

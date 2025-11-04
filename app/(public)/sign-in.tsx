@@ -81,7 +81,7 @@ const SignIn = () => {
       } else {
         router.replace("/(onboarding)/presentation");
       }
-    } catch (error: any) {
+    } catch {
       let errorMessage = "";
 
       // if (error.code === statusCodes.SIGN_IN_CANCELLED) {
