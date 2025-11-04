@@ -41,7 +41,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="routes"
+        name="tours"
         options={{
           tabBarLabel: ({ focused, color }) =>
             focused ? <Text style={{ color }}>Rutas</Text> : undefined,

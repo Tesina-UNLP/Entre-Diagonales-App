@@ -19,6 +19,9 @@ export type Tokens = {
   tabBarBackground: string;
   tabBarInactive: string;
   error: string;
+  badgeActive: string;
+  accent: string;
+  cardBackground: string;
 };
 
 export const TOKENS: Tokens = {
@@ -38,6 +41,9 @@ export const TOKENS: Tokens = {
   tabBarBackground: "#0F2624",
   tabBarInactive: "#639E90",
   error: "#e74c3c",
+  badgeActive: "#8CBCB0",
+  accent: "#F9BC60",
+  cardBackground: "rgba(146, 146, 146, 0.07)",
 };
 
 export type AppTheme = {
