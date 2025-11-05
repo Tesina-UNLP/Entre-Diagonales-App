@@ -18,7 +18,7 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 
-const emptyImage = require("../../../assets/images/empty.png");
+const emptyImage = require("@/assets/images/empty.png");
 
 export default function TabTwoScreen() {
   const [routes, setRoutes] = useState<TourApiResponse[]>([]);

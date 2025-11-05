@@ -7,12 +7,10 @@ import NextStop from "@/views/tour-details/next-stop";
 import Progression from "@/views/tour-details/progression";
 import RewardCard from "@/views/tour-details/reward-card";
 import SpotList from "@/views/tour-details/spot-list";
-import { useFocusEffect } from "@react-navigation/native";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -23,7 +21,6 @@ import Toast from "react-native-toast-message";
 const RouteDetails = () => {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const idStr = useMemo(() => (Array.isArray(id) ? id?.[0] : id), [id]);
-  const navigation = useNavigation();
   const { user } = useAuth();
   const [routeInfo, setRouteInfo] = useState<TourInfoApiResponse | null>(null);
   const [currentSpot, setCurrentSpot] = useState<StopApiResponse | null>(null);
@@ -74,28 +71,6 @@ const RouteDetails = () => {
   useEffect(() => {
     handleGetRoute();
   }, [handleGetRoute]);
-
-  // Hide TabBar when this screen is focused, restore on blur
-  useFocusEffect(
-    useCallback(() => {
-      const parent = navigation.getParent?.();
-      parent?.setOptions({ tabBarStyle: { display: "none" } });
-
-      return () => {
-        parent?.setOptions({
-          tabBarStyle: {
-            position: "absolute",
-            backgroundColor: "transparent",
-            borderColor: "transparent",
-            height: Platform.OS === "ios" ? 75 : 70,
-            elevation: 0,
-            shadowOpacity: 0,
-            paddingTop: Platform.OS === "ios" ? 2 : 5,
-          },
-        });
-      };
-    }, [navigation]),
-  );
 
   return (
     <ThemedBackground style={styles.container} safeArea={false}>
@@ -169,7 +144,9 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 20,
     gap: 20,
   },
   loadingContainer: {

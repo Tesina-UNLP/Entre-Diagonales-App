@@ -4,6 +4,7 @@ import { TOKENS } from "@/constants/colors";
 import { StopApiResponse, TourInfoApiResponse } from "@/libs/api";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { router } from "expo-router";
 import React from "react";
 import { Image, StyleSheet, View } from "react-native";
 
@@ -61,6 +62,12 @@ const NextStop = ({
             variant="secondary"
             size="small"
             style={styles.actionButton}
+            onPress={() =>
+              router.push({
+                pathname: "/(stack)/tours/[id]/map",
+                params: { id: routeInfo?.id.toString() },
+              })
+            }
           >
             <MaterialCommunityIcons
               name="map-marker-radius"

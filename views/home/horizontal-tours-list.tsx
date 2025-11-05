@@ -33,7 +33,7 @@ const HorizontalTourList = ({ routes }: { routes: Array<TourApiResponse> }) => {
           <Link
             asChild
             href={{
-              pathname: "/(tabs)/tours/[id]",
+              pathname: "/(stack)/tours/[id]",
               params: { id: item.id.toString() },
             }}
           >

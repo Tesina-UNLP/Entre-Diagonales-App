@@ -107,7 +107,7 @@ export function ThemedBackground({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingBottom: 12,
+    // paddingBottom: 12,
   },
   content: { flex: 1, paddingInline: 24, paddingTop: 30 },
 });
