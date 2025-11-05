@@ -29,6 +29,51 @@ export type TourApiResponse = {
   readonly number_of_people_completed: number;
 };
 
+export type TourInfoApiResponse = {
+  id: number;
+  name: string; // minLength: 1, maxLength: 100
+  description: string | null;
+  tag: string | null; // maxLength: 50
+  active: boolean;
+  readonly progress: string;
+  readonly completed_at: string | null;
+  readonly started: string;
+  readonly number_of_people_completed: number;
+  readonly spots: StopApiResponse[];
+};
+
+export type StopApiResponse = {
+  order: number;
+  spot: {
+    activated: boolean;
+    address: string;
+    description: string | null;
+    fun_facts: string;
+    historical_information: string;
+    id: number;
+    image_urls: string[];
+    latitude: number | null;
+    longitude: number | null;
+    name: string;
+    schedule: string;
+    secret_items: SecretItemApiResponse[];
+    slug: string;
+    tag: string | null;
+    ticket_price: number | null;
+    wheelchair_accessible: boolean;
+  };
+};
+
+export type SecretItemApiResponse = {
+  description: string;
+  hint: string | null;
+  id: number;
+  image_url: string | null;
+  is_active: boolean;
+  name: string;
+  obtained: boolean;
+};
+
 export const api = {
   // login
   login: async (email: string, password: string) => {
@@ -230,5 +275,39 @@ export const api = {
       throw new Error(message);
     }
     return data as TourApiResponse[];
+  },
+
+  getRoute: async (token: string, id: number): Promise<TourInfoApiResponse> => {
+    const response = await fetch(`${apiBaseUrl}/tours/${id}/`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const message =
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Fetching route failed";
+      throw new Error(message);
+    }
+    return data as TourInfoApiResponse;
+  },
+
+  startTour: async (token: string, id: number) => {
+    const response = await fetch(`${apiBaseUrl}/tours/start/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ tour_id: id }),
+    });
+    const data = await response.json().catch(() => null);
+    return data;
   },
 };

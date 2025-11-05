@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     alignItems: "center",
-    backgroundColor: "rgba(146, 146, 146, 0.07)",
+    backgroundColor: TOKENS.cardBackground,
     borderRadius: 18,
     marginBottom: 20,
   },
