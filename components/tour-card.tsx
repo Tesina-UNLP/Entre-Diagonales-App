@@ -4,7 +4,7 @@ import { capitalizeFirstLetter } from "@/libs/utils";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import React, { cloneElement } from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { ThemedButton } from "./themed-button";
@@ -98,7 +98,16 @@ const TourCard = ({
 
             {/* botón continuar visual (toda la card es clickeable) */}
             {started ? (
-              <ThemedButton variant="primary" size="small">
+              <ThemedButton
+                variant="primary"
+                size="small"
+                onPress={() => {
+                  router.push({
+                    pathname: "/(tabs)/tours/[id]",
+                    params: { id },
+                  });
+                }}
+              >
                 <View style={styles.continueButtonContent}>
                   <ThemedText type="defaultSemiBold">Continuar</ThemedText>
                   <FontAwesome6
@@ -109,7 +118,16 @@ const TourCard = ({
                 </View>
               </ThemedButton>
             ) : (
-              <ThemedButton variant="accent" size="small">
+              <ThemedButton
+                variant="accent"
+                size="small"
+                onPress={() => {
+                  router.push({
+                    pathname: "/(tabs)/tours/[id]",
+                    params: { id },
+                  });
+                }}
+              >
                 <View style={styles.continueButtonContent}>
                   <ThemedText
                     type="defaultSemiBold"

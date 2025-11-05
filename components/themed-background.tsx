@@ -16,6 +16,7 @@ interface ThemedBackgroundProps {
   style?: ViewStyle | ViewStyle[];
   scrollable?: boolean;
   onRefresh?: () => void | Promise<void>;
+  safeArea?: boolean;
 }
 
 export function ThemedBackground({
@@ -23,9 +24,11 @@ export function ThemedBackground({
   style,
   scrollable = false,
   onRefresh,
+  safeArea = true,
 }: ThemedBackgroundProps) {
   const [refreshing, setRefreshing] = useState(false);
   const ContentWrapper = scrollable ? ScrollView : View;
+  const SafeArea = safeArea ? SafeAreaView : View;
 
   const handleRefresh = async () => {
     if (!onRefresh) return;
@@ -39,7 +42,7 @@ export function ThemedBackground({
   };
 
   return (
-    <SafeAreaView style={[styles.container]}>
+    <SafeArea style={[styles.container]}>
       {/* Base color */}
       <View style={[StyleSheet.absoluteFill, { backgroundColor: "#004643" }]} />
 
@@ -97,7 +100,7 @@ export function ThemedBackground({
       >
         {children}
       </ContentWrapper>
-    </SafeAreaView>
+    </SafeArea>
   );
 }
 
