@@ -55,6 +55,8 @@ const styles = StyleSheet.create({
   },
   headerContent: {
     flexDirection: "row",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
     alignItems: "center",
     justifyContent: "space-between",
   },

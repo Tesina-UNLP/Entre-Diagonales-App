@@ -3,7 +3,13 @@ import { ThemedBackground } from "@/components/themed-background";
 import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
+import { useLocation } from "@/hooks/use-location";
 import { api, StopApiResponse, TourInfoApiResponse } from "@/libs/api";
+import {
+  getInformationBetweenStops,
+  StopDistanceInfo,
+} from "@/libs/get-information-between-stops";
+import { getRouteCoords } from "@/libs/get-route-coords";
 import { capitalizeFirstLetter } from "@/libs/utils";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -11,6 +17,9 @@ import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetScrollView,
 } from "@gorhom/bottom-sheet";
+import { AppleMaps, GoogleMaps } from "expo-maps";
+import { AppleMapsMapType } from "expo-maps/build/apple/AppleMaps.types";
+import { GoogleMapsMapType } from "expo-maps/build/google/GoogleMaps.types";
 import { router, useLocalSearchParams } from "expo-router";
 import React, {
   useCallback,
@@ -19,7 +28,15 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { ActivityIndicator, Image, StyleSheet, View } from "react-native";
+
+import {
+  ActivityIndicator,
+  Image,
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Map = () => {
@@ -33,6 +50,33 @@ const Map = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const insets = useSafeAreaInsets();
   const sheetRef = useRef<BottomSheet>(null);
+  // Usamos el hook personalizado de ubicación
+  const { location, isLoading } = useLocation();
+  // Ruta solo hasta el siguiente punto a completar
+  const [routeToNextSpot, setRouteToNextSpot] = useState<
+    { latitude: number; longitude: number }[]
+  >([]);
+  // Estado para almacenar información de distancia y duración entre stops
+  const [stopsDistanceInfo, setStopsDistanceInfo] = useState<
+    StopDistanceInfo[]
+  >([]);
+  // Estado para controlar la posición de la cámara del mapa
+  const [cameraPosition, setCameraPosition] = useState({
+    coordinates: { latitude: 0, longitude: 0 },
+    zoom: 15,
+  });
+
+  useEffect(() => {
+    if (location && !isLoading) {
+      setCameraPosition({
+        coordinates: {
+          latitude: location.latitude,
+          longitude: location.longitude,
+        },
+        zoom: 15,
+      });
+    }
+  }, [location, isLoading]);
 
   const handleGetRoute = useCallback(async () => {
     setLoading(true);
@@ -60,6 +104,87 @@ const Map = () => {
     handleGetRoute();
   }, [handleGetRoute]);
 
+  // Efecto para calcular la ruta desde la ubicación actual hasta el siguiente punto a completar
+  useEffect(() => {
+    const fetchRouteToNextSpot = async () => {
+      // Solo calculamos si tenemos ubicación del usuario y spots disponibles
+      if (!location || isLoading || !routeInfo?.spots) {
+        setRouteToNextSpot([]);
+        return;
+      }
+
+      // Encontramos el índice del siguiente punto a completar
+      const indexNextSpot = completedSpots.length;
+
+      // Si ya completó todos los puntos, no mostramos ruta
+      if (indexNextSpot >= routeInfo.spots.length) {
+        setRouteToNextSpot([]);
+        return;
+      }
+
+      // Obtenemos el siguiente punto a completar
+      const nextSpot = routeInfo.spots[indexNextSpot];
+
+      // Creamos un array con 2 puntos: ubicación actual → siguiente punto
+      const pointsForRoute = [
+        {
+          order: -1, // Order ficticio para la ubicación actual
+          spot: {
+            latitude: location.latitude,
+            longitude: location.longitude,
+            name: "Mi ubicación",
+            tag: "ubicacion_actual",
+            image_urls: [],
+            address: "",
+            description: "",
+            fun_facts: "",
+            historical_information: "",
+            secret_items: [],
+            slug: "",
+            ticket_price: 0,
+            wheelchair_accessible: false,
+            activated: false,
+            id: 0,
+            schedule: "",
+          },
+        },
+        {
+          order: nextSpot.order,
+          spot: nextSpot.spot,
+        },
+      ];
+
+      // Calculamos la ruta entre estos dos puntos
+      const ruta = await getRouteCoords(
+        pointsForRoute,
+        process.env.EXPO_PUBLIC_GOOGLE_MAPS || "",
+      );
+      setRouteToNextSpot(ruta.coordenadas);
+    };
+
+    fetchRouteToNextSpot();
+  }, [routeInfo, completedSpots, location, isLoading]);
+
+  // Efecto separado para calcular distancias cuando la ubicación está disponible
+  useEffect(() => {
+    const calculateDistances = async () => {
+      // Solo calculamos si tenemos los datos del tour cargados
+      if (routeInfo?.spots && routeInfo.spots.length > 0) {
+        const distanceInfo = await getInformationBetweenStops(
+          routeInfo.spots,
+          process.env.EXPO_PUBLIC_GOOGLE_MAPS || "",
+          // Pasamos la ubicación solo si está disponible y no está cargando
+          location && !isLoading
+            ? { latitude: location.latitude, longitude: location.longitude }
+            : null,
+        );
+        setStopsDistanceInfo(distanceInfo);
+      }
+    };
+
+    calculateDistances();
+  }, [location, isLoading, routeInfo]);
+
   const snapPoints = useMemo(() => ["15%", "35%", "80%"], []);
 
   const renderBackdrop = useCallback(
@@ -86,10 +211,69 @@ const Map = () => {
     [completedSpots, currentSpot],
   );
 
+  // Función para mover la cámara del mapa a un punto específico
+  const handleSpotPress = useCallback((item: StopApiResponse) => {
+    if (item.spot.latitude && item.spot.longitude) {
+      // Actualizamos la posición de la cámara para movernos a las coordenadas del punto
+      setCameraPosition({
+        coordinates: {
+          latitude: item.spot.latitude,
+          longitude: item.spot.longitude,
+        },
+        zoom: 17, // Nivel de zoom alto para ver el punto con detalle
+      });
+
+      // Colapsamos el bottomsheet para mostrar más del mapa
+      sheetRef.current?.snapToIndex(0);
+    }
+  }, []);
+
+  // Crear markers para mostrar en el mapa
+  const mapMarkers = useMemo(() => {
+    if (!routeInfo || routeInfo.spots.length === 0) return [];
+
+    return routeInfo.spots
+      .filter(
+        (spot) =>
+          spot.spot.latitude !== null &&
+          spot.spot.latitude !== undefined &&
+          spot.spot.longitude !== null &&
+          spot.spot.longitude !== undefined,
+      )
+      .map((spot) => {
+        const { isCompleted, isCurrent } = getSpotStatus(spot);
+
+        let markerColor = TOKENS.badgeActive;
+
+        if (isCompleted) {
+          markerColor = TOKENS.primary;
+        } else if (isCurrent) {
+          markerColor = TOKENS.accent;
+        }
+
+        return {
+          id: `marker-${spot.order}`,
+          coordinates: {
+            latitude: spot.spot.latitude as number,
+            longitude: spot.spot.longitude as number,
+          },
+          title: spot.spot.name,
+          snippet: spot.spot.tag || "",
+          showCallout: true,
+          color: markerColor,
+        };
+      });
+  }, [routeInfo, getSpotStatus]);
+
   const renderItem = useCallback(
     ({ item, index }: { item: StopApiResponse; index: number }) => {
       const { isCompleted, isCurrent, isPending } = getSpotStatus(item);
       const isLastItem = index === (routeInfo?.spots.length || 0) - 1;
+
+      // Buscamos la información de distancia y duración para este stop
+      const distanceInfo = stopsDistanceInfo.find(
+        (info) => info.order === item.order,
+      );
 
       return (
         <View style={styles.spotContainer} key={item.order}>
@@ -132,7 +316,12 @@ const Map = () => {
             )}
           </View>
 
-          <View style={styles.cardWrapper}>
+          {/* Envolvemos el contenido en Pressable para hacerlo tocable */}
+          <Pressable
+            style={styles.cardWrapper}
+            onPress={() => handleSpotPress(item)}
+            android_ripple={{ color: "rgba(139, 214, 196, 0.2)" }}
+          >
             <View style={styles.messageOfTheDay}>
               <View style={styles.messageOfTheDayIconContainer}>
                 <Image
@@ -178,7 +367,13 @@ const Map = () => {
             <View style={styles.nextStopDescription}>
               <View style={styles.nextStopDescriptionItem}>
                 <FontAwesome6 name="route" size={14} color={TOKENS.muted} />
-                <ThemedText type="muted">5.2 KM</ThemedText>
+                <ThemedText type="muted">
+                  {distanceInfo?.distanceFromPrevious != null
+                    ? `${distanceInfo.distanceFromPrevious} km`
+                    : index === 0
+                      ? "Calculando..."
+                      : "N/A"}
+                </ThemedText>
               </View>
               <View style={styles.nextStopDescriptionItem}>
                 <FontAwesome6
@@ -186,14 +381,25 @@ const Map = () => {
                   size={14}
                   color={TOKENS.muted}
                 />
-                <ThemedText type="muted">12 minutos</ThemedText>
+                <ThemedText type="muted">
+                  {distanceInfo?.durationFromPrevious != null
+                    ? `${distanceInfo.durationFromPrevious} ${distanceInfo.durationFromPrevious === 1 ? "minuto" : "minutos"}`
+                    : index === 0
+                      ? "Calculando..."
+                      : "N/A"}
+                </ThemedText>
               </View>
             </View>
-          </View>
+          </Pressable>
         </View>
       );
     },
-    [routeInfo?.spots.length, getSpotStatus],
+    [
+      routeInfo?.spots.length,
+      getSpotStatus,
+      handleSpotPress,
+      stopsDistanceInfo,
+    ],
   );
 
   return (
@@ -206,9 +412,60 @@ const Map = () => {
         <>
           <Header
             title={routeInfo?.name || ""}
-            description={`${routeInfo?.spots.length} Puntos  •  10 min aprox.`}
+            description={`${routeInfo?.spots.length} Puntos  • ${stopsDistanceInfo.reduce((acc, info) => acc + (info.durationFromPrevious || 0), 0)} min aprox.`}
             onBack={() => router.navigate("/(tabs)/tours")}
           />
+
+          {Platform.OS === "ios" ? (
+            <AppleMaps.View
+              style={{ flex: 1 }}
+              cameraPosition={cameraPosition}
+              markers={mapMarkers}
+              polylines={[
+                {
+                  id: "ruta-hasta-siguiente",
+                  coordinates: routeToNextSpot,
+                  color: TOKENS.accent,
+                  width: 20,
+                },
+              ]}
+              uiSettings={{
+                myLocationButtonEnabled: true,
+                compassEnabled: true,
+              }}
+              properties={{
+                mapType: AppleMapsMapType.IMAGERY,
+                isMyLocationEnabled: true,
+              }}
+            />
+          ) : (
+            <GoogleMaps.View
+              style={{ flex: 1 }}
+              cameraPosition={cameraPosition}
+              uiSettings={{
+                myLocationButtonEnabled: true,
+                zoomControlsEnabled: true,
+                compassEnabled: true,
+              }}
+              markers={mapMarkers}
+              properties={{
+                mapType: GoogleMapsMapType.TERRAIN,
+                isMyLocationEnabled: true,
+              }}
+              onMapLoaded={() => {
+                console.log("Map loaded successfully!");
+              }}
+              polylines={[
+                {
+                  id: "ruta-hasta-siguiente",
+                  coordinates: routeToNextSpot,
+                  color: TOKENS.accent,
+                  width: 20,
+                },
+              ]}
+            />
+          )}
+
           <BottomSheet
             ref={sheetRef}
             index={1}
@@ -246,6 +503,9 @@ const Map = () => {
 };
 
 const styles = StyleSheet.create({
+  map: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     paddingTop: 0,
@@ -278,6 +538,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: 4,
+    marginBottom: 10,
   },
   spotContainer: {
     flexDirection: "row",
@@ -403,6 +664,17 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   subtext: { color: "#CFEAE6", fontSize: 12 },
+  calloutContainer: {
+    padding: 10,
+    minWidth: 150,
+  },
+  calloutTitle: {
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  calloutDescription: {
+    fontSize: 12,
+  },
 });
 
 export default Map;

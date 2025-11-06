@@ -1,6 +1,7 @@
 import { api } from "@/libs/api";
 import { isTokenExpired } from "@/libs/jwt";
 import { getSession, removeSession, storeSession } from "@/libs/store-session";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import React, { createContext, useEffect, useState } from "react";
 import Toast from "react-native-toast-message";
 export type AppUser = {
@@ -114,13 +115,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    // GoogleSignin.configure({
-    //   webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID || "",
-    //   offlineAccess: true,
-    //   hostedDomain: "",
-    //   forceCodeForRefreshToken: true,
-    //   profileImageSize: 150,
-    // });
+    GoogleSignin.configure({
+      webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID || "",
+      offlineAccess: true,
+      hostedDomain: "",
+      forceCodeForRefreshToken: true,
+      profileImageSize: 150,
+    });
     checkAuthState();
   }, []);
 
@@ -184,27 +185,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
 
       // Verificar si Google Play Services están disponibles (solo Android)
-      // await GoogleSignin.hasPlayServices();
+      await GoogleSignin.hasPlayServices();
 
-      // // Iniciar sesión con Google
-      // const response = await GoogleSignin.signIn();
+      // Iniciar sesión con Google
+      const response = await GoogleSignin.signIn();
 
-      // if (response.type === "success") {
-      //   // Obtener los tokens
-      //   const tokens = await GoogleSignin.getTokens();
+      if (response.type === "success") {
+        // Obtener los tokens
+        const tokens = await GoogleSignin.getTokens();
 
-      //   const token = tokens.idToken;
+        const token = tokens.idToken;
 
-      //   const userData = await api.loginWithGoogle(token);
+        const userData = await api.loginWithGoogle(token);
 
-      //   const userProfile = await initProfile(userData);
+        const userProfile = await initProfile(userData);
 
-      //   return userProfile;
-      // } else {
-      //   // El usuario canceló el proceso de login
-      //   throw new Error("Login cancelado por el usuario");
-      // }
-      return null;
+        return userProfile;
+      } else {
+        // El usuario canceló el proceso de login
+        throw new Error("Login cancelado por el usuario");
+      }
     } catch (error: any) {
       throw error;
     } finally {

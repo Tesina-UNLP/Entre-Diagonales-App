@@ -1,5 +1,4 @@
-const apiBaseUrl =
-  process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000/api";
+const apiBaseUrl = "https://feels-eva-gardening-regular.trycloudflare.com/api";
 
 export type CharacterApiResponse = {
   id: number;

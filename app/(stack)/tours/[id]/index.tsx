@@ -2,7 +2,12 @@ import Header from "@/components/header";
 import { ThemedBackground } from "@/components/themed-background";
 import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
+import { useLocation } from "@/hooks/use-location";
 import { api, StopApiResponse, TourInfoApiResponse } from "@/libs/api";
+import {
+  getInformationBetweenStops,
+  StopDistanceInfo,
+} from "@/libs/get-information-between-stops";
 import NextStop from "@/views/tour-details/next-stop";
 import Progression from "@/views/tour-details/progression";
 import RewardCard from "@/views/tour-details/reward-card";
@@ -28,7 +33,11 @@ const RouteDetails = () => {
   const [notCompletedSpots, setNotCompletedSpots] = useState<StopApiResponse[]>(
     [],
   );
+  const [stopsDistanceInfo, setStopsDistanceInfo] = useState<
+    StopDistanceInfo[]
+  >([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const { location, isLoading } = useLocation();
 
   const handleStartTour = async () => {
     if (user) {
@@ -43,6 +52,7 @@ const RouteDetails = () => {
     }
   };
 
+  // Función para cargar los datos del tour (sin calcular distancias)
   const handleGetRoute = useCallback(async () => {
     setLoading(true);
     if (user) {
@@ -72,6 +82,26 @@ const RouteDetails = () => {
     handleGetRoute();
   }, [handleGetRoute]);
 
+  // Efecto separado para calcular distancias cuando la ubicación está disponible
+  useEffect(() => {
+    const calculateDistances = async () => {
+      // Solo calculamos si tenemos los datos del tour cargados
+      if (routeInfo?.spots && routeInfo.spots.length > 0) {
+        const distanceInfo = await getInformationBetweenStops(
+          routeInfo.spots,
+          process.env.EXPO_PUBLIC_GOOGLE_MAPS || "",
+          // Pasamos la ubicación solo si está disponible y no está cargando
+          location && !isLoading
+            ? { latitude: location.latitude, longitude: location.longitude }
+            : null,
+        );
+        setStopsDistanceInfo(distanceInfo);
+      }
+    };
+
+    calculateDistances();
+  }, [location, isLoading, routeInfo]); // Se ejecuta cuando cambia location, isLoading o routeInfo
+
   return (
     <ThemedBackground style={styles.container} safeArea={false}>
       {loading ? (
@@ -82,7 +112,7 @@ const RouteDetails = () => {
         <>
           <Header
             title={routeInfo?.name || ""}
-            description={`${routeInfo?.spots.length} Puntos  •  10 min aprox.`}
+            description={`${routeInfo?.spots.length} Puntos  • ${stopsDistanceInfo.reduce((acc, info) => acc + (info.durationFromPrevious || 0), 0)} min aprox.`}
             onBack={() => router.navigate("/(tabs)/tours")}
           />
           <ScrollView
@@ -109,6 +139,11 @@ const RouteDetails = () => {
               <NextStop
                 routeInfo={routeInfo}
                 currentSpot={currentSpot}
+                stopsDistanceInfo={
+                  stopsDistanceInfo.find(
+                    (info) => info.order === currentSpot?.order,
+                  ) || null
+                }
                 handleStartTour={handleStartTour}
               />
               {/* Spots List */}
