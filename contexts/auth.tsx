@@ -1,41 +1,10 @@
 import { api } from "@/libs/api";
 import { isTokenExpired } from "@/libs/jwt";
 import { getSession, removeSession, storeSession } from "@/libs/store-session";
+import { AppUser } from "@/types";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import React, { createContext, useEffect, useState } from "react";
 import Toast from "react-native-toast-message";
-export type AppUser = {
-  id: string;
-  email: string;
-  access: string;
-  refresh: string;
-  on_boarding_completed_at?: boolean;
-  experience: number;
-  gems: number;
-  coins: number;
-  character?: {
-    id: number;
-    name: string;
-    description: string;
-    image_url: string;
-  };
-  level?: {
-    id: number;
-    name: string;
-    description: string;
-    xp_required: number;
-    image_url: string;
-  };
-  display_name: string;
-  username: string;
-  next_level?: {
-    id: number;
-    name: string;
-    description: string;
-    xp_required: number;
-    image_url: string;
-  };
-};
 
 interface AuthContextType {
   user: AppUser | null;

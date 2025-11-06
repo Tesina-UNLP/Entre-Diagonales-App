@@ -4,13 +4,14 @@ import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "@/hooks/use-location";
-import { api, StopApiResponse, TourInfoApiResponse } from "@/libs/api";
+import { api } from "@/libs/api";
 import {
   getInformationBetweenStops,
+  getRouteCoords,
   StopDistanceInfo,
-} from "@/libs/get-information-between-stops";
-import { getRouteCoords } from "@/libs/get-route-coords";
+} from "@/libs/google-maps";
 import { capitalizeFirstLetter } from "@/libs/utils";
+import { StopApiResponse, TourInfoApiResponse } from "@/types";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import BottomSheet, {
@@ -451,9 +452,6 @@ const Map = () => {
               properties={{
                 mapType: GoogleMapsMapType.TERRAIN,
                 isMyLocationEnabled: true,
-              }}
-              onMapLoaded={() => {
-                console.log("Map loaded successfully!");
               }}
               polylines={[
                 {

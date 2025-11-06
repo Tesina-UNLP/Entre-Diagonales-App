@@ -3,11 +3,12 @@ import { ThemedBackground } from "@/components/themed-background";
 import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "@/hooks/use-location";
-import { api, StopApiResponse, TourInfoApiResponse } from "@/libs/api";
+import { api } from "@/libs/api";
 import {
   getInformationBetweenStops,
   StopDistanceInfo,
-} from "@/libs/get-information-between-stops";
+} from "@/libs/google-maps";
+import { StopApiResponse, TourInfoApiResponse } from "@/types";
 import NextStop from "@/views/tour-details/next-stop";
 import Progression from "@/views/tour-details/progression";
 import RewardCard from "@/views/tour-details/reward-card";
