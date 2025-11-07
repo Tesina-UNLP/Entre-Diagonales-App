@@ -4,22 +4,27 @@ import { SecretItemApiResponse, StopApiResponse } from "@/libs/api";
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { StyleSheet, View } from "react-native";
+import { router } from "expo-router";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 
 export const SpotCard = ({
   spot,
   actual,
   completed,
   currentSpot,
+  tourId,
 }: {
   spot: StopApiResponse;
   actual: boolean;
   completed: boolean;
   currentSpot: StopApiResponse | null;
+  tourId: number;
 }) => {
+  const urlToRedirect = `/(stacks)/spots/${spot.spot.id}`
   return (
     <>
-      <View
+      <TouchableOpacity
+        {...(completed ? { onPress: () => router.navigate(urlToRedirect as any) } : {})}
         style={[
           styles.spotCard,
           !completed && !actual && styles.spotIconInactive,
@@ -59,12 +64,14 @@ export const SpotCard = ({
             />
           )}
         </View>
-      </View>
+      </TouchableOpacity>
       {spot.spot.secret_items.map((secret) => (
         <SecretItemCard
           key={secret.id}
           secret={secret}
           actual={actual || spot.order < (currentSpot?.order || 0)}
+          spot={spot}
+          tourId={tourId}
         />
       ))}
     </>
@@ -74,12 +81,21 @@ export const SpotCard = ({
 export const SecretItemCard = ({
   secret,
   actual,
+  spot,
+  tourId,
 }: {
   secret: SecretItemApiResponse;
   actual: boolean;
+  spot: StopApiResponse;
+  tourId: number;
 }) => {
+
+  console.log(secret);
+
+  const urlToRedirect = secret.obtained ? `/(stacks)/secrets/${secret.id}` : `/(tabs)/scanner?mode=secret&from=/(tabs)/tours/${tourId}&secret_id=${secret.id}&spot_id=${spot.spot.id}&tour_id=${tourId}`
   return (
-    <View
+    <TouchableOpacity
+      onPress={() => router.navigate(urlToRedirect as any)}
       style={[
         styles.secretCard,
         !secret.obtained && !actual && styles.secretIconInactive,
@@ -98,16 +114,22 @@ export const SecretItemCard = ({
         </ThemedText>
         <ThemedText type="muted" style={{ color: "#F7A340" }}>
           {secret.obtained
-            ? "Obtenido"
+            ? "Obtuviste este objeto secreto"
             : actual
               ? secret.hint
               : "Un objeto secreto te espera en esta parada"}
         </ThemedText>
       </View>
       <View style={styles.secretAction}>
-        <Feather name="search" size={14} color={"#F7A340"} />
+        {
+          secret.obtained ? (
+            <MaterialIcons name="check" size={14} color={"#F7A340"} />
+          ) : (
+            <Feather name="search" size={14} color={"#F7A340"} />
+          )
+        }
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

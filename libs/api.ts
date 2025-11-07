@@ -1,5 +1,4 @@
-const apiBaseUrl =
-  process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000/api";
+const apiBaseUrl = process.env.EXPO_PUBLIC_API_URL || "https://discusses-ripe-qualifications-busy.trycloudflare.com/api"
 
 export type CharacterApiResponse = {
   id: number;
@@ -308,6 +307,50 @@ export const api = {
       body: JSON.stringify({ tour_id: id }),
     });
     const data = await response.json().catch(() => null);
+    return data;
+  },
+
+  completeSpot: async (token: string, tour_id: number, item_id: number, photo: FormData) => {
+    const response = await fetch(`${apiBaseUrl}/tours/${tour_id}/spots/${item_id}/complete`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: photo,
+    });
+
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Spot completion failed";
+      throw new Error(message);
+    }
+    return data;
+  },
+
+  completeSecret: async (token: string, item_id: number, spot_id: number, photo: FormData) => {
+    const response = await fetch(`${apiBaseUrl}/spots/${spot_id}/secret_items/${item_id}/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: photo,
+    });
+
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Secret completion failed";
+      throw new Error(message);
+    }
     return data;
   },
 };

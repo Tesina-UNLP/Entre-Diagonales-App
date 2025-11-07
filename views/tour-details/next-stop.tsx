@@ -4,6 +4,7 @@ import { TOKENS } from "@/constants/colors";
 import { StopApiResponse, TourInfoApiResponse } from "@/libs/api";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { router } from "expo-router";
 import React from "react";
 import { Image, StyleSheet, View } from "react-native";
 
@@ -49,6 +50,7 @@ const NextStop = ({
             variant="primary"
             size="small"
             style={styles.actionButton}
+            onPress={() => router.navigate(`/(tabs)/scanner?mode=spot&from=/(tabs)/tours/${routeInfo?.id}&spot_id=${currentSpot?.spot.id}&tour_id=${routeInfo?.id}`)}
           >
             <MaterialCommunityIcons
               name="line-scan"
