@@ -1,4 +1,4 @@
-import { AppUser } from "@/contexts/auth";
+import { AppUser } from "@/types";
 import * as SecureStore from "expo-secure-store";
 
 const key = () => "user_session";

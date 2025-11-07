@@ -4,7 +4,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { StyleSheet, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
-import { StopApiResponse } from "@/libs/api";
+import { StopApiResponse } from "@/types";
 import React from "react";
 
 const Progression = ({

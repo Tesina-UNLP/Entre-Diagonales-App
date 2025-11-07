@@ -19,7 +19,7 @@ export type TourApiResponse = {
   description: string | null;
   tag: string | null; // maxLength: 50
   active: boolean;
-  readonly spots: number;
+  readonly spots: StopApiResponse[];
   readonly progress: string;
   readonly completed_at: string | null;
   readonly started: string;

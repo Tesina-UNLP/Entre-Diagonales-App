@@ -1,8 +1,8 @@
 import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
-import { TourApiResponse } from "@/libs/api";
 import { capitalizeFirstLetter } from "@/libs/utils";
+import { TourApiResponse } from "@/types";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Link } from "expo-router";
 import React from "react";

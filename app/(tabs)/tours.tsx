@@ -64,7 +64,9 @@ export default function TabTwoScreen() {
       if (level && level !== "1") {
         const maxSpots = LEVELS.find((l) => l.id === level)?.maxSpots;
         if (typeof maxSpots === "number") {
-          result = result.filter((route) => (route.spots || 0) <= maxSpots);
+          result = result.filter(
+            (route) => (route.spots.length || 0) <= maxSpots,
+          );
         }
       }
 
@@ -196,7 +198,7 @@ export default function TabTwoScreen() {
             }
             id={item.id.toString()}
             tag={item.tag}
-            spotsCount={item.spots}
+            spotsCount={item.spots.length}
             progress={item.progress}
             started={item.started}
           />

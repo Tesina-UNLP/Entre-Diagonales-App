@@ -446,6 +446,7 @@ const Map = () => {
               uiSettings={{
                 myLocationButtonEnabled: true,
                 zoomControlsEnabled: true,
+                mapToolbarEnabled: true,
                 compassEnabled: true,
               }}
               markers={mapMarkers}

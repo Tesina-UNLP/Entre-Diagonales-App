@@ -13,7 +13,7 @@ const MessageOfTheDay = () => {
       <View style={styles.messageOfTheDayIconContainer}>
         <MaterialIcons name="celebration" size={24} color={TOKENS.background} />
       </View>
-      <View>
+      <View style={styles.messageOfTheDayTextContainer}>
         <ThemedText type="defaultSemiBold">{messageOfTheDay.title}</ThemedText>
         <ThemedText type="muted">{messageOfTheDay.description}</ThemedText>
       </View>
@@ -37,6 +37,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: TOKENS.tabBarInactive,
     alignSelf: "center",
+  },
+  messageOfTheDayTextContainer: {
+    flex: 1,
   },
 });
 

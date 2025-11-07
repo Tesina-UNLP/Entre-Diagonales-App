@@ -1,8 +1,8 @@
 import { ThemedButton } from "@/components/themed-button";
 import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
-import { StopApiResponse, TourInfoApiResponse } from "@/libs/api";
-import { StopDistanceInfo } from "@/libs/get-information-between-stops";
+import { StopDistanceInfo } from "@/libs/google-maps";
+import { StopApiResponse, TourInfoApiResponse } from "@/types";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { router } from "expo-router";

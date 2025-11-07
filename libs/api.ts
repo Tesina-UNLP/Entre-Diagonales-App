@@ -5,7 +5,8 @@ import {
   TourInfoApiResponse,
 } from "@/types";
 
-const apiBaseUrl = process.env.EXPO_PUBLIC_API_URL || "";
+const apiBaseUrl =
+  "https://discusses-ripe-qualifications-busy.trycloudflare.com/api";
 
 export const api = {
   // login

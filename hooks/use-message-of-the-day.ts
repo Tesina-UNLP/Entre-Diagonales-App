@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 const messages = [
   {
     title: "¡Bienvenido a Entre Diagonales!",
-    description: "Descubre nuevas aventuras y desafíos hoy.",
+    description:
+      "Descubre nuevas aventuras y desafíos hoy. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.",
   },
   {
     title: "Consejo del día",
@@ -21,7 +22,7 @@ export function useMessageOfTheDay() {
   const [messageOfTheDay, setMessageOfTheDay] = useState(messages[0]);
 
   const refreshMessage = () => {
-    const randomIndex = Math.floor(Math.random() * messages.length);
+    const randomIndex = Math.floor(0);
     setMessageOfTheDay(messages[randomIndex]);
   };
 
