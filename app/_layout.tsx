@@ -9,6 +9,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { AuthProvider } from "@/contexts/auth";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -69,12 +70,14 @@ export default function RootLayout() {
   };
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <AuthProvider>
-        <Slot screenOptions={{ animation: "fade" }} />
-      </AuthProvider>
-      <Toast config={toastConfig} />
-      <StatusBar style="light" />
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <AuthProvider>
+          <Slot screenOptions={{ animation: "fade" }} />
+        </AuthProvider>
+        <Toast config={toastConfig} />
+        <StatusBar style="light" />
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }

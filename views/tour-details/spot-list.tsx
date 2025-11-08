@@ -1,4 +1,4 @@
-import { StopApiResponse } from "@/libs/api";
+import { StopApiResponse } from "@/types";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { SpotCard } from "./spot-card";

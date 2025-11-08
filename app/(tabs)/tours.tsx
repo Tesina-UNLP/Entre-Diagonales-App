@@ -4,10 +4,11 @@ import TourCard from "@/components/tour-card";
 import { TOKENS } from "@/constants/colors";
 import { LEVELS, TAGS } from "@/constants/lists";
 import { useAuth } from "@/hooks/use-auth";
-import { api, TourApiResponse } from "@/libs/api";
-
+import { api } from "@/libs/api";
+import { TourApiResponse } from "@/types";
 import { cloneElement, useCallback, useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
   Image,
   RefreshControl,
@@ -18,7 +19,7 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 
-const emptyImage = require("../../../assets/images/empty.png");
+const emptyImage = require("@/assets/images/empty.png");
 
 export default function TabTwoScreen() {
   const [routes, setRoutes] = useState<TourApiResponse[]>([]);
@@ -26,10 +27,13 @@ export default function TabTwoScreen() {
   const [selectedTag, setSelectedTag] = useState<string | null>("todos");
   const [selectedLevel, setSelectedLevel] = useState<string | null>("1");
   const [refreshing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Estado de carga
   const { user } = useAuth();
 
   const handleGetRoutes = useCallback(async () => {
     try {
+      // Activar el estado de carga al inicio
+      setIsLoading(true);
       const response = await api.getRoutes(user?.access || "");
       setAllRoutes(response);
       setRoutes(response);
@@ -39,6 +43,9 @@ export default function TabTwoScreen() {
         text1: "Error al obtener las rutas",
         text2: "Por favor, intente nuevamente más tarde.",
       });
+    } finally {
+      // Desactivar el estado de carga al finalizar (exitoso o con error)
+      setIsLoading(false);
     }
   }, [user?.access]);
 
@@ -57,7 +64,9 @@ export default function TabTwoScreen() {
       if (level && level !== "1") {
         const maxSpots = LEVELS.find((l) => l.id === level)?.maxSpots;
         if (typeof maxSpots === "number") {
-          result = result.filter((route) => (route.spots || 0) <= maxSpots);
+          result = result.filter(
+            (route) => (route.spots.length || 0) <= maxSpots,
+          );
         }
       }
 
@@ -154,6 +163,16 @@ export default function TabTwoScreen() {
     </>
   );
 
+  // Si está cargando, mostrar el loader
+  if (isLoading) {
+    return (
+      <ThemedBackground style={styles.container}>
+        {renderHeader()}
+        <LoadingComponent />
+      </ThemedBackground>
+    );
+  }
+
   return (
     <ThemedBackground style={styles.container}>
       <FlatList
@@ -179,7 +198,7 @@ export default function TabTwoScreen() {
             }
             id={item.id.toString()}
             tag={item.tag}
-            spotsCount={item.spots}
+            spotsCount={item.spots.length}
             progress={item.progress}
             started={item.started}
           />
@@ -191,10 +210,18 @@ export default function TabTwoScreen() {
   );
 }
 
+// Componente que se muestra cuando NO hay rutas después de cargar
 const EmptyComponent = () => (
   <View style={styles.emptyContainer}>
     <Image source={emptyImage} style={styles.emptyImage} />
     <ThemedText type="defaultSemiBold">No hay rutas disponibles</ThemedText>
+  </View>
+);
+
+// Componente que se muestra mientras se cargan los datos
+const LoadingComponent = () => (
+  <View style={styles.loadingContainer}>
+    <ActivityIndicator size="large" color={TOKENS.primary} />
   </View>
 );
 
@@ -209,6 +236,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 16,
+  },
+  loadingText: {
+    marginTop: 12,
+    color: TOKENS.text,
   },
   bottomSpacer: { height: 120 },
   container: {

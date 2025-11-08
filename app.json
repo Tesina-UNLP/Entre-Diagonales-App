@@ -18,7 +18,12 @@
         "backgroundColor": "#004643"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.entrediagonales.app"
+      "package": "com.entrediagonales.app",
+      "config": {
+        "googleMaps": {
+          "apiKey": "${EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}"
+        }
+      }
     },
     "web": {
       "bundler": "metro",
@@ -30,9 +35,13 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain"
+          "backgroundColor": "#232323",
+          "image": "./assets/splash-icon.png",
+          "dark": {
+            "image": "./assets/splash-icon-dark.png",
+            "backgroundColor": "#000000"
+          },
+          "imageWidth": 200
         }
       ],
       "expo-secure-store",
@@ -50,6 +59,14 @@
           "cameraPermission": "Permiso para usar la cámara de Entre Diagonales",
           "microphonePermission": "Permiso para usar el micrófono de Entre Diagonales",
           "recordAudioAndroid": true
+        }
+      ],
+      "expo-location",
+      [
+        "expo-maps",
+        {
+          "requestLocationPermission": true,
+          "locationPermission": "Permiso para usar la ubicación de Entre Diagonales"
         }
       ]
     ],

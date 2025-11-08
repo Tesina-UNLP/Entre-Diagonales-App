@@ -37,7 +37,7 @@ const TourCard = ({
   const categoryIcon = TAGS.find((t) => t.id === (tag || "todos"))?.icon;
 
   return (
-    <Link asChild href={{ pathname: "/(tabs)/tours/[id]", params: { id } }}>
+    <Link asChild href={{ pathname: "/(stack)/tours/[id]", params: { id } }}>
       <TouchableOpacity style={{ width: "100%", marginBottom: 20 }}>
         <View style={styles.tourCard}>
           <View style={styles.tourImageWrapper}>
@@ -103,7 +103,7 @@ const TourCard = ({
                 size="small"
                 onPress={() => {
                   router.push({
-                    pathname: "/(tabs)/tours/[id]",
+                    pathname: "/(stack)/tours/[id]",
                     params: { id },
                   });
                 }}
@@ -123,7 +123,7 @@ const TourCard = ({
                 size="small"
                 onPress={() => {
                   router.push({
-                    pathname: "/(tabs)/tours/[id]",
+                    pathname: "/(stack)/tours/[id]",
                     params: { id },
                   });
                 }}
