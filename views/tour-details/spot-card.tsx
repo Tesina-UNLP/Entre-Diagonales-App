@@ -20,11 +20,13 @@ export const SpotCard = ({
   currentSpot: StopApiResponse | null;
   tourId: number;
 }) => {
-  const urlToRedirect = `/(stacks)/spots/${spot.spot.id}`
+  const urlToRedirect = `/(stacks)/spots/${spot.spot.id}`;
   return (
     <>
       <TouchableOpacity
-        {...(completed ? { onPress: () => router.navigate(urlToRedirect as any) } : {})}
+        {...(completed
+          ? { onPress: () => router.navigate(urlToRedirect as any) }
+          : {})}
         style={[
           styles.spotCard,
           !completed && !actual && styles.spotIconInactive,
@@ -89,10 +91,9 @@ export const SecretItemCard = ({
   spot: StopApiResponse;
   tourId: number;
 }) => {
-
-  console.log(secret);
-
-  const urlToRedirect = secret.obtained ? `/(stacks)/secrets/${secret.id}` : `/(tabs)/scanner?mode=secret&from=/(tabs)/tours/${tourId}&secret_id=${secret.id}&spot_id=${spot.spot.id}&tour_id=${tourId}`
+  const urlToRedirect = secret.obtained
+    ? `/(stacks)/secrets/${secret.id}`
+    : `/(tabs)/scanner?mode=secret&from=/(tabs)/tours/${tourId}&secret_id=${secret.id}&spot_id=${spot.spot.id}&tour_id=${tourId}`;
   return (
     <TouchableOpacity
       onPress={() => router.navigate(urlToRedirect as any)}
@@ -121,13 +122,11 @@ export const SecretItemCard = ({
         </ThemedText>
       </View>
       <View style={styles.secretAction}>
-        {
-          secret.obtained ? (
-            <MaterialIcons name="check" size={14} color={"#F7A340"} />
-          ) : (
-            <Feather name="search" size={14} color={"#F7A340"} />
-          )
-        }
+        {secret.obtained ? (
+          <MaterialIcons name="check" size={14} color={"#F7A340"} />
+        ) : (
+          <Feather name="search" size={14} color={"#F7A340"} />
+        )}
       </View>
     </TouchableOpacity>
   );

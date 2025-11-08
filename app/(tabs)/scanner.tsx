@@ -1,14 +1,20 @@
+import { CameraPermissionView } from "@/components/camera-permission-view";
+import { CaptureButton } from "@/components/capture-button";
+import { FlashButton } from "@/components/flash-button";
+import LoadingModal from "@/components/loading-modal";
+import { PhotoPreview } from "@/components/photo-preview";
 import { ThemedBackground } from "@/components/themed-background";
-import { ThemedButton } from "@/components/themed-button";
 import { ThemedText } from "@/components/themed-text";
-import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
 import { api } from "@/libs/api";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { BarcodeScanningResult, CameraView, useCameraPermissions } from "expo-camera";
+import {
+  BarcodeScanningResult,
+  CameraView,
+  useCameraPermissions,
+} from "expo-camera";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useRef, useState } from "react";
-import { ActivityIndicator, Alert, Image, Modal, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 import Toast from "react-native-toast-message";
 import { z } from "zod";
 
@@ -48,15 +54,14 @@ export default function ScannerScreen() {
 
   // get query params
   const parsed = ParamsSchema.safeParse(useLocalSearchParams());
-  const params = parsed.success ? parsed.data : { mode: "qr", from: "/(tabs)", secret_id: "", spot_id: "", tour_id: "" };
+  const params = parsed.success
+    ? parsed.data
+    : { mode: "qr", from: "/(tabs)", secret_id: "", spot_id: "", tour_id: "" };
 
-  // Función para simular una llamada a la API
-  // En el futuro, aquí harás la petición real al servidor
-  const simulateAPICall = async () => {
-    // Mostramos el modal de cargando
+  const handleComplete = async () => {
     setIsLoading(true);
 
-    let urlToRedirect = `(tabs)/${params.mode === "spot" ? "spots" : "secrets"}/${params.secret_id ? params.secret_id : params.spot_id}`
+    let urlToRedirect = `(tabs)/${params.mode === "spot" ? "spots" : "secrets"}/${params.secret_id ? params.secret_id : params.spot_id}`;
 
     // Preparar la foto para enviarla al servidor
     // FormData es una estructura especial que permite enviar archivos junto con otros datos
@@ -65,8 +70,8 @@ export default function ScannerScreen() {
     // Si hay una foto, la agregamos al FormData
     if (photo) {
       // Extraemos el nombre del archivo y el tipo (extensión)
-      const fileName = photo.split('/').pop() || 'photo.jpg';
-      const fileType = fileName.split('.').pop();
+      const fileName = photo.split("/").pop() || "photo.jpg";
+      const fileType = fileName.split(".").pop();
 
       // Agregamos la foto al FormData como si fuera un archivo
       // @ts-ignore - React Native maneja FormData de forma especial
@@ -91,7 +96,12 @@ export default function ScannerScreen() {
     try {
       if (params.mode === "spot") {
         // Intentamos completar el spot
-        const response = await api.completeSpot(user?.access, parseInt(params.tour_id), parseInt(params.spot_id), formData)
+        const response = await api.completeSpot(
+          user?.access,
+          parseInt(params.tour_id),
+          parseInt(params.spot_id),
+          formData,
+        );
         Toast.show({
           type: "success",
           text1: "Spot completado",
@@ -99,17 +109,25 @@ export default function ScannerScreen() {
         });
 
         if (response.tour_completed) {
-          urlToRedirect = `/(stacks)/tours/${params.tour_id}/completed`
+          urlToRedirect = `/(stacks)/tours/${params.tour_id}/completed`;
         }
-
       } else {
         // Intentamos completar el objeto secreto
-        await api.completeSecret(user?.access, parseInt(params.secret_id), parseInt(params.spot_id), formData)
+        const response = await api.completeSecret(
+          user?.access,
+          parseInt(params.secret_id),
+          parseInt(params.spot_id),
+          formData,
+        );
         Toast.show({
           type: "success",
           text1: "Objeto secreto completado",
           text2: "El objeto secreto ha sido completado correctamente",
         });
+
+        if (response.obtained) {
+          urlToRedirect = `/(stacks)/secrets/${params.secret_id}`;
+        }
       }
 
       // Si todo salió bien, limpiamos el estado y navegamos
@@ -117,7 +135,6 @@ export default function ScannerScreen() {
       setScanned(false);
       setPhoto(null);
       router.navigate(urlToRedirect as any);
-
     } catch (error) {
       // Si hay un error en cualquiera de las dos requests
       console.error("Error al completar:", error);
@@ -146,10 +163,7 @@ export default function ScannerScreen() {
     // Marcamos que ya escaneamos
     setScanned(true);
 
-    // Aquí llamamos a la función que simula la API
-    // En el futuro, enviarás los datos del QR al servidor
-    console.log("QR escaneado - Tipo:", type, "Datos:", data);
-    simulateAPICall();
+    handleComplete();
   };
 
   // Función para tomar una foto (para modos "spot" y "secret")
@@ -186,7 +200,7 @@ export default function ScannerScreen() {
   if (!params.mode || !params.from) {
     return (
       <ThemedBackground style={styles.container}>
-        <ThemedText>Invalid params</ThemedText>
+        <ThemedText>Error de parámetros</ThemedText>
       </ThemedBackground>
     );
   }
@@ -202,23 +216,7 @@ export default function ScannerScreen() {
 
   // Si no tenemos permisos, mostramos un botón para solicitarlos
   if (!permission.granted) {
-    return (
-      <ThemedBackground style={styles.container}>
-        <View style={styles.permissionContainer}>
-          <ThemedText style={styles.message}>
-            Necesitamos tu permiso para usar la cámara
-          </ThemedText>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={requestPermission}
-          >
-            <ThemedText style={styles.buttonText}>
-              Conceder permiso
-            </ThemedText>
-          </TouchableOpacity>
-        </View>
-      </ThemedBackground>
-    );
+    return <CameraPermissionView onRequestPermission={requestPermission} />;
   }
 
   // MODO QR: Para escanear códigos QR/barras
@@ -241,29 +239,16 @@ export default function ScannerScreen() {
               </ThemedText>
 
               {/* Botón de flash */}
-              <TouchableOpacity
-                style={[styles.flashButton, flashEnabled && styles.flashButtonActive]}
+              <FlashButton
+                enabled={flashEnabled}
                 onPress={() => setFlashEnabled(!flashEnabled)}
-              >
-                <MaterialCommunityIcons name="flash" size={20} color="white" />
-              </TouchableOpacity>
+              />
             </View>
           </View>
         </CameraView>
 
         {/* Modal de cargando - Se muestra mientras se procesa */}
-        <Modal
-          transparent={true}
-          visible={isLoading}
-          animationType="fade"
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <ActivityIndicator size="large" color={TOKENS.accent} />
-              <ThemedText style={styles.modalText}>Procesando...</ThemedText>
-            </View>
-          </View>
-        </Modal>
+        <LoadingModal isLoading={isLoading} text="Procesando..." />
       </View>
     );
   }
@@ -273,34 +258,12 @@ export default function ScannerScreen() {
     <View style={styles.container}>
       {/* Si ya tomamos una foto, mostramos preview */}
       {photo ? (
-        <View style={styles.previewContainer}>
-          <Image source={{ uri: photo }} style={styles.preview} />
-
-          <View style={styles.previewButtons}>
-            <ThemedButton
-              variant="outline"
-              size="small"
-              style={styles.previewButton}
-              onPress={() => setPhoto(null)}
-            >
-              Tomar otra foto
-            </ThemedButton>
-
-            <ThemedButton
-              variant="secondary"
-              size="small"
-              style={styles.previewButton}
-              onPress={() => {
-                // Aquí llamamos a la función que simula la API
-                // En el futuro, enviarás la foto al servidor
-                console.log("Usando foto:", photo);
-                simulateAPICall();
-              }}
-            >
-              Usar esta foto
-            </ThemedButton>
-          </View>
-        </View>
+        <PhotoPreview
+          photoUri={photo}
+          onRetake={() => setPhoto(null)}
+          onConfirm={handleComplete}
+          isLoading={isLoading}
+        />
       ) : (
         // Mostrar cámara para tomar fotos
         <CameraView
@@ -318,41 +281,20 @@ export default function ScannerScreen() {
               </ThemedText>
 
               {/* Botón de flash */}
-              <TouchableOpacity
-                style={[styles.flashButton, flashEnabled && styles.flashButtonActive]}
+              <FlashButton
+                enabled={flashEnabled}
                 onPress={() => setFlashEnabled(!flashEnabled)}
-              >
-                <MaterialCommunityIcons name="flash" size={20} color="white" />
-              </TouchableOpacity>
+              />
             </View>
 
-            <View style={styles.cameraControls}>
-              {/* Botón para tomar foto - grande y centrado */}
-              <TouchableOpacity
-                style={[styles.captureButton, isTakingPhoto && styles.captureButtonDisabled]}
-                onPress={takePicture}
-                disabled={isTakingPhoto}
-              >
-                <View style={styles.captureButtonInner} />
-              </TouchableOpacity>
-            </View>
+            {/* Botón para tomar foto */}
+            <CaptureButton onPress={takePicture} disabled={isTakingPhoto} />
           </View>
         </CameraView>
       )}
 
       {/* Modal de cargando - Se muestra mientras se procesa */}
-      <Modal
-        transparent={true}
-        visible={isLoading}
-        animationType="fade"
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <ActivityIndicator size="large" color={TOKENS.accent} />
-            <ThemedText style={styles.modalText}>Procesando...</ThemedText>
-          </View>
-        </View>
-      </Modal>
+      <LoadingModal isLoading={isLoading} text="Procesando..." />
     </View>
   );
 }
@@ -379,20 +321,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingHorizontal: 20,
-  },
-  permissionContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  message: {
-    textAlign: "center",
-    marginBottom: 20,
-    fontSize: 16,
-  },
-  flashButtonActive: {
-    backgroundColor: TOKENS.accent,
   },
   scanText: {
     color: "white",
@@ -423,96 +351,5 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
-  },
-  // Estilos para controles de la cámara (tomar fotos)
-  cameraControls: {
-    alignItems: "center",
-    gap: 20,
-    position: "absolute",
-    bottom: 120,
-    left: 0,
-    right: 0,
-  },
-  // Botón circular para capturar foto (estilo clásico de cámara)
-  captureButton: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: "white",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 5,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-  },
-  captureButtonInner: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "white",
-  },
-  captureButtonDisabled: {
-    opacity: 0.5,
-  },
-  // Estilos para la vista previa de la foto
-  previewContainer: {
-    flex: 1,
-    backgroundColor: "black",
-  },
-  preview: {
-    flex: 1,
-    resizeMode: "contain",
-  },
-  previewButtons: {
-    position: "absolute",
-    bottom: 120,
-    left: 0,
-    right: 0,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-start",
-    gap: 10,
-    padding: 20,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-  },
-  previewButton: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  // Estilos para el botón de flash
-  flashButton: {
-    backgroundColor: "rgba(15, 38, 36, 0.4)",
-    padding: 12,
-    borderRadius: 100,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  // Estilos para el modal de cargando
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContent: {
-    backgroundColor: TOKENS.background,
-    padding: 30,
-    borderRadius: 16,
-    alignItems: "center",
-    gap: 15,
-    minWidth: 200,
-    // Sombra para darle profundidad al modal
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  modalText: {
-    fontSize: 18,
-    fontWeight: "600",
   },
 });

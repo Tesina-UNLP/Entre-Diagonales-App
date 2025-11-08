@@ -65,7 +65,11 @@ const NextStop = ({
             variant="primary"
             size="small"
             style={styles.actionButton}
-            onPress={() => router.navigate(`/(tabs)/scanner?mode=spot&from=/(tabs)/tours/${routeInfo?.id}&spot_id=${currentSpot?.spot.id}&tour_id=${routeInfo?.id}`)}
+            onPress={() =>
+              router.navigate(
+                `/(tabs)/scanner?mode=spot&from=/(tabs)/tours/${routeInfo?.id}&spot_id=${currentSpot?.spot.id}&tour_id=${routeInfo?.id}`,
+              )
+            }
           >
             <MaterialCommunityIcons
               name="line-scan"
