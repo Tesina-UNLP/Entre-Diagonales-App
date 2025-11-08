@@ -152,6 +152,7 @@ const RouteDetails = () => {
                 completedSpots={completedSpots}
                 currentSpot={currentSpot}
                 notCompletedSpots={notCompletedSpots}
+                tourId={parseInt(idStr)}
               />
               <RewardCard
                 spots={routeInfo?.spots.length || 0}

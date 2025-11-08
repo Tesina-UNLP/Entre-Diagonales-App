@@ -7,10 +7,12 @@ const SpotList = ({
   completedSpots,
   currentSpot,
   notCompletedSpots,
+  tourId,
 }: {
   completedSpots: StopApiResponse[];
   currentSpot: StopApiResponse | null;
   notCompletedSpots: StopApiResponse[];
+  tourId: number;
 }) => {
   return (
     <View style={styles.spotsList}>
@@ -21,6 +23,7 @@ const SpotList = ({
           actual={false}
           completed={true}
           currentSpot={currentSpot}
+          tourId={tourId}
         />
       ))}
       {currentSpot && (
@@ -30,6 +33,7 @@ const SpotList = ({
           actual={true}
           completed={false}
           currentSpot={currentSpot}
+          tourId={tourId}
         />
       )}
       {notCompletedSpots.map((spot) => (
@@ -39,6 +43,7 @@ const SpotList = ({
           actual={false}
           completed={false}
           currentSpot={currentSpot}
+          tourId={tourId}
         />
       ))}
     </View>

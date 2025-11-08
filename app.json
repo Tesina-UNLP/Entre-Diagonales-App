@@ -53,12 +53,20 @@
           "iosUrlScheme": "com.googleusercontent.apps.769784730737-7rokmmf9brdn9ade99u9eeum191pmbvj"
         }
       ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Permiso para usar la cámara de Entre Diagonales",
+          "microphonePermission": "Permiso para usar el micrófono de Entre Diagonales",
+          "recordAudioAndroid": true
+        }
+      ],
       "expo-location",
       [
         "expo-maps",
         {
           "requestLocationPermission": true,
-          "locationPermission": "Allow $(PRODUCT_NAME) to use your location"
+          "locationPermission": "Permiso para usar la ubicación de Entre Diagonales"
         }
       ]
     ],
