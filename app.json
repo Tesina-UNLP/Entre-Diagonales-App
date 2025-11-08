@@ -21,7 +21,7 @@
       "package": "com.entrediagonales.app",
       "config": {
         "googleMaps": {
-          "apiKey": "${EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}"
+          "apiKey": "AIzaSyDW7kEZAJo4THqgkTJQSDUqak_7hkBz10w"
         }
       }
     },
