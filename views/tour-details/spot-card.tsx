@@ -1,6 +1,6 @@
 import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
-import { SecretItemApiResponse, StopApiResponse } from "@/libs/api";
+import { SecretItemApiResponse, StopApiResponse } from "@/types";
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";

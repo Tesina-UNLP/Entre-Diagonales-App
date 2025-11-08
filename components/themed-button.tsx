@@ -79,6 +79,7 @@ export function ThemedButton({
       <TouchableOpacity
         style={[
           styles.container,
+          styles.shadowElevation, // Agregamos elevación al botón gold
           size === "small" && styles.smallContainer,
           size === "large" && styles.largeContainer,
           isDisabled && styles.disabled,
@@ -114,6 +115,8 @@ export function ThemedButton({
       style={[
         styles.container,
         styles.button,
+        // Agregamos elevación a todos los botones excepto outline y ghost
+        variant !== "outline" && variant !== "ghost" && styles.shadowElevation,
         variant === "primary" && styles.primaryButton,
         variant === "secondary" && styles.secondaryButton,
         variant === "outline" && styles.outlineButton,
@@ -138,7 +141,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 56,
     borderRadius: 12,
-    overflow: "hidden",
+    // Removemos overflow: "hidden" para que las sombras se vean correctamente
   },
   button: {
     alignItems: "center",
@@ -236,5 +239,15 @@ const styles = StyleSheet.create({
   },
   accentButton: {
     backgroundColor: TOKENS.accent,
+  },
+  // Estilo de elevación sutil para los botones
+  shadowElevation: {
+    // Sombras para iOS
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    // Elevación para Android
+    elevation: 2,
   },
 });

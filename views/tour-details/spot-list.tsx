@@ -1,7 +1,7 @@
+import { StopApiResponse } from "@/types";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { SpotCard } from "./spot-card";
-import { StopApiResponse } from "@/libs/api";
 
 const SpotList = ({
   completedSpots,

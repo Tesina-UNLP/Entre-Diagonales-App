@@ -2,17 +2,21 @@ import Header from "@/components/header";
 import { ThemedBackground } from "@/components/themed-background";
 import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
-import { api, StopApiResponse, TourInfoApiResponse } from "@/libs/api";
+import { useLocation } from "@/hooks/use-location";
+import { api } from "@/libs/api";
+import {
+  getInformationBetweenStops,
+  StopDistanceInfo,
+} from "@/libs/google-maps";
+import { StopApiResponse, TourInfoApiResponse } from "@/types";
 import NextStop from "@/views/tour-details/next-stop";
 import Progression from "@/views/tour-details/progression";
 import RewardCard from "@/views/tour-details/reward-card";
 import SpotList from "@/views/tour-details/spot-list";
-import { useFocusEffect } from "@react-navigation/native";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -23,7 +27,6 @@ import Toast from "react-native-toast-message";
 const RouteDetails = () => {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const idStr = useMemo(() => (Array.isArray(id) ? id?.[0] : id), [id]);
-  const navigation = useNavigation();
   const { user } = useAuth();
   const [routeInfo, setRouteInfo] = useState<TourInfoApiResponse | null>(null);
   const [currentSpot, setCurrentSpot] = useState<StopApiResponse | null>(null);
@@ -31,7 +34,11 @@ const RouteDetails = () => {
   const [notCompletedSpots, setNotCompletedSpots] = useState<StopApiResponse[]>(
     [],
   );
+  const [stopsDistanceInfo, setStopsDistanceInfo] = useState<
+    StopDistanceInfo[]
+  >([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const { location, isLoading } = useLocation();
 
   const handleStartTour = async () => {
     if (user) {
@@ -46,6 +53,7 @@ const RouteDetails = () => {
     }
   };
 
+  // Función para cargar los datos del tour (sin calcular distancias)
   const handleGetRoute = useCallback(async () => {
     setLoading(true);
     if (user) {
@@ -75,27 +83,25 @@ const RouteDetails = () => {
     handleGetRoute();
   }, [handleGetRoute]);
 
-  // Hide TabBar when this screen is focused, restore on blur
-  useFocusEffect(
-    useCallback(() => {
-      const parent = navigation.getParent?.();
-      parent?.setOptions({ tabBarStyle: { display: "none" } });
+  // Efecto separado para calcular distancias cuando la ubicación está disponible
+  useEffect(() => {
+    const calculateDistances = async () => {
+      // Solo calculamos si tenemos los datos del tour cargados
+      if (routeInfo?.spots && routeInfo.spots.length > 0) {
+        const distanceInfo = await getInformationBetweenStops(
+          routeInfo.spots,
+          process.env.EXPO_PUBLIC_GOOGLE_MAPS || "",
+          // Pasamos la ubicación solo si está disponible y no está cargando
+          location && !isLoading
+            ? { latitude: location.latitude, longitude: location.longitude }
+            : null,
+        );
+        setStopsDistanceInfo(distanceInfo);
+      }
+    };
 
-      return () => {
-        parent?.setOptions({
-          tabBarStyle: {
-            position: "absolute",
-            backgroundColor: "transparent",
-            borderColor: "transparent",
-            height: Platform.OS === "ios" ? 75 : 70,
-            elevation: 0,
-            shadowOpacity: 0,
-            paddingTop: Platform.OS === "ios" ? 2 : 5,
-          },
-        });
-      };
-    }, [navigation]),
-  );
+    calculateDistances();
+  }, [location, isLoading, routeInfo]); // Se ejecuta cuando cambia location, isLoading o routeInfo
 
   return (
     <ThemedBackground style={styles.container} safeArea={false}>
@@ -107,7 +113,7 @@ const RouteDetails = () => {
         <>
           <Header
             title={routeInfo?.name || ""}
-            description={`${routeInfo?.spots.length} Puntos  •  10 min aprox.`}
+            description={`${routeInfo?.spots.length} Puntos  • ${stopsDistanceInfo.reduce((acc, info) => acc + (info.durationFromPrevious || 0), 0)} min aprox.`}
             onBack={() => router.navigate("/(tabs)/tours")}
           />
           <ScrollView
@@ -134,6 +140,11 @@ const RouteDetails = () => {
               <NextStop
                 routeInfo={routeInfo}
                 currentSpot={currentSpot}
+                stopsDistanceInfo={
+                  stopsDistanceInfo.find(
+                    (info) => info.order === currentSpot?.order,
+                  ) || null
+                }
                 handleStartTour={handleStartTour}
               />
               {/* Spots List */}
@@ -169,7 +180,9 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 20,
     gap: 20,
   },
   loadingContainer: {

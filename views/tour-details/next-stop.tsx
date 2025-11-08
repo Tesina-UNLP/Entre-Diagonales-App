@@ -1,9 +1,11 @@
 import { ThemedButton } from "@/components/themed-button";
 import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
-import { StopApiResponse, TourInfoApiResponse } from "@/libs/api";
+import { StopDistanceInfo } from "@/libs/google-maps";
+import { StopApiResponse, TourInfoApiResponse } from "@/types";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { router } from "expo-router";
 import React from "react";
 import { Image, StyleSheet, View } from "react-native";
 
@@ -11,10 +13,12 @@ const NextStop = ({
   routeInfo,
   currentSpot,
   handleStartTour,
+  stopsDistanceInfo,
 }: {
   routeInfo: TourInfoApiResponse | null;
   currentSpot: StopApiResponse | null;
   handleStartTour: () => void;
+  stopsDistanceInfo: StopDistanceInfo | null;
 }) => {
   return (
     <View style={styles.nextStopContainer}>
@@ -37,7 +41,19 @@ const NextStop = ({
                 size={14}
                 color={TOKENS.accent}
               />
-              <ThemedText type="muted">350m • 10 min a pie.</ThemedText>
+              {stopsDistanceInfo?.distanceFromPrevious != null &&
+              stopsDistanceInfo?.durationFromPrevious != null ? (
+                <ThemedText type="muted">
+                  {stopsDistanceInfo?.distanceFromPrevious} km •{" "}
+                  {stopsDistanceInfo?.durationFromPrevious}{" "}
+                  {stopsDistanceInfo?.durationFromPrevious === 1
+                    ? "minuto"
+                    : "minutos"}{" "}
+                  a pie.
+                </ThemedText>
+              ) : (
+                <ThemedText type="muted">Calculando...</ThemedText>
+              )}
             </View>
           </View>
         </View>
@@ -61,6 +77,12 @@ const NextStop = ({
             variant="secondary"
             size="small"
             style={styles.actionButton}
+            onPress={() =>
+              router.push({
+                pathname: "/(stack)/tours/[id]/map",
+                params: { id: routeInfo?.id.toString() },
+              })
+            }
           >
             <MaterialCommunityIcons
               name="map-marker-radius"
