@@ -6,7 +6,7 @@ const messages = [
   {
     title: "¡Bienvenido a Entre Diagonales!",
     description:
-      "Descubre nuevas aventuras y desafíos hoy. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.",
+      "Descubre nuevas aventuras y desafíos hoy.",
   },
   {
     title: "Consejo del día",
