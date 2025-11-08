@@ -5,8 +5,7 @@ import { useEffect, useState } from "react";
 const messages = [
   {
     title: "¡Bienvenido a Entre Diagonales!",
-    description:
-      "Descubre nuevas aventuras y desafíos hoy.",
+    description: "Descubre nuevas aventuras y desafíos hoy.",
   },
   {
     title: "Consejo del día",

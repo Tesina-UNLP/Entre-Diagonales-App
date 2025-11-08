@@ -109,8 +109,10 @@ export default function ScannerScreen() {
         });
 
         if (response.tour_completed) {
-          urlToRedirect = `/(stacks)/tours/${params.tour_id}/completed`;
+          urlToRedirect = `/(stack)/tours/${params.tour_id}/completed`;
         }
+
+        urlToRedirect = `/(stack)/spots/${params.spot_id}`;
       } else {
         // Intentamos completar el objeto secreto
         const response = await api.completeSecret(
@@ -126,7 +128,7 @@ export default function ScannerScreen() {
         });
 
         if (response.obtained) {
-          urlToRedirect = `/(stacks)/secrets/${params.secret_id}`;
+          urlToRedirect = `/(stack)/secrets/${params.secret_id}`;
         }
       }
 
