@@ -33,9 +33,10 @@ export const CompletionActions = ({
   };
 
   // Función para navegar a la lista de tours
-  const handleStartAnother = () => {
+  const handleSendFeedback = () => {
     router.push({
-      pathname: "/(tabs)/tours",
+      pathname: "/(stack)/tours/[id]/feedback",
+      params: { id: tourId },
     });
   };
 
@@ -52,16 +53,16 @@ export const CompletionActions = ({
         <ThemedText type="defaultSemiBold">Ver mi progreso</ThemedText>
       </ThemedButton>
 
-      {/* Botón para iniciar otro recorrido */}
+      {/* Botón para enviar feedback */}
       <ThemedButton
         variant="accent"
         size="small"
         style={styles.button}
-        onPress={handleStartAnother}
+        onPress={handleSendFeedback}
       >
-        <FontAwesome name="play-circle" size={16} color={TOKENS.primary} />
+        <FontAwesome name="comment" size={16} color={TOKENS.primary} />
         <ThemedText type="defaultSemiBold" style={styles.accentButtonText}>
-          Iniciar otro recorrido
+          Envianos tu feedback
         </ThemedText>
       </ThemedButton>
 

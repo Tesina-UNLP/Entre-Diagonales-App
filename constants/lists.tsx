@@ -45,3 +45,59 @@ export const LEVELS = [
   { id: "3", label: "Intermedio", maxSpots: 10 },
   { id: "4", label: "Difícil", maxSpots: 15 },
 ];
+
+export const QUALIFICATION_OPTIONS = [
+  {
+    id: 1,
+    label: "Muy mal",
+    icon: "emoticon-sad-outline",
+  },
+  {
+    id: 2,
+    label: "Mal",
+    icon: "emoticon-neutral-outline",
+  },
+  {
+    id: 3,
+    label: "Regular",
+    icon: "emoticon-happy-outline",
+  },
+  {
+    id: 4,
+    label: "Bueno",
+    icon: "emoticon-excited-outline",
+  },
+  {
+    id: 5,
+    label: "Muy bueno",
+    icon: "emoticon-cool-outline",
+  },
+];
+
+export const FEEDBACK_OPTIONS = [
+  {
+    id: 1,
+    label: "Trivias",
+    icon: "help-circle",
+  },
+  {
+    id: 2,
+    label: "Secretos",
+    icon: "lock",
+  },
+  {
+    id: 3,
+    label: "Lugares",
+    icon: "map-marker",
+  },
+  {
+    id: 4,
+    label: "Mapa",
+    icon: "map",
+  },
+  {
+    id: 5,
+    label: "Recompensas",
+    icon: "gift",
+  },
+];

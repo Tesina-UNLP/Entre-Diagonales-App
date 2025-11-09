@@ -138,3 +138,14 @@ export type AppUser = {
     image_url: string;
   };
 };
+
+export type FeedbackApiData = {
+  name: string;
+  qualification: number;
+  trivia_liked: boolean;
+  spots_liked: boolean;
+  secrets_liked: boolean;
+  route_liked: boolean;
+  rewards_liked: boolean;
+  comment?: string | null;
+};
