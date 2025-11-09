@@ -95,7 +95,7 @@ export const SecretItemCard = ({
   completed: boolean;
 }) => {
   const urlToRedirect = secret.obtained
-    ? `/(stacks)/secrets/${secret.id}`
+    ? `/(stack)/secrets/${secret.id}`
     : actual || completed
       ? `/(tabs)/scanner?mode=secret&from=/(tabs)/tours/${tourId}&secret_id=${secret.id}&spot_id=${spot.spot.id}&tour_id=${tourId}`
       : undefined;

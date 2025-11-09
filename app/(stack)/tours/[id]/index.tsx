@@ -40,6 +40,10 @@ const RouteDetails = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const { location, isLoading } = useLocation();
 
+  const isTourCompleted = useMemo(() => {
+    return Number(routeInfo?.progress) === 100;
+  }, [routeInfo?.progress]);
+
   const handleStartTour = async () => {
     if (user) {
       await api.startTour(user.access, parseInt(idStr));
@@ -53,7 +57,6 @@ const RouteDetails = () => {
     }
   };
 
-  // Función para cargar los datos del tour (sin calcular distancias)
   const handleGetRoute = useCallback(async () => {
     setLoading(true);
     if (user) {
@@ -83,15 +86,12 @@ const RouteDetails = () => {
     handleGetRoute();
   }, [handleGetRoute]);
 
-  // Efecto separado para calcular distancias cuando la ubicación está disponible
   useEffect(() => {
     const calculateDistances = async () => {
-      // Solo calculamos si tenemos los datos del tour cargados
       if (routeInfo?.spots && routeInfo.spots.length > 0) {
         const distanceInfo = await getInformationBetweenStops(
           routeInfo.spots,
           process.env.EXPO_PUBLIC_GOOGLE_MAPS || "",
-          // Pasamos la ubicación solo si está disponible y no está cargando
           location && !isLoading
             ? { latitude: location.latitude, longitude: location.longitude }
             : null,
@@ -101,7 +101,7 @@ const RouteDetails = () => {
     };
 
     calculateDistances();
-  }, [location, isLoading, routeInfo]); // Se ejecuta cuando cambia location, isLoading o routeInfo
+  }, [location, isLoading, routeInfo]);
 
   return (
     <ThemedBackground style={styles.container} safeArea={false}>
@@ -146,6 +146,7 @@ const RouteDetails = () => {
                   ) || null
                 }
                 handleStartTour={handleStartTour}
+                isTourCompleted={isTourCompleted}
               />
               {/* Spots List */}
               <SpotList
