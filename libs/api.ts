@@ -2,6 +2,7 @@ import {
   CharacterApiResponse,
   IndividualSpotApiResponse,
   LevelApiResponse,
+  QuizApiResponse,
   TourApiResponse,
   TourInfoApiResponse,
 } from "@/types";
@@ -329,5 +330,48 @@ export const api = {
       throw new Error(message);
     }
     return data as IndividualSpotApiResponse;
+  },
+
+  getQuiz: async (token: string, id: number): Promise<QuizApiResponse> => {
+    const response = await fetch(`${apiBaseUrl}/quizzes/${id}/`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Fetching quiz failed";
+      throw new Error(message);
+    }
+    return data;
+  },
+
+  solveQuiz: async (token: string, id: number, answer_id: number) => {
+    const response = await fetch(
+      `${apiBaseUrl}/quizzes/${id}/answer/${answer_id}/`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Solving quiz failed";
+      throw new Error(message);
+    }
+    return data;
   },
 };

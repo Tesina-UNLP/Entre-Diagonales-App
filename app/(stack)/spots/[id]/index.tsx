@@ -87,7 +87,7 @@ const SpotDetails = () => {
    * Función para cerrar la pantalla y volver atrás.
    */
   const handleClose = () => {
-    router.back();
+    router.replace("/(tabs)");
   };
 
   // Si está cargando, mostramos un indicador
