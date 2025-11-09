@@ -1,5 +1,6 @@
 import {
   CharacterApiResponse,
+  FeedbackApiData,
   IndividualSpotApiResponse,
   LevelApiResponse,
   QuizApiResponse,
@@ -370,6 +371,32 @@ export const api = {
         data?.detail ||
         response.statusText ||
         "Solving quiz failed";
+      throw new Error(message);
+    }
+    return data;
+  },
+
+  sendFeedback: async (
+    token: string,
+    formData: FeedbackApiData,
+    tour_id: number,
+  ) => {
+    const response = await fetch(`${apiBaseUrl}/tours/${tour_id}/feedback/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(formData),
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Sending feedback failed";
       throw new Error(message);
     }
     return data;
