@@ -61,6 +61,20 @@ export type StopApiResponse = {
   };
 };
 
+export type QuizAnswerApiResponse = {
+  id: number;
+  quiz: number;
+  name: string;
+};
+
+export type QuizApiResponse = {
+  id: number;
+  name: string;
+  explanation: string;
+  actived: boolean;
+  answers: QuizAnswerApiResponse[];
+};
+
 export type IndividualSpotApiResponse = {
   activated: boolean;
   address: string;
@@ -78,6 +92,8 @@ export type IndividualSpotApiResponse = {
   tag: string | null;
   ticket_price: number | null;
   wheelchair_accessible: boolean;
+  quiz: QuizApiResponse | null;
+  quiz_solved: boolean;
 };
 
 export type SecretItemApiResponse = {
