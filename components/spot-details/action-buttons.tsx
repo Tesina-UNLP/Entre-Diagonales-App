@@ -7,6 +7,7 @@
  */
 
 import { ThemedButton } from "@/components/themed-button";
+import { router } from "expo-router";
 import { Linking, StyleSheet, View } from "react-native";
 import { ActionButtonsProps } from "./types";
 
@@ -38,7 +39,12 @@ export const ActionButtons = ({
           variant="primary"
           size="small"
           // TODO: Descomentar cuando esté lista la navegación a la trivia
-          // onPress={() => router.navigate(`/(stack)/quizzes/${quizId}`)}
+          onPress={() =>
+            router.push({
+              pathname: "/(stack)/quizzes/[id]",
+              params: { id: quizId?.toString() },
+            })
+          }
         >
           Realizar trivia de este lugar
         </ThemedButton>
