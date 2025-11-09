@@ -74,6 +74,7 @@ export const SpotCard = ({
           actual={actual || spot.order < (currentSpot?.order || 0)}
           spot={spot}
           tourId={tourId}
+          completed={completed}
         />
       ))}
     </>
@@ -84,19 +85,25 @@ export const SecretItemCard = ({
   secret,
   actual,
   spot,
+  completed,
   tourId,
 }: {
   secret: SecretItemApiResponse;
   actual: boolean;
   spot: StopApiResponse;
   tourId: number;
+  completed: boolean;
 }) => {
   const urlToRedirect = secret.obtained
     ? `/(stack)/secrets/${secret.id}`
-    : `/(tabs)/scanner?mode=secret&from=/(tabs)/tours/${tourId}&secret_id=${secret.id}&spot_id=${spot.spot.id}&tour_id=${tourId}`;
+    : actual || completed
+      ? `/(tabs)/scanner?mode=secret&from=/(tabs)/tours/${tourId}&secret_id=${secret.id}&spot_id=${spot.spot.id}&tour_id=${tourId}`
+      : undefined;
   return (
     <TouchableOpacity
-      onPress={() => router.navigate(urlToRedirect as any)}
+      onPress={() =>
+        urlToRedirect ? router.navigate(urlToRedirect as any) : undefined
+      }
       style={[
         styles.secretCard,
         !secret.obtained && !actual && styles.secretIconInactive,

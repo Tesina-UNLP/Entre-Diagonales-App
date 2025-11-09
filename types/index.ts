@@ -61,6 +61,41 @@ export type StopApiResponse = {
   };
 };
 
+export type QuizAnswerApiResponse = {
+  id: number;
+  quiz: number;
+  name: string;
+};
+
+export type QuizApiResponse = {
+  id: number;
+  name: string;
+  explanation: string;
+  actived: boolean;
+  answers: QuizAnswerApiResponse[];
+};
+
+export type IndividualSpotApiResponse = {
+  activated: boolean;
+  address: string;
+  description: string | null;
+  fun_facts: string;
+  historical_information: string;
+  id: number;
+  image_urls: string[];
+  latitude: number | null;
+  longitude: number | null;
+  name: string;
+  schedule: string;
+  secret_items: SecretItemApiResponse[];
+  slug: string;
+  tag: string | null;
+  ticket_price: number | null;
+  wheelchair_accessible: boolean;
+  quiz: QuizApiResponse | null;
+  quiz_solved: boolean;
+};
+
 export type SecretItemApiResponse = {
   description: string;
   hint: string | null;
