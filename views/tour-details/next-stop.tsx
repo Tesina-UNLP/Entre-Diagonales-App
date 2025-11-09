@@ -9,20 +9,40 @@ import { router } from "expo-router";
 import React from "react";
 import { Image, StyleSheet, View } from "react-native";
 
+const happyImage = require("@/assets/images/happy.png");
+
 const NextStop = ({
   routeInfo,
   currentSpot,
   handleStartTour,
   stopsDistanceInfo,
+  isTourCompleted,
 }: {
   routeInfo: TourInfoApiResponse | null;
   currentSpot: StopApiResponse | null;
   handleStartTour: () => void;
   stopsDistanceInfo: StopDistanceInfo | null;
+  isTourCompleted: boolean;
 }) => {
   return (
     <View style={styles.nextStopContainer}>
-      {routeInfo?.started && (
+      {/* Mostrar mensaje de felicitación si el tour está completado */}
+      {routeInfo?.started && isTourCompleted ? (
+        <View style={styles.completedTourContainer}>
+          <View style={styles.completedIconContainer}>
+            <Image source={happyImage} style={styles.completedIcon} />
+          </View>
+          <View style={styles.completedTextContent}>
+            <ThemedText type="subtitle" style={styles.completedTitle}>
+              ¡Tour Completado!
+            </ThemedText>
+            <ThemedText type="default" style={styles.completedDescription}>
+              Has visitado todos los puntos de este tour. ¡Felicitaciones por
+              completar la aventura!
+            </ThemedText>
+          </View>
+        </View>
+      ) : routeInfo?.started ? (
         <View style={styles.messageOfTheDay}>
           <View style={styles.messageOfTheDayIconContainer}>
             <Image
@@ -57,9 +77,10 @@ const NextStop = ({
             </View>
           </View>
         </View>
-      )}
+      ) : null}
       {/* Next Stop Actions */}
-      {routeInfo?.started ? (
+      {routeInfo?.started && !isTourCompleted ? (
+        // Mostrar botones normales cuando el tour no está completado
         <View style={styles.nextStopActions}>
           <ThemedButton
             variant="primary"
@@ -99,6 +120,28 @@ const NextStop = ({
             </ThemedText>
           </ThemedButton>
         </View>
+      ) : routeInfo?.started && isTourCompleted ? (
+        // Mostrar solo botón de ver mapa cuando el tour está completado
+        <ThemedButton
+          variant="secondary"
+          size="small"
+          style={styles.completedActionButton}
+          onPress={() =>
+            router.push({
+              pathname: "/(stack)/tours/[id]/map",
+              params: { id: routeInfo?.id.toString() },
+            })
+          }
+        >
+          <MaterialCommunityIcons
+            name="map-marker-radius"
+            size={20}
+            color={TOKENS.primary}
+          />
+          <ThemedText type="defaultSemiBold" style={styles.actionButtonText}>
+            Revisar mapa del tour
+          </ThemedText>
+        </ThemedButton>
       ) : (
         <ThemedButton
           variant="gold"
@@ -164,6 +207,50 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     color: TOKENS.primary,
+  },
+  // Estilos para el estado de tour completado
+  completedTourContainer: {
+    flexDirection: "column",
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+    alignItems: "center",
+    backgroundColor: TOKENS.cardBackground,
+    borderRadius: 18,
+    marginBottom: 20,
+    gap: 16,
+    borderWidth: 2,
+    borderColor: TOKENS.accent,
+  },
+  completedIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  completedTextContent: {
+    flexDirection: "column",
+    gap: 8,
+    alignItems: "center",
+  },
+  completedTitle: {
+    color: TOKENS.accent,
+    textAlign: "center",
+  },
+  completedDescription: {
+    textAlign: "center",
+    color: TOKENS.muted,
+    paddingHorizontal: 10,
+  },
+  completedActionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  completedIcon: {
+    width: 80,
+    height: 80,
   },
 });
 
