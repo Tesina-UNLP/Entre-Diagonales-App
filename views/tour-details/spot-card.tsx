@@ -20,7 +20,7 @@ export const SpotCard = ({
   currentSpot: StopApiResponse | null;
   tourId: number;
 }) => {
-  const urlToRedirect = `/(stacks)/spots/${spot.spot.id}`;
+  const urlToRedirect = `/(stack)/spots/${spot.spot.id}`;
   return (
     <>
       <TouchableOpacity
@@ -92,7 +92,7 @@ export const SecretItemCard = ({
   tourId: number;
 }) => {
   const urlToRedirect = secret.obtained
-    ? `/(stacks)/secrets/${secret.id}`
+    ? `/(stack)/secrets/${secret.id}`
     : `/(tabs)/scanner?mode=secret&from=/(tabs)/tours/${tourId}&secret_id=${secret.id}&spot_id=${spot.spot.id}&tour_id=${tourId}`;
   return (
     <TouchableOpacity
