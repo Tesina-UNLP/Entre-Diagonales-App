@@ -61,7 +61,8 @@ export default function ScannerScreen() {
   const handleComplete = async () => {
     setIsLoading(true);
 
-    let urlToRedirect = `(tabs)/${params.mode === "spot" ? "spots" : "secrets"}/${params.secret_id ? params.secret_id : params.spot_id}`;
+    // URL por defecto - apunta a la ruta correcta en (stack)
+    let urlToRedirect = `/(stack)/${params.mode === "spot" ? "spots" : "secrets"}/${params.secret_id ? params.secret_id : params.spot_id}`;
 
     // Preparar la foto para enviarla al servidor
     // FormData es una estructura especial que permite enviar archivos junto con otros datos
@@ -127,8 +128,8 @@ export default function ScannerScreen() {
           text2: "El objeto secreto ha sido completado correctamente",
         });
 
-        if (response.obtained) {
-          urlToRedirect = `/(stack)/secrets/${params.secret_id}`;
+        if (response.success) {
+          urlToRedirect = `/(stack)/secrets/${params.secret_id}/complete?secret_id=${params.secret_id}&coins=${response.coins}&xp=${response.xp}&name=${response.name}&description=${response.description}&image_url=${response.image}`;
         }
       }
 

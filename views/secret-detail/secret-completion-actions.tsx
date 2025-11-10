@@ -1,0 +1,134 @@
+import { ThemedButton } from "@/components/themed-button";
+import { ThemedText } from "@/components/themed-text";
+import { TOKENS } from "@/constants/colors";
+import { FontAwesome } from "@expo/vector-icons";
+import { router } from "expo-router";
+import React from "react";
+import { Alert, Platform, Share, StyleSheet, View } from "react-native";
+
+/**
+ * Componente que muestra las acciones disponibles después de descubrir un secreto
+ * Incluye botones para: ir a colecciones, compartir, y continuar con el recorrido
+ *
+ * @param secretName - Nombre del secreto para compartir
+ * @param secretDescription - Descripción del secreto para compartir
+ */
+interface SecretCompletionActionsProps {
+  secretName: string;
+  secretDescription: string;
+}
+
+export const SecretCompletionActions = ({
+  secretName,
+  secretDescription,
+}: SecretCompletionActionsProps) => {
+  /**
+   * Función que maneja el compartir del secreto descubierto
+   * Usa la API nativa de Share para compartir en diferentes plataformas
+   */
+  const handleShare = async () => {
+    try {
+      // Preparar el mensaje personalizado para cuando se descubre un secreto
+      const message = `¡Acabo de descubrir un secreto! 🎉✨\n\n${secretName}\n\n${secretDescription}\n\n¿Podrás encontrarlo tú también? 🔍\n\n#EntreDigonales #SecretsDiscovered`;
+
+      // Llamar a la API de Share nativa
+      const result = await Share.share(
+        {
+          message: message,
+          // En iOS, puedes agregar un título separado
+          ...(Platform.OS === "ios" && {
+            title: `¡Descubrí: ${secretName}!`,
+          }),
+        },
+        {
+          // En Android, puedes especificar el título del diálogo
+          ...(Platform.OS === "android" && {
+            dialogTitle: `Compartir descubrimiento: ${secretName}`,
+          }),
+        },
+      );
+
+      // Verificar si se compartió exitosamente (solo en iOS se puede detectar)
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          // Se compartió con una actividad específica (iOS)
+        } else {
+          // Se compartió
+        }
+      } else if (result.action === Share.dismissedAction) {
+        // El usuario canceló el compartir (iOS)
+      }
+    } catch (error) {
+      // Manejar errores al compartir
+      console.error("Error al compartir:", error);
+      Alert.alert(
+        "Error al compartir",
+        "No se pudo compartir tu descubrimiento. Por favor, intenta nuevamente.",
+      );
+    }
+  };
+
+  /**
+   * Navega a la pantalla de colecciones de secretos
+   */
+  const handleGoToCollections = () => {
+    router.navigate("/(stack)/secrets");
+  };
+
+  /**
+   * Navega de vuelta a la lista de tours
+   */
+  const handleContinueTour = () => {
+    router.navigate("/(tabs)/tours");
+  };
+
+  return (
+    <View style={styles.actionsContainer}>
+      {/* Botón principal: Ir a colecciones */}
+      <ThemedButton
+        variant="primary"
+        onPress={handleGoToCollections}
+        size="small"
+        style={styles.actionButton}
+      >
+        <FontAwesome name="book" size={16} color={TOKENS.text} />
+        <ThemedText type="defaultSemiBold">Ir a colecciones</ThemedText>
+      </ThemedButton>
+
+      {/* Botón secundario: Compartir descubrimiento */}
+      <ThemedButton
+        variant="outline"
+        onPress={handleShare}
+        size="small"
+        style={styles.actionButton}
+      >
+        <FontAwesome name="share" size={16} color={TOKENS.text} />
+        <ThemedText type="defaultSemiBold">Compartir</ThemedText>
+      </ThemedButton>
+
+      {/* Botón terciario: Continuar con el recorrido */}
+      <ThemedButton variant="ghost" onPress={handleContinueTour} size="small">
+        <ThemedText type="defaultSemiBold" style={styles.ghostButtonText}>
+          Continuar con el recorrido
+        </ThemedText>
+      </ThemedButton>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  actionsContainer: {
+    width: "100%",
+    gap: 0,
+  },
+  actionButton: {
+    flexDirection: "row",
+    gap: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+  ghostButtonText: {
+    color: TOKENS.muted,
+  },
+});
