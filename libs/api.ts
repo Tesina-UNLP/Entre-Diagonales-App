@@ -4,6 +4,7 @@ import {
   IndividualSpotApiResponse,
   LevelApiResponse,
   QuizApiResponse,
+  SecretItemApiResponse,
   TourApiResponse,
   TourInfoApiResponse,
 } from "@/types";
@@ -400,5 +401,25 @@ export const api = {
       throw new Error(message);
     }
     return data;
+  },
+
+  getSecrets: async (token: string): Promise<SecretItemApiResponse[]> => {
+    const response = await fetch(`${apiBaseUrl}/secret_items/`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Fetching secrets failed";
+      throw new Error(message);
+    }
+    return data as SecretItemApiResponse[];
   },
 };

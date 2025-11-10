@@ -19,6 +19,14 @@ export default function ProfileScreen() {
       <ThemedButton variant="danger" size="small" onPress={handleSignOut}>
         Sign Out
       </ThemedButton>
+      <ThemedButton
+        variant="primary"
+        size="small"
+        onPress={() => router.navigate("/(stack)/secrets")}
+      >
+        {" "}
+        Secretos
+      </ThemedButton>
     </ThemedBackground>
   );
 }
