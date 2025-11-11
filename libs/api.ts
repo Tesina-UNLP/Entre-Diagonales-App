@@ -11,7 +11,7 @@ import {
 
 const apiBaseUrl =
   process.env.EXPO_PUBLIC_API_URL ||
-  "https://iii-routines-proposal-doors.trycloudflare.com/api";
+  "https://started-circles-tim-optimization.trycloudflare.com/api";
 
 export const api = {
   // login
@@ -91,7 +91,7 @@ export const api = {
   completeOnboarding: async (
     token: string,
     character_id: number,
-    notification_token: string,
+    notificationToken: string,
   ) => {
     const response = await fetch(`${apiBaseUrl}/onboarding/`, {
       method: "POST",
@@ -99,7 +99,10 @@ export const api = {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ character: character_id, notification_token }),
+      body: JSON.stringify({
+        character: character_id,
+        notification_token: notificationToken,
+      }),
     });
     const data = await response.json().catch(() => null);
     if (!response.ok) {
@@ -421,5 +424,31 @@ export const api = {
       throw new Error(message);
     }
     return data as SecretItemApiResponse[];
+  },
+
+  updateNotifications: async (
+    token: string,
+    notifications: boolean,
+    expoToken: string,
+  ) => {
+    const response = await fetch(`${apiBaseUrl}/profile/notifications/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ notifications, notification_token: expoToken }),
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Updating notifications failed";
+      throw new Error(message);
+    }
+    return data;
   },
 };

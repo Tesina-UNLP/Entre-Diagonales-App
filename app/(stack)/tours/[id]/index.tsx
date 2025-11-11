@@ -41,8 +41,8 @@ const RouteDetails = () => {
   const { location, isLoading } = useLocation();
 
   const isTourCompleted = useMemo(() => {
-    return Number(routeInfo?.progress) === 100;
-  }, [routeInfo?.progress]);
+    return routeInfo?.completed_at !== null;
+  }, [routeInfo?.completed_at]);
 
   const handleStartTour = async () => {
     if (user) {
@@ -65,12 +65,11 @@ const RouteDetails = () => {
       if (response) {
         setRouteInfo(response);
 
-        const spotsQuantityCompleted = Math.floor(
-          (Number(response.progress) / 100) * response.spots.length,
-        );
+        const spotsQuantityCompleted = Number(response.progress);
         const completedSpots = response.spots.slice(0, spotsQuantityCompleted);
+        // Si el tour comenzó, saltamos el spot actual (+1), sino comenzamos desde el primero
         const notCompletedSpots = response.spots.slice(
-          spotsQuantityCompleted + 1,
+          spotsQuantityCompleted + (response.started ? 1 : 0),
         );
         setCompletedSpots(completedSpots);
         setNotCompletedSpots(notCompletedSpots);

@@ -115,6 +115,7 @@ export type AppUser = {
   experience: number;
   gems: number;
   coins: number;
+  notifications?: boolean; // Estado de las notificaciones push
   character?: {
     id: number;
     name: string;

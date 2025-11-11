@@ -29,10 +29,11 @@ const TourCard = ({
   progress?: string;
   started?: string;
 }) => {
-  const progressNumber = Math.min(
-    100,
-    Math.max(0, Number(String(progress || "0").replace("%", ""))),
+  //progress es el número de spots completados
+  const progressNumber = ((Number(progress) / (spotsCount || 0)) * 100).toFixed(
+    0,
   );
+  const completed = spotsCount === Number(progress);
 
   const categoryIcon = TAGS.find((t) => t.id === (tag || "todos"))?.icon;
 
@@ -88,7 +89,10 @@ const TourCard = ({
             <View style={styles.progressRow}>
               <View style={styles.progressTrack}>
                 <View
-                  style={[styles.progressFill, { width: `${progressNumber}%` }]}
+                  style={[
+                    styles.progressFill,
+                    { width: `${progressNumber}%` as any },
+                  ]}
                 />
               </View>
               <ThemedText type="defaultSemiBold" style={styles.progressPercent}>
@@ -109,7 +113,9 @@ const TourCard = ({
                 }}
               >
                 <View style={styles.continueButtonContent}>
-                  <ThemedText type="defaultSemiBold">Continuar</ThemedText>
+                  <ThemedText type="defaultSemiBold">
+                    {completed ? "Ver detalles" : "Continuar"}
+                  </ThemedText>
                   <FontAwesome6
                     name="arrow-right"
                     size={14}
@@ -220,6 +226,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
+    width: "100%",
+    justifyContent: "center",
   },
   startButtonText: { color: TOKENS.background },
 });

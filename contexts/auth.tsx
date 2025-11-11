@@ -18,7 +18,10 @@ interface AuthContextType {
   logout: () => void;
   checkAuthState?: () => Promise<void>;
   loginWithGoogle: () => Promise<AppUser | null>;
-  completeOnboarding: (args: { characterId: number }) => Promise<void>;
+  completeOnboarding: (args: {
+    characterId: number;
+    notificationToken?: string;
+  }) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -33,7 +36,13 @@ export const AuthContext = createContext<AuthContextType>({
     return null;
   },
   checkAuthState: async () => {},
-  completeOnboarding: async ({ characterId }: { characterId: number }) => {},
+  completeOnboarding: async ({
+    characterId,
+    notificationToken,
+  }: {
+    characterId: number;
+    notificationToken?: string;
+  }) => {},
 });
 
 interface AuthProviderProps {
@@ -183,14 +192,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const completeOnboarding = async ({
     characterId,
+    notificationToken,
   }: {
     characterId: number;
+    notificationToken?: string;
   }) => {
     if (user) {
       const onboardingData = await api.completeOnboarding(
         user?.access,
         characterId,
-        "",
+        notificationToken ?? "",
       );
 
       if (!onboardingData) {
