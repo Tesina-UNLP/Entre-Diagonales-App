@@ -22,7 +22,6 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import Toast from "react-native-toast-message";
 
 const RouteDetails = () => {
   const { id } = useLocalSearchParams<{ id?: string }>();
@@ -48,12 +47,6 @@ const RouteDetails = () => {
     if (user) {
       await api.startTour(user.access, parseInt(idStr));
       await handleGetRoute();
-
-      Toast.show({
-        type: "success",
-        text1: "Tour iniciado correctamente",
-        text2: "Ahora puedes comenzar a explorar el tour",
-      });
     }
   };
 
@@ -113,7 +106,7 @@ const RouteDetails = () => {
           <Header
             title={routeInfo?.name || ""}
             description={`${routeInfo?.spots.length} Puntos  • ${stopsDistanceInfo.reduce((acc, info) => acc + (info.durationFromPrevious || 0), 0)} min aprox.`}
-            onBack={() => router.navigate("/(tabs)/tours")}
+            onBack={() => router.back()}
           />
           <ScrollView
             style={styles.container}

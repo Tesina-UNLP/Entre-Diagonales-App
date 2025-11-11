@@ -412,7 +412,7 @@ const Map = () => {
           <Header
             title={routeInfo?.name || ""}
             description={`${routeInfo?.spots.length} Puntos  • ${stopsDistanceInfo.reduce((acc, info) => acc + (info.durationFromPrevious || 0), 0)} min aprox.`}
-            onBack={() => router.navigate("/(tabs)/tours")}
+            onBack={() => router.back()}
           />
 
           {Platform.OS === "ios" ? (

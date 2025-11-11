@@ -7,11 +7,12 @@ import {
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { AuthProvider } from "@/contexts/auth";
+import { HapticsProvider } from "@/contexts/haptics";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Slot } from "expo-router";
 import { useEffect } from "react";
@@ -72,11 +73,13 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <AuthProvider>
-          <Slot screenOptions={{ animation: "fade" }} />
-        </AuthProvider>
-        <Toast config={toastConfig} />
-        <StatusBar style="light" />
+        <HapticsProvider>
+          <AuthProvider>
+            <Slot screenOptions={{ animation: "fade" }} />
+          </AuthProvider>
+          <Toast config={toastConfig} />
+          <StatusBar style="light" />
+        </HapticsProvider>
       </ThemeProvider>
     </GestureHandlerRootView>
   );

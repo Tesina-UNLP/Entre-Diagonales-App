@@ -97,15 +97,22 @@ const NextStop = ({
               size={20}
               color={TOKENS.text}
             />
-            <ThemedText type="defaultSemiBold">Completar</ThemedText>
+            <ThemedText
+              type="defaultSemiBold"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              style={{ flexShrink: 1 }}
+            >
+              Completar
+            </ThemedText>
           </ThemedButton>
           <ThemedButton
             variant="secondary"
             size="small"
             style={styles.actionButton}
             onPress={() =>
-              router.push({
-                pathname: "/(stack)/tours/[id]/map",
+              router.navigate({
+                pathname: "/(tabs)/tours/[id]/map",
                 params: { id: routeInfo?.id.toString() },
               })
             }
@@ -115,7 +122,12 @@ const NextStop = ({
               size={20}
               color={TOKENS.primary}
             />
-            <ThemedText type="defaultSemiBold" style={styles.actionButtonText}>
+            <ThemedText
+              type="defaultSemiBold"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              style={[styles.actionButtonText, { flexShrink: 1 }]}
+            >
               Ver mapa
             </ThemedText>
           </ThemedButton>
@@ -126,9 +138,9 @@ const NextStop = ({
           variant="secondary"
           size="small"
           style={styles.completedActionButton}
-          onPress={() =>
-            router.push({
-              pathname: "/(stack)/tours/[id]/map",
+          onPress={async () =>
+            router.navigate({
+              pathname: "/(tabs)/tours/[id]/map",
               params: { id: routeInfo?.id.toString() },
             })
           }
@@ -138,7 +150,12 @@ const NextStop = ({
             size={20}
             color={TOKENS.primary}
           />
-          <ThemedText type="defaultSemiBold" style={styles.actionButtonText}>
+          <ThemedText
+            type="defaultSemiBold"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={[styles.actionButtonText, { flexShrink: 1 }]}
+          >
             Revisar mapa del tour
           </ThemedText>
         </ThemedButton>
@@ -149,7 +166,14 @@ const NextStop = ({
           style={styles.actionButton}
           onPress={handleStartTour}
         >
-          <ThemedText type="defaultSemiBold">Comenzar aventura</ThemedText>
+          <ThemedText
+            type="defaultSemiBold"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={{ flexShrink: 1 }}
+          >
+            Comenzar aventura
+          </ThemedText>
         </ThemedButton>
       )}
     </View>

@@ -8,13 +8,14 @@ import {
 } from "@/components/tour-completion";
 import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
+import { useHaptics } from "@/hooks/use-haptics";
 import { useTourCompletion } from "@/hooks/use-tour-completion";
 import {
   calculateQualityPercentage,
   calculateStarsToShow,
 } from "@/utils/tour-quality";
 import { useLocalSearchParams } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import { Image, StyleSheet, View } from "react-native";
 import * as z from "zod";
 
@@ -68,6 +69,12 @@ const CompleteTour = () => {
       triviasTotal: params.trivias,
     });
   };
+
+  const { playSound } = useHaptics();
+
+  useEffect(() => {
+    playSound("tourCompleted");
+  }, [playSound]);
 
   return (
     <ThemedBackground style={styles.container}>

@@ -1,8 +1,10 @@
 import { TOKENS } from "@/constants/colors";
+import { useHaptics } from "@/hooks/use-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import {
   ActivityIndicator,
+  GestureResponderEvent,
   StyleSheet,
   TouchableOpacity,
   TouchableOpacityProps,
@@ -30,9 +32,16 @@ export function ThemedButton({
   disabled,
   style,
   children,
+  onPress,
   ...rest
 }: ThemedButtonProps) {
   const isDisabled = disabled || loading;
+  const { haptic } = useHaptics();
+
+  const handlePress = async (e: GestureResponderEvent) => {
+    haptic("light");
+    onPress?.(e); // luego ejecuta el onPress original
+  };
 
   const buttonContent = (
     <>
@@ -86,7 +95,8 @@ export function ThemedButton({
           style,
         ]}
         disabled={isDisabled}
-        {...rest}
+        {...rest} // 👈 primero el spread…
+        onPress={handlePress}
       >
         <LinearGradient
           colors={
@@ -130,6 +140,7 @@ export function ThemedButton({
       ]}
       disabled={isDisabled}
       {...rest}
+      onPress={handlePress}
     >
       {buttonContent}
     </TouchableOpacity>

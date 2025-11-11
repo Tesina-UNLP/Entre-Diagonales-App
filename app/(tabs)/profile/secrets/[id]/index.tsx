@@ -38,7 +38,7 @@ const SecretScreen = () => {
         <Header
           title={params.name}
           description={"Explora el mundo y descubre secretos"}
-          onBack={() => router.navigate("/(tabs)")}
+          onBack={() => router.back()}
         />
 
         <View style={styles.content}>

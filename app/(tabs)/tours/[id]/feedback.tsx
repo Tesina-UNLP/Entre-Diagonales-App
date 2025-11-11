@@ -97,7 +97,7 @@ const Feedback = () => {
       <Header
         title={"Cuentanos tu experiencia"}
         description={"Ayudanos a mejorar!"}
-        onBack={() => router.navigate("/(tabs)/tours")}
+        onBack={() => router.back()}
       />
 
       <View style={styles.content}>
@@ -136,7 +136,14 @@ const Feedback = () => {
             size="small"
             onPress={() => router.navigate("/(tabs)/tours")}
           >
-            <ThemedText type="defaultSemiBold">Omitir</ThemedText>
+            <ThemedText
+              type="defaultSemiBold"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              style={{ flexShrink: 1 }}
+            >
+              Omitir
+            </ThemedText>
           </ThemedButton>
         </View>
       </View>

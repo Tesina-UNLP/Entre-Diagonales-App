@@ -25,13 +25,13 @@ const Welcome = () => {
       <View style={styles.buttonsContainer}>
         <ThemedButton
           variant="gold"
-          onPress={() => router.push("/(public)/sign-in")}
+          onPress={() => router.navigate("/(public)/sign-in")}
         >
           Iniciar la exploracion
         </ThemedButton>
         <ThemedButton
           variant="outline"
-          onPress={() => router.push("/(public)/sign-up")}
+          onPress={() => router.navigate("/(public)/sign-up")}
         >
           Aun no tengo una cuenta
         </ThemedButton>

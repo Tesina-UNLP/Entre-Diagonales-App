@@ -1,8 +1,9 @@
 import { ThemedBackground } from "@/components/themed-background";
+import { useHaptics } from "@/hooks/use-haptics";
 import { SecretCompletionActions } from "@/views/secret-detail/secret-completion-actions";
 import { SecretCompletionInfo } from "@/views/secret-detail/secret-completion-info";
 import { useLocalSearchParams } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import * as z from "zod";
 
@@ -34,6 +35,12 @@ const SecretScreen = () => {
         coins: 0,
         xp: 0,
       };
+
+  const { playSound } = useHaptics();
+
+  useEffect(() => {
+    playSound("secretFound");
+  }, [playSound]);
 
   return (
     <ThemedBackground style={styles.container}>

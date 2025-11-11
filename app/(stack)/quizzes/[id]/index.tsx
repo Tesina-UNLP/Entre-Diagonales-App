@@ -8,6 +8,7 @@ import { ThemedBackground } from "@/components/themed-background";
 import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
+import { useHaptics } from "@/hooks/use-haptics";
 import { api } from "@/libs/api";
 import { QuizApiResponse } from "@/types";
 import { useLocalSearchParams } from "expo-router";
@@ -22,6 +23,7 @@ const QuizPage = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [correctAnswer, setCorrectAnswer] = useState<number | null>(null);
+  const { playSound } = useHaptics();
 
   const handleGetQuiz = useCallback(async () => {
     setLoading(true);
@@ -70,6 +72,12 @@ const QuizPage = () => {
       );
       if (response) {
         setCorrectAnswer(response.correct_answer_id);
+
+        if (response.correct_answer_id === selectedAnswer) {
+          playSound("success");
+        } else {
+          playSound("error");
+        }
       }
     }
   };

@@ -46,7 +46,7 @@ export const SecretItemCard = ({ secret }: SecretItemCardProps) => {
       style={styles.secretItemCard}
       onPress={() =>
         router.navigate({
-          pathname: "/(stack)/secrets/[id]",
+          pathname: "/(tabs)/profile/secrets/[id]",
           params: {
             id: secret.id.toString(),
             name: secret.name,

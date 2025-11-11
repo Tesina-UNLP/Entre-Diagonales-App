@@ -62,7 +62,7 @@ export default function ScannerScreen() {
     setIsLoading(true);
 
     // URL por defecto - apunta a la ruta correcta en (stack)
-    let urlToRedirect = `/(stack)/${params.mode === "spot" ? "spots" : "secrets"}/${params.secret_id ? params.secret_id : params.spot_id}`;
+    let urlToRedirect = `/${params.mode === "spot" ? "(stack)/spots" : "(tabs)/profile/secrets"}/${params.secret_id ? params.secret_id : params.spot_id}`;
 
     // Preparar la foto para enviarla al servidor
     // FormData es una estructura especial que permite enviar archivos junto con otros datos
@@ -103,14 +103,9 @@ export default function ScannerScreen() {
           parseInt(params.spot_id),
           formData,
         );
-        Toast.show({
-          type: "success",
-          text1: "Spot completado",
-          text2: "El spot ha sido completado correctamente",
-        });
 
         if (response.tour_completed) {
-          urlToRedirect = `/(stack)/tours/${params.tour_id}/complete?tour_id=${params.tour_id}&xp=${response.rewards.experience}&coins=${response.rewards.coins}&secrets=${response.total_secret_items}&trivias=${response.total_quizzes}&secrets_completed=${response.secret_items_completed}&trivias_completed=${response.quizzes_completed}&tour_name=${response.tour_name}`;
+          urlToRedirect = `/(tabs)/tours/${params.tour_id}/complete?tour_id=${params.tour_id}&xp=${response.rewards.experience}&coins=${response.rewards.coins}&secrets=${response.total_secret_items}&trivias=${response.total_quizzes}&secrets_completed=${response.secret_items_completed}&trivias_completed=${response.quizzes_completed}&tour_name=${response.tour_name}`;
         } else {
           urlToRedirect = `/(stack)/spots/${params.spot_id}`;
         }
@@ -122,14 +117,9 @@ export default function ScannerScreen() {
           parseInt(params.spot_id),
           formData,
         );
-        Toast.show({
-          type: "success",
-          text1: "Objeto secreto completado",
-          text2: "El objeto secreto ha sido completado correctamente",
-        });
 
         if (response.success) {
-          urlToRedirect = `/(stack)/secrets/${params.secret_id}/complete?secret_id=${params.secret_id}&coins=${response.coins}&xp=${response.xp}&name=${response.name}&description=${response.description}&image_url=${response.image}`;
+          urlToRedirect = `/(tabs)/profile/secrets/${params.secret_id}/complete?secret_id=${params.secret_id}&coins=${response.coins}&xp=${response.xp}&name=${response.name}&description=${response.description}&image_url=${response.image}`;
         }
       }
 

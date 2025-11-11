@@ -263,7 +263,9 @@ const SignUp = () => {
               <FontAwesome name="google" size={24} color={TOKENS.primary} />
               <ThemedText
                 type="defaultSemiBold"
-                style={styles.googleButtonText}
+                style={[styles.googleButtonText, { flexShrink: 1 }]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
               >
                 Continuar con Google
               </ThemedText>
@@ -274,7 +276,7 @@ const SignUp = () => {
           Ya tienes una cuenta?{" "}
           <ThemedText
             type="link"
-            onPress={() => router.push("/(public)/sign-in")}
+            onPress={() => router.navigate("/(public)/sign-in")}
           >
             Inicia Sesion
           </ThemedText>
