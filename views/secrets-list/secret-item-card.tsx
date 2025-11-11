@@ -4,7 +4,20 @@ import { SecretItemApiResponse } from "@/types";
 import Entypo from "@expo/vector-icons/build/Entypo";
 import { router } from "expo-router";
 import React from "react";
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import {
+  Dimensions,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
+
+// Obtener el ancho de la pantalla
+const screenWidth = Dimensions.get("window").width;
+// Calcular el tamaño de cada tarjeta: (ancho total - gaps - padding) / 3
+// Gaps: 2 gaps de 10px entre las 3 columnas = 20px
+// Padding lateral: 80px (40px a cada lado)
+const cardSize = (screenWidth - 20 - 40) / 3;
 
 /**
  * Tarjeta individual de secreto
@@ -53,18 +66,16 @@ export const SecretItemCard = ({ secret }: SecretItemCardProps) => {
 
 const styles = StyleSheet.create({
   secretItemCard: {
-    // Calculamos el ancho: (100% - 2 gaps de 10px) / 3 columnas
-    // Usamos width en lugar de flex para mantener el tamaño consistente
-    width: "30%",
-    aspectRatio: 1, // Mantiene la tarjeta cuadrada (ancho = alto)
+    // Tamaño calculado dinámicamente para ocupar todo el ancho de la pantalla
+    width: cardSize,
+    height: cardSize,
     borderRadius: 18,
     overflow: "hidden", // Evita que el contenido se salga de los bordes
-    padding: 10,
   },
   secretItemCardNotObtained: {
-    // Mismo tamaño que secretItemCard para consistencia
-    width: "30%",
-    aspectRatio: 1, // Mantiene la tarjeta cuadrada (ancho = alto)
+    // Mismo tamaño exacto que secretItemCard para consistencia total
+    width: cardSize,
+    height: cardSize,
     backgroundColor: TOKENS.cardBackground,
     borderRadius: 18,
     overflow: "hidden", // Evita que el contenido se salga de los bordes

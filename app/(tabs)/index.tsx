@@ -25,7 +25,9 @@ export default function HomeScreen() {
   const handleGetRoutes = useCallback(async () => {
     try {
       const response = await api.getRoutes(user?.access || "");
-      const current = response.find((route) => route.started);
+      const current = response.find(
+        (route) => route.started && route.completed_at === null,
+      );
       setRoutes(response);
       setCurrentRoute(current || null);
     } catch {

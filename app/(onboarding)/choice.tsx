@@ -4,6 +4,10 @@ import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
 import { api } from "@/libs/api";
+import {
+  getExpoPushToken,
+  requestNotificationPermissions,
+} from "@/libs/notifications";
 import { CharacterApiResponse } from "@/types";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router } from "expo-router";
@@ -23,7 +27,7 @@ const Choice = () => {
   const { completeOnboarding, user } = useAuth();
   const [npcs, setNpcs] = useState<CharacterApiResponse[]>([]);
   const [selectedNpc, setSelectedNpc] = useState<number | null>(null);
-
+  // Efecto para cargar los personajes disponibles
   useEffect(() => {
     const fetchNpcs = async () => {
       const token = user?.access;
@@ -35,10 +39,40 @@ const Choice = () => {
     fetchNpcs();
   }, [user]);
 
-  const complete = () => {
+  const requestNotifications = async () => {
+    try {
+      // Paso 1: Solicitar permisos al usuario
+      const granted = await requestNotificationPermissions();
+
+      if (granted) {
+        // Paso 2: Si acepta, obtener el token del dispositivo
+        const token = await getExpoPushToken();
+
+        if (token) {
+          // Paso 3: Guardar el token en el estado
+          return token;
+        } else {
+          return null;
+        }
+      } else {
+        // El usuario rechazó los permisos, seguimos sin token (string vacío)
+        return null;
+      }
+    } catch (error) {
+      // Si hay algún error, lo registramos pero no bloqueamos el onboarding
+      console.error("Error al solicitar permisos de notificaciones:", error);
+      return null;
+    }
+  };
+
+  const complete = async () => {
     try {
       if (!selectedNpc) return;
-      completeOnboarding({ characterId: selectedNpc });
+      const token = await requestNotifications();
+      completeOnboarding({
+        characterId: selectedNpc,
+        notificationToken: token ?? "",
+      });
       router.replace("/(tabs)");
     } catch (error: any) {
       const message = error?.message || "Error desconocido";

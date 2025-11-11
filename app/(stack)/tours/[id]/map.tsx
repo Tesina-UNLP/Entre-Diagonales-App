@@ -87,9 +87,7 @@ const Map = () => {
       if (response) {
         setRouteInfo(response);
 
-        const spotsQuantityCompleted = Math.floor(
-          (Number(response.progress) / 100) * response.spots.length,
-        );
+        const spotsQuantityCompleted = Number(response.progress);
         const completedSpots = response.spots.slice(0, spotsQuantityCompleted);
 
         setCompletedSpots(completedSpots);

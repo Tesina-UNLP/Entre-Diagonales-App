@@ -53,11 +53,15 @@ const ActiveTour = ({
               <View
                 style={[
                   styles.simpleProgressBarFill,
-                  { width: `${Number(currentRoute.progress) || 0}%` },
+                  {
+                    width:
+                      (currentRoute.spots.length || 0) > 0
+                        ? `${(Number(currentRoute.progress) / currentRoute.spots.length) * 100}%`
+                        : 0,
+                  },
                 ]}
               />
             </View>
-
             {currentRoute.number_of_people_completed > 0 ? (
               <View style={styles.completedRow}>
                 <View style={styles.completedAvatarsRow}>
