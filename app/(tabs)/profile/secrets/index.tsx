@@ -63,7 +63,7 @@ const SecretsScreen = () => {
           <Header
             title={"Secretos"}
             description={"Descubre los secretos de la ciudad"}
-            onBack={() => router.navigate("/(tabs)")}
+            onBack={() => router.back()}
           />
           {/* Usamos FlatList en lugar de ScrollView para evitar problemas con listas anidadas */}
           <FlatList

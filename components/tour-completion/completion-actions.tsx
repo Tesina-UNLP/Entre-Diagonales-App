@@ -26,16 +26,16 @@ export const CompletionActions = ({
 }: CompletionActionsProps) => {
   // Función para navegar a la pantalla de detalles del tour
   const handleViewProgress = () => {
-    router.push({
-      pathname: "/(stack)/tours/[id]",
+    router.navigate({
+      pathname: "/(tabs)/tours/[id]",
       params: { id: tourId },
     });
   };
 
   // Función para navegar a la lista de tours
   const handleSendFeedback = () => {
-    router.push({
-      pathname: "/(stack)/tours/[id]/feedback",
+    router.navigate({
+      pathname: "/(tabs)/tours/[id]/feedback",
       params: { id: tourId },
     });
   };
@@ -50,7 +50,14 @@ export const CompletionActions = ({
         onPress={handleViewProgress}
       >
         <FontAwesome name="line-chart" size={16} color={TOKENS.text} />
-        <ThemedText type="defaultSemiBold">Ver mi progreso</ThemedText>
+        <ThemedText
+          type="defaultSemiBold"
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          style={{ flexShrink: 1 }}
+        >
+          Ver mi progreso
+        </ThemedText>
       </ThemedButton>
 
       {/* Botón para enviar feedback */}
@@ -61,7 +68,12 @@ export const CompletionActions = ({
         onPress={handleSendFeedback}
       >
         <FontAwesome name="comment" size={16} color={TOKENS.primary} />
-        <ThemedText type="defaultSemiBold" style={styles.accentButtonText}>
+        <ThemedText
+          type="defaultSemiBold"
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          style={[styles.accentButtonText, { flexShrink: 1 }]}
+        >
           Envianos tu feedback
         </ThemedText>
       </ThemedButton>
@@ -74,7 +86,12 @@ export const CompletionActions = ({
         onPress={onShare}
       >
         <FontAwesome name="share" size={16} color={TOKENS.primary} />
-        <ThemedText type="defaultSemiBold" style={styles.accentButtonText}>
+        <ThemedText
+          type="defaultSemiBold"
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          style={[styles.accentButtonText, { flexShrink: 1 }]}
+        >
           Compartir logro
         </ThemedText>
       </ThemedButton>

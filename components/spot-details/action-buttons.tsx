@@ -40,7 +40,7 @@ export const ActionButtons = ({
           size="small"
           // TODO: Descomentar cuando esté lista la navegación a la trivia
           onPress={() =>
-            router.push({
+            router.navigate({
               pathname: "/(stack)/quizzes/[id]",
               params: { id: quizId?.toString() },
             })

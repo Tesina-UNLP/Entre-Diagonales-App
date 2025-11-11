@@ -44,7 +44,14 @@ export const QuizActions: React.FC<QuizActionsProps> = ({
         disabled={isSubmitDisabled}
       >
         <FontAwesome name="send" size={16} color={TOKENS.text} />
-        <ThemedText type="defaultSemiBold">Enviar mi respuesta</ThemedText>
+        <ThemedText
+          type="defaultSemiBold"
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          style={{ flexShrink: 1 }}
+        >
+          Enviar mi respuesta
+        </ThemedText>
       </ThemedButton>
 
       {/* Botón para volver al inicio - solo visible después de responder */}
@@ -52,11 +59,16 @@ export const QuizActions: React.FC<QuizActionsProps> = ({
         <ThemedButton
           variant="secondary"
           size="small"
-          onPress={() => router.push("/(tabs)")}
+          onPress={() => router.navigate("/(tabs)")}
           style={styles.button}
         >
           <FontAwesome name="home" size={16} color={TOKENS.primary} />
-          <ThemedText type="defaultSemiBold" style={styles.secondaryButtonText}>
+          <ThemedText
+            type="defaultSemiBold"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={[styles.secondaryButtonText, { flexShrink: 1 }]}
+          >
             Volver al inicio
           </ThemedText>
         </ThemedButton>

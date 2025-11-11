@@ -182,7 +182,7 @@ const SignIn = () => {
           <View style={styles.forgotPasswordContainer}>
             <ThemedText
               type="link"
-              onPress={() => router.push("/(public)/forgot-password")}
+              onPress={() => router.navigate("/(public)/forgot-password")}
             >
               Olvidaste tu contrasena?
             </ThemedText>
@@ -206,7 +206,9 @@ const SignIn = () => {
               <FontAwesome name="google" size={24} color={TOKENS.primary} />
               <ThemedText
                 type="defaultSemiBold"
-                style={styles.googleButtonText}
+                style={[styles.googleButtonText, { flexShrink: 1 }]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
               >
                 Continuar con Google
               </ThemedText>
@@ -217,7 +219,7 @@ const SignIn = () => {
           No tienes una cuenta?{" "}
           <ThemedText
             type="link"
-            onPress={() => router.push("/(public)/sign-up")}
+            onPress={() => router.navigate("/(public)/sign-up")}
           >
             Registrate
           </ThemedText>

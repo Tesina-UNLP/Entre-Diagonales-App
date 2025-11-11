@@ -134,7 +134,7 @@ const Notifications = () => {
       <Header
         title={"Notificaciones"}
         description={"Configura tus notificaciones"}
-        onBack={() => router.navigate("/(stack)/settings")}
+        onBack={() => router.back()}
       />
       <View style={styles.content}>
         <View style={styles.sectionContainer}>

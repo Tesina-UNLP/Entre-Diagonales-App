@@ -11,14 +11,14 @@ export default function ProfileScreen() {
       <ThemedButton
         variant="primary"
         size="small"
-        onPress={() => router.navigate("/(stack)/secrets")}
+        onPress={() => router.navigate("/(tabs)/profile/secrets")}
       >
         Secretos
       </ThemedButton>
       <ThemedButton
         variant="primary"
         size="small"
-        onPress={() => router.navigate("/(stack)/settings")}
+        onPress={() => router.navigate("/(tabs)/profile/settings")}
       >
         Configuración
       </ThemedButton>

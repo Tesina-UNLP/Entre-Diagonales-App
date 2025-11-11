@@ -21,11 +21,11 @@ const Settings = () => {
       <Header
         title={"Configuración"}
         description={"Configura tu perfil y preferencias"}
-        onBack={() => router.navigate("/(tabs)/profile")}
+        onBack={() => router.back()}
       />
       <View style={styles.content}>
         <TouchableOpacity
-          onPress={() => router.navigate("/(stack)/settings/profile")}
+          onPress={() => router.back()}
           style={styles.sectionContainer}
         >
           <View style={styles.sectionLeft}>
@@ -41,7 +41,9 @@ const Settings = () => {
           </View>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => router.navigate("/(stack)/settings/notifications")}
+          onPress={() =>
+            router.navigate("/(tabs)/profile/settings/notifications")
+          }
           style={styles.sectionContainer}
         >
           <View style={styles.sectionLeft}>
@@ -57,7 +59,7 @@ const Settings = () => {
           </View>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => router.navigate("/(stack)/settings/music")}
+          onPress={() => router.navigate("/(tabs)/profile/settings/sounds")}
           style={styles.sectionContainer}
         >
           <View style={styles.sectionLeft}>
@@ -73,7 +75,7 @@ const Settings = () => {
           </View>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => router.navigate("/(stack)/settings/security")}
+          onPress={() => router.navigate("/(tabs)/profile/settings/security")}
           style={styles.sectionContainer}
         >
           <View style={styles.sectionLeft}>
@@ -89,7 +91,7 @@ const Settings = () => {
           </View>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => router.navigate("/(stack)/settings/help")}
+          onPress={() => router.navigate("/(tabs)/profile/settings/help")}
           style={styles.sectionContainer}
         >
           <View style={styles.sectionLeft}>
@@ -105,7 +107,7 @@ const Settings = () => {
           </View>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => router.navigate("/(stack)/settings/about")}
+          onPress={() => router.navigate("/(tabs)/profile/settings/about")}
           style={styles.sectionContainer}
         >
           <View style={styles.sectionLeft}>

@@ -72,7 +72,7 @@ export const SecretCompletionActions = ({
    * Navega a la pantalla de colecciones de secretos
    */
   const handleGoToCollections = () => {
-    router.navigate("/(stack)/secrets");
+    router.navigate("/(tabs)/profile/secrets");
   };
 
   /**
@@ -92,7 +92,14 @@ export const SecretCompletionActions = ({
         style={styles.actionButton}
       >
         <FontAwesome name="book" size={16} color={TOKENS.text} />
-        <ThemedText type="defaultSemiBold">Ir a colecciones</ThemedText>
+        <ThemedText
+          type="defaultSemiBold"
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          style={{ flexShrink: 1 }}
+        >
+          Ir a colecciones
+        </ThemedText>
       </ThemedButton>
 
       {/* Botón secundario: Compartir descubrimiento */}
@@ -103,12 +110,24 @@ export const SecretCompletionActions = ({
         style={styles.actionButton}
       >
         <FontAwesome name="share" size={16} color={TOKENS.text} />
-        <ThemedText type="defaultSemiBold">Compartir</ThemedText>
+        <ThemedText
+          type="defaultSemiBold"
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          style={{ flexShrink: 1 }}
+        >
+          Compartir
+        </ThemedText>
       </ThemedButton>
 
       {/* Botón terciario: Continuar con el recorrido */}
       <ThemedButton variant="ghost" onPress={handleContinueTour} size="small">
-        <ThemedText type="defaultSemiBold" style={styles.ghostButtonText}>
+        <ThemedText
+          type="defaultSemiBold"
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          style={[styles.ghostButtonText, { flexShrink: 1 }]}
+        >
           Continuar con el recorrido
         </ThemedText>
       </ThemedButton>

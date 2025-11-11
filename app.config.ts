@@ -71,7 +71,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           "Permiso para usar la ubicación de Entre Diagonales",
       },
     ],
-    ["expo-notifications"],
+    [
+      "expo-notifications",
+      {
+        defaultChannel: "default",
+        sounds: ["./assets/sfx/notifications.wav"],
+      },
+    ],
+    "expo-audio",
   ],
   experiments: {
     typedRoutes: true,

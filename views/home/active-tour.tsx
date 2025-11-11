@@ -23,7 +23,7 @@ const ActiveTour = ({
         </ThemedText>
         <Link
           href={{
-            pathname: "/(stack)/tours/[id]",
+            pathname: "/(tabs)/tours/[id]",
             params: { id: currentRoute.id.toString() },
           }}
           asChild

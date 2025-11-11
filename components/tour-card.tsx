@@ -38,7 +38,7 @@ const TourCard = ({
   const categoryIcon = TAGS.find((t) => t.id === (tag || "todos"))?.icon;
 
   return (
-    <Link asChild href={{ pathname: "/(stack)/tours/[id]", params: { id } }}>
+    <Link asChild href={{ pathname: "/(tabs)/tours/[id]", params: { id } }}>
       <TouchableOpacity style={{ width: "100%", marginBottom: 20 }}>
         <View style={styles.tourCard}>
           <View style={styles.tourImageWrapper}>
@@ -106,14 +106,19 @@ const TourCard = ({
                 variant="primary"
                 size="small"
                 onPress={() => {
-                  router.push({
-                    pathname: "/(stack)/tours/[id]",
+                  router.navigate({
+                    pathname: "/(tabs)/tours/[id]",
                     params: { id },
                   });
                 }}
               >
                 <View style={styles.continueButtonContent}>
-                  <ThemedText type="defaultSemiBold">
+                  <ThemedText
+                    type="defaultSemiBold"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                    style={{ flexShrink: 1 }} // 👈 permite que el texto ceda ancho
+                  >
                     {completed ? "Ver detalles" : "Continuar"}
                   </ThemedText>
                   <FontAwesome6
@@ -128,8 +133,8 @@ const TourCard = ({
                 variant="accent"
                 size="small"
                 onPress={() => {
-                  router.push({
-                    pathname: "/(stack)/tours/[id]",
+                  router.navigate({
+                    pathname: "/(tabs)/tours/[id]",
                     params: { id },
                   });
                 }}
@@ -137,7 +142,9 @@ const TourCard = ({
                 <View style={styles.continueButtonContent}>
                   <ThemedText
                     type="defaultSemiBold"
-                    style={styles.startButtonText}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                    style={[styles.startButtonText, { flexShrink: 1 }]}
                   >
                     Empezar
                   </ThemedText>

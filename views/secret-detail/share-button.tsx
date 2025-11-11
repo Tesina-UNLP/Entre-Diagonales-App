@@ -75,7 +75,14 @@ export const ShareButton = ({
       style={styles.shareButton}
     >
       <FontAwesome name="share" size={16} color={TOKENS.text} />
-      <ThemedText type="defaultSemiBold">Compartir</ThemedText>
+      <ThemedText
+        type="defaultSemiBold"
+        numberOfLines={1}
+        ellipsizeMode="tail"
+        style={{ flexShrink: 1 }}
+      >
+        Compartir
+      </ThemedText>
     </ThemedButton>
   );
 };
