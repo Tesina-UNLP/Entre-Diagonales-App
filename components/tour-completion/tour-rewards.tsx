@@ -1,10 +1,8 @@
 import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
 import React from "react";
-import { Image, StyleSheet, View } from "react-native";
-
-// Importamos la imagen de la moneda
-const coinImage = require("@/assets/images/coin.png");
+import { StyleSheet, View } from "react-native";
+import CoinIcon from "../icons/coin";
 
 /**
  * Props para el componente TourRewards
@@ -36,7 +34,7 @@ export const TourRewards = ({ xp, coins }: TourRewardsProps) => {
 
       {/* Sección de monedas */}
       <View style={styles.rewardsItem}>
-        <Image source={coinImage} style={styles.coinImage} />
+        <CoinIcon height={40} width={40} />
         <ThemedText type="default" style={styles.valueText}>
           {" "}
           {coins}

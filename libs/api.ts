@@ -7,6 +7,7 @@ import {
   SecretItemApiResponse,
   TourApiResponse,
   TourInfoApiResponse,
+  UserAchievementApiResponse,
 } from "@/types";
 
 const apiBaseUrl =
@@ -450,5 +451,27 @@ export const api = {
       throw new Error(message);
     }
     return data;
+  },
+
+  getAchievements: async (
+    token: string,
+  ): Promise<UserAchievementApiResponse[]> => {
+    const response = await fetch(`${apiBaseUrl}/achievements/`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Fetching achievements failed";
+      throw new Error(message);
+    }
+    return data as UserAchievementApiResponse[];
   },
 };

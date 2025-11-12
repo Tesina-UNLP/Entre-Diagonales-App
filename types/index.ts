@@ -138,6 +138,9 @@ export type AppUser = {
     xp_required: number;
     image_url: string;
   };
+  total_tours_completed: number;
+  total_secret_items_completed: number;
+  total_quizzes_completed: number;
 };
 
 export type FeedbackApiData = {
@@ -149,4 +152,25 @@ export type FeedbackApiData = {
   route_liked: boolean;
   rewards_liked: boolean;
   comment?: string | null;
+};
+
+export type AchievementApiResponse = {
+  id: number;
+  name: string;
+  description: string;
+  image_url: string;
+  multiplier: number;
+  expired_at: string | null;
+  goal: number;
+  goal_type: string;
+  is_active: boolean;
+};
+
+export type UserAchievementApiResponse = {
+  id: number;
+  achievement: AchievementApiResponse;
+  progress: number;
+  completed_at: string | null;
+  is_completed: boolean;
+  completion_percentage: string;
 };

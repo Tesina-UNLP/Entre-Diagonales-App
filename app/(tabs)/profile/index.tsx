@@ -1,27 +1,20 @@
+import AchievementsProfile from "@/components/profile/achievements-profile";
+import HeaderProfile from "@/components/profile/header-profile";
+import SecretsProfile from "@/components/profile/secrets-profile";
+import StatsProfile from "@/components/profile/stats-profile";
+import ToursProfile from "@/components/profile/tours-profile";
 import { ThemedBackground } from "@/components/themed-background";
-import { ThemedButton } from "@/components/themed-button";
-import { ThemedText } from "@/components/themed-text";
-import { router } from "expo-router";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 export default function ProfileScreen() {
   return (
-    <ThemedBackground style={styles.container}>
-      <ThemedText>Profile</ThemedText>
-      <ThemedButton
-        variant="primary"
-        size="small"
-        onPress={() => router.navigate("/(tabs)/profile/secrets")}
-      >
-        Secretos
-      </ThemedButton>
-      <ThemedButton
-        variant="primary"
-        size="small"
-        onPress={() => router.navigate("/(tabs)/profile/settings")}
-      >
-        Configuración
-      </ThemedButton>
+    <ThemedBackground style={styles.container} scrollable>
+      <HeaderProfile />
+      <StatsProfile />
+      <SecretsProfile />
+      <ToursProfile />
+      <AchievementsProfile />
+      <View style={styles.bottomSpacer}></View>
     </ThemedBackground>
   );
 }
@@ -29,5 +22,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    gap: 20,
   },
+  bottomSpacer: { height: 120 },
 });
