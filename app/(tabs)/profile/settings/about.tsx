@@ -2,65 +2,70 @@ import Header from "@/components/header";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
-import { useAuth } from "@/hooks/use-auth";
 import { Ionicons } from "@expo/vector-icons";
+import Constants from "expo-constants";
 import { router } from "expo-router";
 import React from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  Linking,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const sections = [
   {
-    title: "Perfil",
-    icon: "person",
-    onPress: () => router.navigate("/(tabs)/profile/settings/profile"),
+    title: "Desarrolladores",
+    icon: "people",
+    href: process.env.EXPO_PUBLIC_WEB_FRONTEND + "/developers",
   },
   {
-    title: "Notificaciones",
-    icon: "notifications",
-    onPress: () => router.navigate("/(tabs)/profile/settings/notifications"),
+    title: "Política de privacidad",
+    icon: "shield-outline",
+    href: process.env.EXPO_PUBLIC_WEB_FRONTEND + "/privacy",
   },
   {
-    title: "Musica & efectos",
-    icon: "musical-notes",
-    onPress: () => router.navigate("/(tabs)/profile/settings/sounds"),
+    title: "Terminos y condiciones",
+    icon: "document-text-outline",
+    href: process.env.EXPO_PUBLIC_WEB_FRONTEND + "/terms",
   },
   {
-    title: "Centro de ayuda",
-    icon: "help-circle",
-    onPress: () => router.navigate("/(tabs)/profile/settings/help"),
-  },
-  {
-    title: "Sobre nosotros",
-    icon: "information-circle",
-    onPress: () => router.navigate("/(tabs)/profile/settings/about"),
+    title: "Visita nuestra pagina",
+    icon: "globe-outline",
+    href: process.env.EXPO_PUBLIC_WEB_FRONTEND,
   },
 ];
 
-const Settings = () => {
-  const { logout } = useAuth();
+const logo = require("@/assets/images/splash-icon.png");
 
-  const handleSignOut = () => {
-    logout();
-    router.replace("/(public)/welcome");
-  };
+const About = () => {
+  const version = Constants.expoConfig?.version ?? "1.0.0";
 
   return (
     <ThemedBackground style={styles.container} safeArea={false}>
       <Header
-        title={"Configuración"}
-        description={"Configura tu perfil y preferencias"}
+        title={"Acerca de"}
+        description={"Información sobre la aplicación"}
         onBack={() => router.back()}
       />
+
+      <View style={styles.logoContainer}>
+        <Image source={logo} style={styles.logo} />
+        <ThemedText type="defaultSemiBold">Entre Diagonales</ThemedText>
+        <ThemedText type="defaultSemiBold">Versión {version}</ThemedText>
+      </View>
+
       <View style={styles.content}>
         {sections.map((section) => (
           <TouchableOpacity
             key={section.title}
-            onPress={section.onPress}
+            onPress={() => Linking.openURL(section.href as string)}
             style={styles.sectionContainer}
           >
             <View style={styles.sectionLeft}>
               <Ionicons
-                name={section.icon as any}
+                name={section.icon as any} // Cast to any to fix type error, but ideally fix the icon typing upstream
                 size={24}
                 color={TOKENS.text}
               />
@@ -75,18 +80,6 @@ const Settings = () => {
             </View>
           </TouchableOpacity>
         ))}
-
-        <TouchableOpacity
-          onPress={handleSignOut}
-          style={styles.sectionContainer}
-        >
-          <View style={styles.sectionLeft}>
-            <Ionicons name="log-out" size={24} color={TOKENS.error} />
-            <ThemedText type="defaultSemiBold" style={styles.logoutText}>
-              Cerrar sesión
-            </ThemedText>
-          </View>
-        </TouchableOpacity>
       </View>
     </ThemedBackground>
   );
@@ -123,9 +116,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
   },
-  logoutText: {
-    color: TOKENS.error,
+  logo: {
+    width: 140,
+    height: 140,
+    alignSelf: "center",
+    marginVertical: 20,
+  },
+  logoContainer: {
+    alignItems: "center",
+    marginVertical: 10,
+    justifyContent: "center",
   },
 });
 
-export default Settings;
+export default About;
