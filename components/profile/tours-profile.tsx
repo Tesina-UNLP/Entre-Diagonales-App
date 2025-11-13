@@ -1,3 +1,4 @@
+import { ToursProfileSkeleton } from "@/components/skeletons/tours-profile-skeleton";
 import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
 import { api } from "@/libs/api";
@@ -11,14 +12,20 @@ import { ThemedText } from "../themed-text";
 const SecretsProfile = () => {
   const { user } = useAuth();
   const [tours, setTours] = useState<TourApiResponse[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Obtener las rutas del usuario desde la API
   const handleGetTours = useCallback(async () => {
     if (user) {
-      const response = await api.getRoutes(user.access);
+      try {
+        setLoading(true);
+        const response = await api.getRoutes(user.access);
 
-      if (response) {
-        setTours(response);
+        if (response) {
+          setTours(response);
+        }
+      } finally {
+        setLoading(false);
       }
     }
   }, [user]);
@@ -26,6 +33,10 @@ const SecretsProfile = () => {
   useEffect(() => {
     handleGetTours();
   }, [handleGetTours]);
+
+  if (loading) {
+    return <ToursProfileSkeleton />;
+  }
 
   return (
     <View style={styles.container}>

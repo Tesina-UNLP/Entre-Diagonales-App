@@ -1,3 +1,6 @@
+import { TourCardSkeleton } from "@/components/skeletons/tour-card-skeleton";
+import { ToursFiltersSkeleton } from "@/components/skeletons/tours-filters-skeleton";
+import { ToursHeaderSkeleton } from "@/components/skeletons/tours-header-skeleton";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedText } from "@/components/themed-text";
 import TourCard from "@/components/tour-card";
@@ -8,7 +11,6 @@ import { api } from "@/libs/api";
 import { TourApiResponse } from "@/types";
 import { cloneElement, useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   Image,
   RefreshControl,
@@ -163,12 +165,29 @@ export default function TabTwoScreen() {
     </>
   );
 
-  // Si está cargando, mostrar el loader
+  // Función para renderizar el header con skeletons cuando está cargando
+  const renderSkeletonHeader = () => (
+    <>
+      <ToursHeaderSkeleton />
+      <ToursFiltersSkeleton />
+    </>
+  );
+
+  // Si está cargando, mostrar los skeletons
   if (isLoading) {
     return (
       <ThemedBackground style={styles.container}>
-        {renderHeader()}
-        <LoadingComponent />
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContent}
+        >
+          {renderSkeletonHeader()}
+          {/* Mostrar varios TourCard skeletons */}
+          {[1, 2, 3].map((item) => (
+            <TourCardSkeleton key={item} />
+          ))}
+          <View style={styles.bottomSpacer}></View>
+        </ScrollView>
       </ThemedBackground>
     );
   }
@@ -219,13 +238,6 @@ const EmptyComponent = () => (
   </View>
 );
 
-// Componente que se muestra mientras se cargan los datos
-const LoadingComponent = () => (
-  <View style={styles.loadingContainer}>
-    <ActivityIndicator size="large" color={TOKENS.primary} />
-  </View>
-);
-
 const styles = StyleSheet.create({
   emptyImage: {
     width: 200,
@@ -237,16 +249,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 20,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 16,
-  },
-  loadingText: {
-    marginTop: 12,
-    color: TOKENS.text,
   },
   bottomSpacer: { height: 120 },
   container: {

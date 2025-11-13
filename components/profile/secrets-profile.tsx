@@ -1,3 +1,4 @@
+import { SecretsProfileSkeleton } from "@/components/skeletons/secrets-profile-skeleton";
 import { useAuth } from "@/hooks/use-auth";
 import { api } from "@/libs/api";
 import { SecretItemApiResponse } from "@/types";
@@ -10,14 +11,20 @@ import { ThemedText } from "../themed-text";
 const SecretsProfile = () => {
   const { user } = useAuth();
   const [secrets, setSecrets] = useState<SecretItemApiResponse[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Obtener los secretos del usuario desde la API
   const handleGetSecrets = useCallback(async () => {
     if (user) {
-      const response = await api.getSecrets(user.access);
+      try {
+        setLoading(true);
+        const response = await api.getSecrets(user.access);
 
-      if (response) {
-        setSecrets(response);
+        if (response) {
+          setSecrets(response);
+        }
+      } finally {
+        setLoading(false);
       }
     }
   }, [user]);
@@ -25,6 +32,10 @@ const SecretsProfile = () => {
   useEffect(() => {
     handleGetSecrets();
   }, [handleGetSecrets]);
+
+  if (loading) {
+    return <SecretsProfileSkeleton />;
+  }
 
   return (
     <View style={styles.container}>

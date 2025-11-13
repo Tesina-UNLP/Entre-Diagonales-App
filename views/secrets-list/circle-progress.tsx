@@ -1,8 +1,11 @@
 import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
-import React from "react";
-import { View } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { Animated, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
+
+// Creamos una versión animada del componente Circle
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 /**
  * Componente de barra de progreso circular
@@ -27,7 +30,28 @@ export const CircleProgress = ({
   const radius = (size - strokeWidth) / 2; // Radio del círculo
   const circumference = radius * 2 * Math.PI; // Circunferencia del círculo
   const progress = total > 0 ? obtained / total : 0; // Calcular el porcentaje de progreso
-  const strokeDashoffset = circumference - progress * circumference; // Calcular cuánto del círculo debe estar lleno
+
+  // Creamos un valor animado que comenzará en 0
+  const animatedProgress = useRef(new Animated.Value(0)).current;
+
+  // Efecto que se ejecuta cuando cambia el progreso o cuando el componente se monta
+  useEffect(() => {
+    // Reiniciamos la animación a 0
+    animatedProgress.setValue(0);
+
+    // Creamos la animación que va de 0 al progreso final
+    Animated.timing(animatedProgress, {
+      toValue: progress, // Valor final: el progreso calculado (0 a 1)
+      duration: 1000, // Duración de la animación en milisegundos (1 segundo)
+      useNativeDriver: false, // No podemos usar native driver para strokeDashoffset
+    }).start(); // Iniciamos la animación
+  }, [progress, animatedProgress]);
+
+  // Interpolamos el valor animado para calcular el strokeDashoffset
+  const animatedStrokeDashoffset = animatedProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [circumference, 0], // De circumference (vacío) a 0 (lleno)
+  });
 
   return (
     <View
@@ -53,7 +77,7 @@ export const CircleProgress = ({
           strokeWidth={strokeWidth}
         />
         {/* Círculo de progreso (color primario) */}
-        <Circle
+        <AnimatedCircle
           stroke={TOKENS.primary}
           fill="none"
           cx={size / 2}
@@ -61,7 +85,7 @@ export const CircleProgress = ({
           r={radius}
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
+          strokeDashoffset={animatedStrokeDashoffset}
           strokeLinecap="round"
         />
       </Svg>
