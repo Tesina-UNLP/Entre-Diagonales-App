@@ -1,3 +1,4 @@
+import { AchievementsProfileSkeleton } from "@/components/skeletons/achievements-profile-skeleton";
 import { useAuth } from "@/hooks/use-auth";
 import { api } from "@/libs/api";
 import { UserAchievementApiResponse } from "@/types";
@@ -12,14 +13,20 @@ const AchievementsProfile = () => {
   const [achievements, setAchievements] = useState<
     UserAchievementApiResponse[]
   >([]);
+  const [loading, setLoading] = useState(true);
 
   // Obtener los logros del usuario desde la API
   const handleGetAchievements = useCallback(async () => {
     if (user) {
-      const response = await api.getAchievements(user.access);
+      try {
+        setLoading(true);
+        const response = await api.getAchievements(user.access);
 
-      if (response) {
-        setAchievements(response);
+        if (response) {
+          setAchievements(response);
+        }
+      } finally {
+        setLoading(false);
       }
     }
   }, [user]);
@@ -27,6 +34,10 @@ const AchievementsProfile = () => {
   useEffect(() => {
     handleGetAchievements();
   }, [handleGetAchievements]);
+
+  if (loading) {
+    return <AchievementsProfileSkeleton />;
+  }
 
   return (
     <View style={styles.container}>

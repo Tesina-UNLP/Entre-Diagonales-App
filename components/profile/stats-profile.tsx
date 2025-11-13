@@ -1,12 +1,40 @@
+import { StatsProfileSkeleton } from "@/components/skeletons/stats-profile-skeleton";
 import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
-import { Image, StyleSheet, View } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { Animated, Image, StyleSheet, View } from "react-native";
 import { ThemedText } from "../themed-text";
 
 const StatsProfile = () => {
   const { user } = useAuth();
+  // Creamos un valor animado que comenzará en 0
+  const animatedWidth = useRef(new Animated.Value(0)).current;
+
+  // Calculamos el porcentaje de progreso (usando valores por defecto si user no existe)
+  const xp = user?.experience || 0;
+  const req = user?.next_level?.xp_required || 1;
+  const percent = Math.min((xp / req) * 100, 100);
+
+  // Efecto que se ejecuta cuando cambia el porcentaje o cuando el componente se monta
+  // IMPORTANTE: Los hooks deben estar ANTES de cualquier return condicional
+  useEffect(() => {
+    // Solo animamos si hay un usuario (percent será 0 si no hay user)
+    // Reiniciamos la animación a 0
+    animatedWidth.setValue(0);
+
+    // Creamos la animación que va de 0 al porcentaje final
+    Animated.timing(animatedWidth, {
+      toValue: percent, // Valor final: el porcentaje calculado
+      duration: 1000, // Duración de la animación en milisegundos (1 segundo)
+      useNativeDriver: false, // No podemos usar native driver para width
+    }).start(); // Iniciamos la animación
+  }, [percent, animatedWidth]);
+
+  // Ahora verificamos si hay usuario DESPUÉS de todos los hooks
+  if (!user) {
+    return <StatsProfileSkeleton />;
+  }
 
   return (
     <View style={styles.statsProfileContainer}>
@@ -24,24 +52,19 @@ const StatsProfile = () => {
 
       {/* Progression level */}
       <View style={styles.levelProgressionContainer}>
-        {(() => {
-          const xp = user?.experience || 0;
-          const req = user?.next_level?.xp_required || 1;
-          const percent = Math.min((xp / req) * 100, 100);
-
-          return (
-            <View style={styles.levelProgressBarContainer}>
-              <View
-                style={{
-                  width: `${percent}%`,
-                  height: "100%",
-                  backgroundColor: TOKENS.text,
-                  borderRadius: 4,
-                }}
-              />
-            </View>
-          );
-        })()}
+        <View style={styles.levelProgressBarContainer}>
+          <Animated.View
+            style={{
+              width: animatedWidth.interpolate({
+                inputRange: [0, 100],
+                outputRange: ["0%", "100%"],
+              }),
+              height: "100%",
+              backgroundColor: TOKENS.text,
+              borderRadius: 4,
+            }}
+          />
+        </View>
 
         <View style={styles.levelProgressPlan}>
           <ThemedText

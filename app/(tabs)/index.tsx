@@ -1,3 +1,8 @@
+import { ActiveTourSkeleton } from "@/components/skeletons/active-tour-skeleton";
+import { HeaderHomeSkeleton } from "@/components/skeletons/header-home-skeleton";
+import { HorizontalToursSkeleton } from "@/components/skeletons/horizontal-tours-skeleton";
+import { MessageOfTheDaySkeleton } from "@/components/skeletons/message-of-the-day-skeleton";
+import { ProgressionLevelSkeleton } from "@/components/skeletons/progression-level-skeleton";
 import { ThemedBackground } from "@/components/themed-background";
 import { useAuth } from "@/hooks/use-auth";
 import { useMessageOfTheDay } from "@/hooks/use-message-of-the-day";
@@ -15,15 +20,17 @@ import Toast from "react-native-toast-message";
 
 export default function HomeScreen() {
   const { user, checkAuthState } = useAuth();
-  const { fetchWeather } = useWeather();
+  const { fetchWeather, isLoading: isWeatherLoading } = useWeather();
   const { refreshMessage } = useMessageOfTheDay();
   const [routes, setRoutes] = useState<TourApiResponse[]>([]);
   const [currentRoute, setCurrentRoute] = useState<TourApiResponse | null>(
     null,
   );
+  const [loading, setLoading] = useState(true);
 
   const handleGetRoutes = useCallback(async () => {
     try {
+      setLoading(true);
       const response = await api.getRoutes(user?.access || "");
       const current = response.find(
         (route) => route.started && route.completed_at === null,
@@ -37,6 +44,8 @@ export default function HomeScreen() {
         text2: "Por favor, intente nuevamente más tarde.",
       });
       return [];
+    } finally {
+      setLoading(false);
     }
   }, [user?.access]);
 
@@ -59,11 +68,22 @@ export default function HomeScreen() {
       scrollable
       onRefresh={refreshAll}
     >
-      <HeaderHome />
-      <MessageOfTheDay />
-      <ProgressionLevel />
-      <ActiveTour currentRoute={currentRoute} />
-      <HorizontalTourList routes={routes} />
+      {loading ? (
+        <>
+          <MessageOfTheDaySkeleton />
+          <ProgressionLevelSkeleton />
+          <ActiveTourSkeleton />
+          <HorizontalToursSkeleton />
+        </>
+      ) : (
+        <>
+          {isWeatherLoading ? <HeaderHomeSkeleton /> : <HeaderHome />}
+          <MessageOfTheDay />
+          <ProgressionLevel />
+          <ActiveTour currentRoute={currentRoute} />
+          <HorizontalTourList routes={routes} />
+        </>
+      )}
       <View style={styles.bottomSpacer}></View>
     </ThemedBackground>
   );

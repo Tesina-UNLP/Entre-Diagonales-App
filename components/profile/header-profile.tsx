@@ -1,6 +1,7 @@
 import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
+import { HeaderProfileSkeleton } from "@/components/skeletons/header-profile-skeleton";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
@@ -10,6 +11,10 @@ import GemIcon from "../icons/gem";
 
 const HeaderHome = () => {
   const { user } = useAuth();
+
+  if (!user) {
+    return <HeaderProfileSkeleton />;
+  }
 
   return (
     <View style={styles.header}>
