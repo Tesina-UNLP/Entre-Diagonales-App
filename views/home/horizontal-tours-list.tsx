@@ -42,7 +42,7 @@ const HorizontalTourList = ({ routes }: { routes: Array<TourApiResponse> }) => {
                 <Image
                   source={{
                     uri:
-                      item.spots[0].spot.image_urls[0] ??
+                      item.spots[0]?.spot?.image_urls[0] ??
                       "https://images.unsplash.com/photo-1600591832245-9a9f49ec6f5a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bGElMjBwbGF0YXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=400",
                   }}
                   style={styles.routeCardImage}

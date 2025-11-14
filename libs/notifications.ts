@@ -1,5 +1,37 @@
 import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
+import { Platform } from "react-native";
+
+/**
+ * Configura el canal de notificaciones para Android
+ * Esto es necesario para que las notificaciones muestren banners cuando la app está cerrada
+ * En Android 8.0+ (API 26+), todas las notificaciones deben pertenecer a un canal
+ *
+ * IMPORTANTE: La importancia (importance) debe ser HIGH para que las notificaciones
+ * muestren banners cuando la app está en segundo plano o cerrada
+ */
+export async function setupNotificationChannel(): Promise<void> {
+  // Solo configuramos el canal en Android
+  if (Platform.OS === "android") {
+    try {
+      await Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        description: "Canal para todas las notificaciones de la aplicación",
+        importance: Notifications.AndroidImportance.MAX, // IMPORTANTE: HIGH hace que muestre banners
+        vibrationPattern: [0, 250, 250, 250], // Patrón de vibración
+        lightColor: "#004643", // Color del LED (si el dispositivo lo soporta)
+        sound: "./assets/sfx/notifications.wav", // Sonido personalizado
+        enableVibrate: true, // Activar vibración
+        showBadge: true, // Mostrar badge en el ícono
+      });
+    } catch (error) {
+      console.error("Error setting up notification channel:", error);
+    }
+  }
+}
+
+// Configuramos el canal al iniciar el módulo
+setupNotificationChannel();
 
 /**
  * Configura cómo se mostrarán las notificaciones cuando la app está en primer plano
@@ -20,6 +52,10 @@ Notifications.setNotificationHandler({
  */
 export async function requestNotificationPermissions(): Promise<boolean> {
   try {
+    // Primero configuramos el canal de notificaciones en Android
+    // Esto asegura que las notificaciones muestren banners cuando la app está cerrada
+    await setupNotificationChannel();
+
     // En Android 13+, se necesita pedir permisos explícitamente
     // En iOS, siempre se necesita pedir permisos
     const { status: existingStatus } =

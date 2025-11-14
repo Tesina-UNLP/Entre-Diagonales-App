@@ -38,6 +38,16 @@ const SecretsProfile = () => {
     return <ToursProfileSkeleton />;
   }
 
+  if (tours.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <ThemedText type="subtitle">
+          No tienes ninguna ruta realizada
+        </ThemedText>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -46,13 +56,22 @@ const SecretsProfile = () => {
           <ThemedText type="muted">Ver todos</ThemedText>
         </Link>
       </View>
-      <View style={styles.tourList}>
-        {tours
-          .filter((tour) => tour.started)
-          .map((tour) => (
-            <TourItem key={tour.id} tour={tour} />
-          ))}
-      </View>
+      {tours.filter((tour) => tour.started).length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <ThemedText type="muted">No tienes ninguna ruta realizada</ThemedText>
+          <Link asChild href={{ pathname: "/(tabs)/tours" }}>
+            <ThemedText type="link">Ver todas las rutas</ThemedText>
+          </Link>
+        </View>
+      ) : (
+        <View style={styles.tourList}>
+          {tours
+            .filter((tour) => tour.started)
+            .map((tour) => (
+              <TourItem key={tour.id} tour={tour} />
+            ))}
+        </View>
+      )}
     </View>
   );
 };
@@ -189,6 +208,12 @@ const styles = StyleSheet.create({
     color: TOKENS.navActive,
   },
   progressPercent: { color: TOKENS.badgeActive, fontSize: 18 },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 10,
+  },
 });
 
 export default SecretsProfile;
