@@ -268,9 +268,7 @@ export default function ScannerScreen() {
           <View style={styles.overlay}>
             <View style={styles.scanTextContainer}>
               <ThemedText style={styles.scanText}>
-                {params.mode === "spot"
-                  ? "Toma una foto del lugar"
-                  : "Toma una foto del objeto"}
+                Intenta apuntar de frente al lugar
               </ThemedText>
 
               {/* Botón de flash */}

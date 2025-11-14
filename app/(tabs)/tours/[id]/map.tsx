@@ -321,6 +321,32 @@ const Map = () => {
             onPress={() => handleSpotPress(item)}
             android_ripple={{ color: "rgba(139, 214, 196, 0.2)" }}
           >
+            <View style={styles.nextStopDescription}>
+              <View style={styles.nextStopDescriptionItem}>
+                <FontAwesome6 name="route" size={14} color={TOKENS.muted} />
+                <ThemedText type="muted">
+                  {distanceInfo?.distanceFromPrevious != null
+                    ? `${distanceInfo.distanceFromPrevious} km`
+                    : index === 0
+                      ? "Calculando..."
+                      : "N/A"}
+                </ThemedText>
+              </View>
+              <View style={styles.nextStopDescriptionItem}>
+                <FontAwesome6
+                  name="person-walking"
+                  size={14}
+                  color={TOKENS.muted}
+                />
+                <ThemedText type="muted">
+                  {distanceInfo?.durationFromPrevious != null
+                    ? `${distanceInfo.durationFromPrevious} ${distanceInfo.durationFromPrevious === 1 ? "minuto" : "minutos"}`
+                    : index === 0
+                      ? "Calculando..."
+                      : "N/A"}
+                </ThemedText>
+              </View>
+            </View>
             <View style={styles.messageOfTheDay}>
               <View style={styles.messageOfTheDayIconContainer}>
                 <Image
@@ -363,32 +389,7 @@ const Map = () => {
                 </View>
               </View>
             </View>
-            <View style={styles.nextStopDescription}>
-              <View style={styles.nextStopDescriptionItem}>
-                <FontAwesome6 name="route" size={14} color={TOKENS.muted} />
-                <ThemedText type="muted">
-                  {distanceInfo?.distanceFromPrevious != null
-                    ? `${distanceInfo.distanceFromPrevious} km`
-                    : index === 0
-                      ? "Calculando..."
-                      : "N/A"}
-                </ThemedText>
-              </View>
-              <View style={styles.nextStopDescriptionItem}>
-                <FontAwesome6
-                  name="person-walking"
-                  size={14}
-                  color={TOKENS.muted}
-                />
-                <ThemedText type="muted">
-                  {distanceInfo?.durationFromPrevious != null
-                    ? `${distanceInfo.durationFromPrevious} ${distanceInfo.durationFromPrevious === 1 ? "minuto" : "minutos"}`
-                    : index === 0
-                      ? "Calculando..."
-                      : "N/A"}
-                </ThemedText>
-              </View>
-            </View>
+
           </Pressable>
         </View>
       );
@@ -535,7 +536,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: 4,
-    marginBottom: 10,
+    marginTop: 10,
   },
   spotContainer: {
     flexDirection: "row",

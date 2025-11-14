@@ -2,8 +2,9 @@ import { ThemedBackground } from "@/components/themed-background";
 import { useHaptics } from "@/hooks/use-haptics";
 import { SecretCompletionActions } from "@/views/secret-detail/secret-completion-actions";
 import { SecretCompletionInfo } from "@/views/secret-detail/secret-completion-info";
-import { useLocalSearchParams } from "expo-router";
-import React, { useEffect } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useCallback, useEffect, useRef } from "react";
 import { StyleSheet, View } from "react-native";
 import * as z from "zod";
 
@@ -28,19 +29,36 @@ const SecretScreen = () => {
   const params = parsed.success
     ? parsed.data
     : {
-        id: "",
-        name: "",
-        description: "",
-        image_url: "",
-        coins: 0,
-        xp: 0,
-      };
+      id: "",
+      name: "",
+      description: "",
+      image_url: "",
+      coins: 0,
+      xp: 0,
+    };
 
   const { playSound } = useHaptics();
+  const hasNavigatedAway = useRef(false);
 
   useEffect(() => {
     playSound("secretFound");
   }, [playSound]);
+
+  // Si el usuario navega a otro tab y luego vuelve al tab de perfil,
+  // redirigir a la pantalla principal del perfil en lugar de mostrar esta pantalla
+  useFocusEffect(
+    useCallback(() => {
+      // Si el usuario ya navegó a otro tab, redirigir a la pantalla principal del perfil
+      if (hasNavigatedAway.current) {
+        router.replace("/(tabs)/profile");
+      }
+    }, [])
+  );
+
+  // Función para marcar que el usuario navegó a otro tab
+  const handleNavigateAway = useCallback(() => {
+    hasNavigatedAway.current = true;
+  }, []);
 
   return (
     <ThemedBackground style={styles.container}>
@@ -58,6 +76,7 @@ const SecretScreen = () => {
         <SecretCompletionActions
           secretName={params.name}
           secretDescription={params.description}
+          onNavigateAway={handleNavigateAway}
         />
       </View>
     </ThemedBackground>
