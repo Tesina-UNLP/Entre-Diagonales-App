@@ -55,7 +55,17 @@ const AchievementsProfile = () => {
         renderItem={({ item }) => (
           <TouchableOpacity
             key={item.id}
-            onPress={() => router.navigate(`/(tabs)/profile/achievements`)}
+            onPress={() =>
+              router.navigate({
+                pathname: "/(tabs)/profile/achievements/[id]",
+                params: {
+                  id: item.achievement.id.toString(),
+                  name: item.achievement.name,
+                  description: item.achievement.description,
+                  image_url: item.achievement.image_url,
+                },
+              })
+            }
           >
             <Image
               source={{ uri: item.achievement.image_url || "" }}

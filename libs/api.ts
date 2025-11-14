@@ -474,4 +474,24 @@ export const api = {
     }
     return data as UserAchievementApiResponse[];
   },
+
+  claimAchievement: async (token: string, id: number) => {
+    const response = await fetch(`${apiBaseUrl}/achievements/redeem/${id}/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Claiming achievement failed";
+      throw new Error(message);
+    }
+    return data as UserAchievementApiResponse;
+  },
 };

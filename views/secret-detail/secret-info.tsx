@@ -24,7 +24,11 @@ export const SecretInfo = ({
   return (
     <View style={styles.imageContainer}>
       {/* Imagen del secreto */}
-      <Image source={{ uri: imageUrl }} style={styles.image} />
+      <Image
+        source={{ uri: imageUrl }}
+        style={styles.image}
+        resizeMode="contain"
+      />
 
       {/* Título del secreto */}
       <ThemedText type="title" style={styles.centeredText}>
