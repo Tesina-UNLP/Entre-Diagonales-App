@@ -101,3 +101,26 @@ export const FEEDBACK_OPTIONS = [
     icon: "gift",
   },
 ];
+
+export const ACHIEVEMENT_TAGS = [
+  {
+    id: "todos",
+    label: "Todos",
+  },
+  {
+    id: "tour",
+    label: "Rutas",
+  },
+  {
+    id: "secret_item",
+    label: "Secretos",
+  },
+  {
+    id: "trivia",
+    label: "Trivias",
+  },
+  {
+    id: "not-completed",
+    label: "No completados",
+  },
+];

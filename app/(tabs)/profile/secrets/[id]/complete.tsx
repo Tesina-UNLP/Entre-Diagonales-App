@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    paddingTop: 40,
     paddingBottom: 20,
     alignItems: "center", // Centra los elementos horizontalmente
     justifyContent: "space-between",

@@ -8,8 +8,8 @@ import { StyleSheet, View } from "react-native";
 import * as z from "zod";
 
 /**
- * Pantalla de detalle de secreto
- * Muestra la información completa de un secreto descubierto
+ * Pantalla de detalle de logro
+ * Muestra la información completa de un logro obtenido
  * y permite compartirlo
  */
 const SecretScreen = () => {
@@ -37,19 +37,19 @@ const SecretScreen = () => {
       <>
         <Header
           title={params.name}
-          description={"Explora el mundo y descubre secretos"}
+          description={"Insignia obtenida explorando"}
           onBack={() => router.back()}
         />
 
         <View style={styles.content}>
-          {/* Información del secreto (imagen, título, descripción) */}
+          {/* Información del logro (imagen, título, descripción) */}
           <SecretInfo
             name={params.name}
             description={params.description}
             imageUrl={params.image_url}
           />
 
-          {/* Botón para compartir el secreto */}
+          {/* Botón para compartir el logro */}
           <ShareButton
             secretName={params.name}
             secretDescription={params.description}

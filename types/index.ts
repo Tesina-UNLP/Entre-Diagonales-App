@@ -173,4 +173,6 @@ export type UserAchievementApiResponse = {
   completed_at: string | null;
   is_completed: boolean;
   completion_percentage: string;
+  experience_reward: number;
+  gems_reward: number;
 };
