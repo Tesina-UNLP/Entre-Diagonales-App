@@ -57,7 +57,7 @@ export const SecretCompletionInfo = ({
 const styles = StyleSheet.create({
   image: {
     aspectRatio: 1, // Mantiene la imagen cuadrada
-    width: "100%",
+    width: "80%",
   },
   centeredText: {
     textAlign: "center", // Centra el texto dentro del componente

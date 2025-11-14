@@ -12,15 +12,18 @@ import { Alert, Platform, Share, StyleSheet, View } from "react-native";
  *
  * @param secretName - Nombre del secreto para compartir
  * @param secretDescription - Descripción del secreto para compartir
+ * @param onNavigateAway - Callback que se ejecuta cuando el usuario navega a otro tab
  */
 interface SecretCompletionActionsProps {
   secretName: string;
   secretDescription: string;
+  onNavigateAway?: () => void;
 }
 
 export const SecretCompletionActions = ({
   secretName,
   secretDescription,
+  onNavigateAway,
 }: SecretCompletionActionsProps) => {
   /**
    * Función que maneja el compartir del secreto descubierto
@@ -77,9 +80,14 @@ export const SecretCompletionActions = ({
 
   /**
    * Navega de vuelta a la lista de tours
+   * Usa replace() para reemplazar la pantalla actual y evitar que quede en el stack
+   * Marca que el usuario navegó a otro tab para que cuando vuelva al tab de perfil,
+   * se muestre la pantalla principal en lugar de esta pantalla
    */
   const handleContinueTour = () => {
-    router.navigate("/(tabs)/tours");
+    // Marcar que el usuario navegó a otro tab
+    onNavigateAway?.();
+    router.replace("/(tabs)/tours");
   };
 
   return (
