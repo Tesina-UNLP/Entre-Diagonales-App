@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   personButton: { marginBottom: 20, alignItems: "center", width: "30%" },
   personImage: { width: 80, height: 80, borderRadius: 100 },
   personName: { marginTop: 8 },
-  xImage: { width: 250, height: 250, marginTop: 20 },
+  xImage: { width: 250, height: 250 },
 });
 
 export default Choice;

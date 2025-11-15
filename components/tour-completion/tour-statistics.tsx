@@ -32,7 +32,7 @@ export const TourStatistics = ({
     <View style={styles.informationContainer}>
       {/* Card de secretos descubiertos */}
       <View style={styles.informationItem}>
-        <ThemedText type="muted">Secretos descubiertos</ThemedText>
+        <ThemedText type="muted">Secretos encontr.</ThemedText>
         <View style={styles.informationItemValue}>
           <FontAwesome6 name="diamond" size={16} color={TOKENS.accent} />
           <ThemedText type="defaultSemiBold">

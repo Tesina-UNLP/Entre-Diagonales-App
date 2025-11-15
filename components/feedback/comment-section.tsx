@@ -33,6 +33,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
       {/* Campo de texto multilinea */}
       <TextInput
         placeholder="Escribe aqui tu idea o sugerencia..."
+        placeholderTextColor={TOKENS.muted}
         style={styles.input}
         value={value}
         onChangeText={onChangeText}

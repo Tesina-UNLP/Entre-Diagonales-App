@@ -29,13 +29,13 @@ const SecretScreen = () => {
   const params = parsed.success
     ? parsed.data
     : {
-      id: "",
-      name: "",
-      description: "",
-      image_url: "",
-      coins: 0,
-      xp: 0,
-    };
+        id: "",
+        name: "",
+        description: "",
+        image_url: "",
+        coins: 0,
+        xp: 0,
+      };
 
   const { playSound } = useHaptics();
   const hasNavigatedAway = useRef(false);
@@ -52,7 +52,7 @@ const SecretScreen = () => {
       if (hasNavigatedAway.current) {
         router.replace("/(tabs)/profile");
       }
-    }, [])
+    }, []),
   );
 
   // Función para marcar que el usuario navegó a otro tab

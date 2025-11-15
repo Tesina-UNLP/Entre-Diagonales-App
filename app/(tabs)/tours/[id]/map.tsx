@@ -389,7 +389,6 @@ const Map = () => {
                 </View>
               </View>
             </View>
-
           </Pressable>
         </View>
       );

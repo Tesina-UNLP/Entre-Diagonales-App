@@ -56,7 +56,11 @@ export const getRouteCoords = async (
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Error al obtener la ruta ORS:", response.status, errorText);
+      console.error(
+        "Error al obtener la ruta ORS:",
+        response.status,
+        errorText,
+      );
       return { coordenadas: [] };
     }
 
@@ -75,11 +79,12 @@ export const getRouteCoords = async (
     }
 
     // geometry.coordinates: [ [lng, lat], [lng, lat], ... ]
-    const coordenadas = (geometry.coordinates as [number, number][])
-      .map(([lng, lat]) => ({
+    const coordenadas = (geometry.coordinates as [number, number][]).map(
+      ([lng, lat]) => ({
         latitude: lat,
         longitude: lng,
-      }));
+      }),
+    );
 
     return { coordenadas };
   } catch (error) {
