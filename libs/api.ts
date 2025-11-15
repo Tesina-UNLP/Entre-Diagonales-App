@@ -494,4 +494,65 @@ export const api = {
     }
     return data as UserAchievementApiResponse;
   },
+
+  updateProfile: async (
+    token: string,
+    dataForm: {
+      display_name: string;
+      username: string;
+      email: string;
+      character: number;
+    },
+  ) => {
+    const response = await fetch(`${apiBaseUrl}/profile/`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(dataForm),
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Updating profile failed";
+      throw new Error(message);
+    }
+    return data;
+  },
+
+  changePassword: async (
+    token: string,
+    currentPassword: string,
+    newPassword: string,
+    confirmPassword: string,
+  ) => {
+    const response = await fetch(`${apiBaseUrl}/auth/change-password/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        current_password: currentPassword,
+        new_password: newPassword,
+        confirm_new_password: confirmPassword,
+      }),
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Changing password failed";
+      throw new Error(message);
+    }
+    return data;
+  },
 };
