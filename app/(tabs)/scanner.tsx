@@ -6,6 +6,7 @@ import { PhotoPreview } from "@/components/photo-preview";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedText } from "@/components/themed-text";
 import { useAuth } from "@/hooks/use-auth";
+import { useLocation } from "@/hooks/use-location";
 import { api } from "@/libs/api";
 import {
   BarcodeScanningResult,
@@ -40,6 +41,8 @@ export default function ScannerScreen() {
 
   // Referencia a la cámara para poder tomar fotos
   const cameraRef = useRef<CameraView>(null);
+
+  const { location } = useLocation();
 
   // Router para navegar después de escanear
   const router = useRouter();
@@ -96,6 +99,8 @@ export default function ScannerScreen() {
     // Bloque try-catch para manejar errores de las requests
     try {
       if (params.mode === "spot") {
+        formData.append("latitude", location?.latitude?.toString() || "");
+        formData.append("longitude", location?.longitude?.toString() || "");
         // Intentamos completar el spot
         const response = await api.completeSpot(
           user?.access,
