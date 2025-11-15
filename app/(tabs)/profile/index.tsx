@@ -22,7 +22,7 @@ export default function ProfileScreen() {
       if (pathname !== "/profile") {
         router.replace("/(tabs)/profile");
       }
-    }, [pathname])
+    }, [pathname]),
   );
 
   return (

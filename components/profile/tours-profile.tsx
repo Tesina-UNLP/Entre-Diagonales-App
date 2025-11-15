@@ -46,13 +46,19 @@ const SecretsProfile = () => {
           <ThemedText type="muted">Ver todos</ThemedText>
         </Link>
       </View>
-      <View style={styles.tourList}>
-        {tours
-          .filter((tour) => tour.started)
-          .map((tour) => (
-            <TourItem key={tour.id} tour={tour} />
-          ))}
-      </View>
+      {tours.filter((tour) => tour.started).length > 0 ? (
+        <View style={styles.tourList}>
+          {tours
+            .filter((tour) => tour.started)
+            .map((tour) => (
+              <TourItem key={tour.id} tour={tour} />
+            ))}
+        </View>
+      ) : (
+        <View style={styles.emptyContainer}>
+          <ThemedText type="muted">No tienes ninguna ruta realizada</ThemedText>
+        </View>
+      )}
     </View>
   );
 };
@@ -189,6 +195,11 @@ const styles = StyleSheet.create({
     color: TOKENS.navActive,
   },
   progressPercent: { color: TOKENS.badgeActive, fontSize: 18 },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });
 
 export default SecretsProfile;
