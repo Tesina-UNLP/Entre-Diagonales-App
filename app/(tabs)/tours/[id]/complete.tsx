@@ -1,3 +1,4 @@
+import { Confetti } from "@/components/animations/confetti";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedText } from "@/components/themed-text";
 import {
@@ -79,10 +80,13 @@ const CompleteTour = () => {
       await checkAuthState?.();
     };
     checkAuth();
-  }, [playSound, checkAuthState]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Array vacío = solo se ejecuta una vez al montar
 
   return (
     <ThemedBackground style={styles.container}>
+      <Confetti show={true} onComplete={() => {}} particleCount={60} />
+
       <View style={styles.header}>
         <ThemedText type="defaultSemiBold" style={styles.headerTourName}>
           {params.tour_name}
