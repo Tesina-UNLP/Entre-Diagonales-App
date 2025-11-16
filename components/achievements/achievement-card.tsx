@@ -1,4 +1,5 @@
 import { TOKENS } from "@/constants/colors";
+import { useAuth } from "@/hooks/use-auth";
 import { useHaptics } from "@/hooks/use-haptics";
 import { api } from "@/libs/api";
 import { AppUser, UserAchievementApiResponse } from "@/types";
@@ -29,6 +30,7 @@ const AchievementCard = ({
   const [isClaiming, setIsClaiming] = useState<string | null>(null);
 
   const { playSound } = useHaptics();
+  const { checkAuthState } = useAuth();
 
   const progressNumber = (
     (Number(achievement.progress) / (achievement.achievement.goal || 1)) *
@@ -70,6 +72,8 @@ const AchievementCard = ({
       });
 
       setIsClaiming(new Date().toISOString());
+
+      await checkAuthState?.();
     } catch (error) {
       Toast.show({
         type: "error",

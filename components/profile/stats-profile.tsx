@@ -77,7 +77,9 @@ const StatsProfile = () => {
             type="defaultSemiBold"
             style={styles.levelProgressPlanText}
           >
-            Siguiente: {user?.next_level?.xp_required} XP
+            {user?.next_level?.name
+              ? `Siguiente: ${user?.next_level?.name}`
+              : "Nivel máximo"}
           </ThemedText>
         </View>
       </View>

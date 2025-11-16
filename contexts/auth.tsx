@@ -52,6 +52,8 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AppUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  // Guardamos el nivel anterior para detectar cambios
+  const previousLevelIdRef = React.useRef<number | undefined>(undefined);
 
   const initProfile = async (session: {
     access: string;
@@ -64,6 +66,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       access: session.access,
       refresh: session.refresh,
     };
+
+    // Detectamos si el usuario subió de nivel comparando el nivel anterior con el nuevo
+    const previousLevelId = previousLevelIdRef.current;
+    const newLevelId = updatedUser.level?.id;
+
+    // Solo mostramos el toast si:
+    // 1. Ya teníamos un nivel anterior (no es la primera carga)
+    // 2. El nuevo nivel es diferente al anterior
+    // 3. El nuevo nivel existe
+    if (
+      previousLevelId !== undefined &&
+      newLevelId !== undefined &&
+      previousLevelId !== newLevelId
+    ) {
+      // Mostramos el toast de nivel up
+      Toast.show({
+        type: "levelUp",
+        text1: updatedUser.level?.name || "Nuevo Nivel",
+        props: {
+          levelImage: updatedUser.level?.image_url,
+        },
+        visibilityTime: 4000, // El toast se muestra por 4 segundos
+      });
+    }
+
+    // Actualizamos la referencia del nivel anterior
+    previousLevelIdRef.current = newLevelId;
 
     setUser(updatedUser);
     await storeSession(updatedUser);
@@ -150,11 +179,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = async () => {
     try {
       setUser(null);
+      // Reseteamos la referencia del nivel anterior al cerrar sesión
+      previousLevelIdRef.current = undefined;
       await removeSession();
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
       // Incluso si hay error, limpiamos el estado local
       setUser(null);
+      previousLevelIdRef.current = undefined;
     }
   };
 

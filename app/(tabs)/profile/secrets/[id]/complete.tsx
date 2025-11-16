@@ -1,4 +1,5 @@
 import { ThemedBackground } from "@/components/themed-background";
+import { useAuth } from "@/hooks/use-auth";
 import { useHaptics } from "@/hooks/use-haptics";
 import { SecretCompletionActions } from "@/views/secret-detail/secret-completion-actions";
 import { SecretCompletionInfo } from "@/views/secret-detail/secret-completion-info";
@@ -14,6 +15,7 @@ import * as z from "zod";
  * y opciones para compartir o continuar explorando
  */
 const SecretScreen = () => {
+  const { checkAuthState } = useAuth();
   // Schema de validación para los parámetros de la URL
   const ParamsSchema = z.object({
     id: z.string().optional().default(""),
@@ -41,8 +43,12 @@ const SecretScreen = () => {
   const hasNavigatedAway = useRef(false);
 
   useEffect(() => {
-    playSound("secretFound");
-  }, [playSound]);
+    const checkAuth = async () => {
+      playSound("secretFound");
+      await checkAuthState?.();
+    };
+    checkAuth();
+  }, [playSound, checkAuthState]);
 
   // Si el usuario navega a otro tab y luego vuelve al tab de perfil,
   // redirigir a la pantalla principal del perfil en lugar de mostrar esta pantalla
