@@ -20,6 +20,7 @@ import { Image, StyleSheet, View } from "react-native";
 import * as z from "zod";
 
 const CompleteTour = () => {
+  const { checkAuthState } = useAuth();
   const ParamsSchema = z.object({
     tour_id: z.string().optional().default(""),
     xp: z.coerce.number().optional().default(0),
@@ -73,8 +74,12 @@ const CompleteTour = () => {
   const { playSound } = useHaptics();
 
   useEffect(() => {
-    playSound("tourCompleted");
-  }, [playSound]);
+    const checkAuth = async () => {
+      playSound("tourCompleted");
+      await checkAuthState?.();
+    };
+    checkAuth();
+  }, [playSound, checkAuthState]);
 
   return (
     <ThemedBackground style={styles.container}>

@@ -55,24 +55,22 @@ export const QuizActions: React.FC<QuizActionsProps> = ({
       </ThemedButton>
 
       {/* Botón para volver al inicio - solo visible después de responder */}
-      {correctAnswer !== null && (
-        <ThemedButton
-          variant="secondary"
-          size="small"
-          onPress={() => router.navigate("/(tabs)")}
-          style={styles.button}
+      <ThemedButton
+        variant="secondary"
+        size="small"
+        onPress={() => router.back()}
+        style={styles.button}
+      >
+        <FontAwesome name="home" size={16} color={TOKENS.primary} />
+        <ThemedText
+          type="defaultSemiBold"
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          style={[styles.secondaryButtonText, { flexShrink: 1 }]}
         >
-          <FontAwesome name="home" size={16} color={TOKENS.primary} />
-          <ThemedText
-            type="defaultSemiBold"
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            style={[styles.secondaryButtonText, { flexShrink: 1 }]}
-          >
-            Volver al inicio
-          </ThemedText>
-        </ThemedButton>
-      )}
+          Volver al inicio
+        </ThemedText>
+      </ThemedButton>
     </View>
   );
 };

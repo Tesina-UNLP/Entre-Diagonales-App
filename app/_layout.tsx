@@ -16,6 +16,7 @@ import { HapticsProvider } from "@/contexts/haptics";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Slot } from "expo-router";
 import { useEffect } from "react";
+import { LevelUpToast } from "@/components/toasts/level-up-toast";
 
 SplashScreen.setOptions({
   duration: 1000,
@@ -68,6 +69,7 @@ export default function RootLayout() {
         text2Style={{ fontSize: 15, color: TOKENS.muted }}
       />
     ),
+    levelUp: (props: any) => <LevelUpToast {...props} />,
   };
 
   return (

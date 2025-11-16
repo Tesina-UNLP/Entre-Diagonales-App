@@ -70,12 +70,9 @@ const HorizontalTourList = ({ routes }: { routes: Array<TourApiResponse> }) => {
                         color={TOKENS.text}
                       />
                       <ThemedText type="muted" style={styles.routeCardText}>
-                        1.2 km
+                        {item.spots.length} Puntos
                       </ThemedText>
                     </View>
-                    <ThemedText type="muted" style={styles.routeCardText}>
-                      1 hora
-                    </ThemedText>
                   </View>
                 </View>
               </View>

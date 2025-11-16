@@ -5,7 +5,6 @@ import {
   QuizQuestion,
 } from "@/components/quiz";
 import { ThemedBackground } from "@/components/themed-background";
-import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
 import { useHaptics } from "@/hooks/use-haptics";
@@ -16,7 +15,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 const QuizPage = () => {
-  const { user } = useAuth();
+  const { user, checkAuthState } = useAuth();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const idStr = useMemo(() => (Array.isArray(id) ? id?.[0] : id), [id]);
   const [quiz, setQuiz] = useState<QuizApiResponse | null>(null);
@@ -75,6 +74,7 @@ const QuizPage = () => {
 
         if (response.correct_answer_id === selectedAnswer) {
           playSound("success");
+          await checkAuthState?.();
         } else {
           playSound("error");
         }
@@ -109,13 +109,6 @@ const QuizPage = () => {
             onAnswerPress={handleAnswer}
           />
         )}
-
-        {/* Sección de power-ups (actualmente solo muestra 50/50) */}
-        <View style={styles.powerupsContainer}>
-          <ThemedText type="defaultSemiBold" style={styles.powerupsText}>
-            50/50
-          </ThemedText>
-        </View>
       </View>
 
       {/* Botones de acción */}
