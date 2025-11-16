@@ -106,7 +106,7 @@ const RouteDetails = () => {
           <Header
             title={routeInfo?.name || ""}
             description={`${routeInfo?.spots.length} Puntos  • ${stopsDistanceInfo.reduce((acc, info) => acc + (info.durationFromPrevious || 0), 0)} min aprox.`}
-            onBack={() => router.back()}
+            onBack={() => router.navigate("/(tabs)/tours")}
           />
           <ScrollView
             style={styles.container}

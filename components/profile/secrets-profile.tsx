@@ -1,38 +1,20 @@
 import { SecretsProfileSkeleton } from "@/components/skeletons/secrets-profile-skeleton";
-import { useAuth } from "@/hooks/use-auth";
-import { api } from "@/libs/api";
 import { SecretItemApiResponse } from "@/types";
 import { Link, router } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import React from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { ThemedText } from "../themed-text";
 
-const SecretsProfile = () => {
-  const { user } = useAuth();
-  const [secrets, setSecrets] = useState<SecretItemApiResponse[]>([]);
-  const [loading, setLoading] = useState(true);
+// Ahora este componente recibe los datos por props desde el componente padre
+// Esto evita hacer llamadas API redundantes y mejora el rendimiento
+interface SecretsProfileProps {
+  data: SecretItemApiResponse[];
+  loading: boolean;
+}
 
-  // Obtener los secretos del usuario desde la API
-  const handleGetSecrets = useCallback(async () => {
-    if (user) {
-      try {
-        setLoading(true);
-        const response = await api.getSecrets(user.access);
-
-        if (response) {
-          setSecrets(response);
-        }
-      } finally {
-        setLoading(false);
-      }
-    }
-  }, [user]);
-
-  useEffect(() => {
-    handleGetSecrets();
-  }, [handleGetSecrets]);
-
+const SecretsProfile = ({ data, loading }: SecretsProfileProps) => {
+  // Si aún está cargando, mostramos el skeleton
   if (loading) {
     return <SecretsProfileSkeleton />;
   }
@@ -45,10 +27,11 @@ const SecretsProfile = () => {
           <ThemedText type="muted">Ver todos</ThemedText>
         </Link>
       </View>
-      {secrets.filter((secret) => secret.obtained).length > 0 ? (
+      {/* Usamos 'data' en lugar de 'secrets' ya que ahora lo recibimos por props */}
+      {data.filter((secret) => secret.obtained).length > 0 ? (
         <FlatList
           showsHorizontalScrollIndicator={false}
-          data={secrets.filter((secret) => secret.obtained)}
+          data={data.filter((secret) => secret.obtained)}
           // gap between item
           ItemSeparatorComponent={() => <View style={{ width: 10 }} />}
           horizontal

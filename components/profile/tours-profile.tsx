@@ -1,39 +1,21 @@
 import { ToursProfileSkeleton } from "@/components/skeletons/tours-profile-skeleton";
 import { TOKENS } from "@/constants/colors";
-import { useAuth } from "@/hooks/use-auth";
-import { api } from "@/libs/api";
 import { TourApiResponse } from "@/types";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Link, router } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "../themed-text";
 
-const SecretsProfile = () => {
-  const { user } = useAuth();
-  const [tours, setTours] = useState<TourApiResponse[]>([]);
-  const [loading, setLoading] = useState(true);
+// Ahora este componente recibe los datos por props desde el componente padre
+// Esto evita hacer llamadas API redundantes y mejora el rendimiento
+interface ToursProfileProps {
+  data: TourApiResponse[];
+  loading: boolean;
+}
 
-  // Obtener las rutas del usuario desde la API
-  const handleGetTours = useCallback(async () => {
-    if (user) {
-      try {
-        setLoading(true);
-        const response = await api.getRoutes(user.access);
-
-        if (response) {
-          setTours(response);
-        }
-      } finally {
-        setLoading(false);
-      }
-    }
-  }, [user]);
-
-  useEffect(() => {
-    handleGetTours();
-  }, [handleGetTours]);
-
+const ToursProfile = ({ data, loading }: ToursProfileProps) => {
+  // Si aún está cargando, mostramos el skeleton
   if (loading) {
     return <ToursProfileSkeleton />;
   }
@@ -46,9 +28,10 @@ const SecretsProfile = () => {
           <ThemedText type="muted">Ver todos</ThemedText>
         </Link>
       </View>
-      {tours.filter((tour) => tour.started).length > 0 ? (
+      {/* Usamos 'data' en lugar de 'tours' ya que ahora lo recibimos por props */}
+      {data.filter((tour) => tour.started).length > 0 ? (
         <View style={styles.tourList}>
-          {tours
+          {data
             .filter((tour) => tour.started)
             .map((tour) => (
               <TourItem key={tour.id} tour={tour} />
@@ -202,4 +185,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SecretsProfile;
+export default ToursProfile;

@@ -1,3 +1,4 @@
+import { Confetti } from "@/components/animations/confetti";
 import { ThemedBackground } from "@/components/themed-background";
 import { useAuth } from "@/hooks/use-auth";
 import { useHaptics } from "@/hooks/use-haptics";
@@ -42,13 +43,15 @@ const SecretScreen = () => {
   const { playSound } = useHaptics();
   const hasNavigatedAway = useRef(false);
 
+  // Reproducir sonido y verificar autenticación solo una vez al montar el componente
   useEffect(() => {
     const checkAuth = async () => {
       playSound("secretFound");
       await checkAuthState?.();
     };
     checkAuth();
-  }, [playSound, checkAuthState]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Array vacío = solo se ejecuta una vez al montar
 
   // Si el usuario navega a otro tab y luego vuelve al tab de perfil,
   // redirigir a la pantalla principal del perfil en lugar de mostrar esta pantalla
@@ -68,6 +71,7 @@ const SecretScreen = () => {
 
   return (
     <ThemedBackground style={styles.container}>
+      <Confetti show={true} onComplete={() => {}} particleCount={60} />
       <View style={styles.content}>
         {/* Información del secreto descubierto con recompensas */}
         <SecretCompletionInfo

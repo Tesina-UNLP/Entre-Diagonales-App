@@ -1,40 +1,20 @@
 import { AchievementsProfileSkeleton } from "@/components/skeletons/achievements-profile-skeleton";
-import { useAuth } from "@/hooks/use-auth";
-import { api } from "@/libs/api";
 import { UserAchievementApiResponse } from "@/types";
 import { Link, router } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import React from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { ThemedText } from "../themed-text";
 
-const AchievementsProfile = () => {
-  const { user } = useAuth();
-  const [achievements, setAchievements] = useState<
-    UserAchievementApiResponse[]
-  >([]);
-  const [loading, setLoading] = useState(true);
+// Ahora este componente recibe los datos por props desde el componente padre
+// Esto evita hacer llamadas API redundantes y mejora el rendimiento
+interface AchievementsProfileProps {
+  data: UserAchievementApiResponse[];
+  loading: boolean;
+}
 
-  // Obtener los logros del usuario desde la API
-  const handleGetAchievements = useCallback(async () => {
-    if (user) {
-      try {
-        setLoading(true);
-        const response = await api.getAchievements(user.access);
-
-        if (response) {
-          setAchievements(response);
-        }
-      } finally {
-        setLoading(false);
-      }
-    }
-  }, [user]);
-
-  useEffect(() => {
-    handleGetAchievements();
-  }, [handleGetAchievements]);
-
+const AchievementsProfile = ({ data, loading }: AchievementsProfileProps) => {
+  // Si aún está cargando, mostramos el skeleton
   if (loading) {
     return <AchievementsProfileSkeleton />;
   }
@@ -47,10 +27,10 @@ const AchievementsProfile = () => {
           <ThemedText type="muted">Ver todos</ThemedText>
         </Link>
       </View>
-      {achievements.filter((achievement) => achievement.is_completed).length >
-      0 ? (
+      {/* Usamos 'data' en lugar de 'achievements' ya que ahora lo recibimos por props */}
+      {data.filter((achievement) => achievement.is_completed).length > 0 ? (
         <FlatList
-          data={achievements.filter((achievement) => achievement.is_completed)}
+          data={data.filter((achievement) => achievement.is_completed)}
           horizontal
           ItemSeparatorComponent={() => <View style={{ width: 10 }} />}
           showsHorizontalScrollIndicator={false}
