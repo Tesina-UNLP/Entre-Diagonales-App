@@ -184,4 +184,5 @@ export type RankingApiResponse = {
   experience: number;
   character: string;
   position?: number | null;
+  display_name: string;
 };

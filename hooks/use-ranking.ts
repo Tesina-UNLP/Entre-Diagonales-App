@@ -8,6 +8,7 @@ export type RankingItem = {
   experience: number;
   character: string;
   position: number;
+  display_name: string;
 };
 
 export function useRanking(token: string, username?: string, level?: string) {
