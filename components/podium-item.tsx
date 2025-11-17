@@ -1,6 +1,7 @@
 import { TOKENS } from "@/constants/colors";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, View } from "react-native";
+import { ThemedText } from "./themed-text";
 
 interface Props {
   user: any;
@@ -14,13 +15,20 @@ const podiumConfig = {
     icon: (
       <FontAwesome5
         name="trophy"
-        size={28}
+        size={16}
         color={TOKENS.firstPlaceLight}
         solid
       />
     ),
-    avatarSize: 100,
+    sizeBadge: {
+      justifyContent: "center",
+      alignItems: "center",
+      height: 48,
+      width: 48,
+    },
+    avatarSize: 80,
     badgeFontSize: 24,
+    badgeFontWeight: "black",
     offset: 0,
     textColor: TOKENS.firstPlaceLight,
   },
@@ -30,12 +38,18 @@ const podiumConfig = {
     icon: (
       <FontAwesome5
         name="medal"
-        size={22}
+        size={16}
         color={TOKENS.secondPlaceLight}
         solid
       />
     ),
-    avatarSize: 85,
+    sizeBadge: {
+      justifyContent: "center",
+      alignItems: "center",
+      height: 28,
+      width: 32,
+    },
+    avatarSize: 64,
     badgeFontSize: 18,
     offset: 20,
     textColor: TOKENS.secondPlaceLight,
@@ -46,12 +60,18 @@ const podiumConfig = {
     icon: (
       <FontAwesome5
         name="medal"
-        size={20}
+        size={16}
         color={TOKENS.thirdPlaceLight}
         solid
       />
     ),
-    avatarSize: 70,
+    sizeBadge: {
+      justifyContent: "center",
+      alignItems: "center",
+      height: 24,
+      width: 28,
+    },
+    avatarSize: 60,
     badgeFontSize: 14,
     offset: 45,
     textColor: TOKENS.thirdPlaceLight,
@@ -72,7 +92,7 @@ const PodiumItem = ({ user, position }: Props) => {
             height: config.avatarSize,
             borderRadius: config.avatarSize / 2,
             borderColor: config.borderColor,
-            borderWidth: 3,
+            borderWidth: 2,
           },
         ]}
       >
@@ -88,34 +108,43 @@ const PodiumItem = ({ user, position }: Props) => {
         <View style={styles.row}>
           {config.icon}
 
-          <Text
+          <ThemedText
+            type="defaultSemiBold"
             style={{
-              marginLeft: 6,
-              fontWeight: "bold",
               color: config.textColor,
             }}
           >
             {Number(user?.experience ?? 0).toLocaleString()} pts
-          </Text>
+          </ThemedText>
         </View>
 
-        <Text style={styles.username}>{user.username}</Text>
+        <ThemedText type="defaultSemiBold" style={styles.username}>
+          {user?.display_name?.slice(0, 12) ?? user.username?.slice(0, 12)}
+        </ThemedText>
 
         <View
-          style={[styles.badge, { backgroundColor: config.badgeBackground }]}
+          style={[
+            styles.badge,
+            {
+              justifyContent: "center",
+              alignItems: "center",
+              height: config.sizeBadge.height,
+              width: config.sizeBadge.width,
+              backgroundColor: config.badgeBackground,
+            },
+          ]}
         >
-          <Text
+          <ThemedText
+            type="subtitle"
             style={[
-              styles.badgeText,
               {
                 fontSize: config.badgeFontSize,
                 color: config.textColor,
-                fontWeight: "bold",
               },
             ]}
           >
             {position}
-          </Text>
+          </ThemedText>
         </View>
       </View>
     </View>
@@ -143,11 +172,11 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 4,
   },
   username: {
-    fontWeight: "600",
     marginTop: 4,
-    color: TOKENS.text,
+    textAlign: "center",
   },
   badge: {
     marginTop: 6,
@@ -155,9 +184,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderTopLeftRadius: 6,
     borderTopRightRadius: 6,
-  },
-  badgeText: {
-    color: "white",
-    fontWeight: "bold",
   },
 });

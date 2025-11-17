@@ -2,7 +2,7 @@
 import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
 import { RankingItem } from "@/hooks/use-ranking";
-import { FontAwesome5 } from "@expo/vector-icons";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Octicons from "@expo/vector-icons/Octicons";
 import { Image, StyleSheet, View } from "react-native";
 
@@ -19,7 +19,9 @@ export function UserRankingCard({
       <View style={styles.left}>
         {/* CÍRCULO SUPERPUESTO */}
         <View style={styles.positionCircle}>
-          <ThemedText style={styles.posText}>{user.position}</ThemedText>
+          <ThemedText type="defaultSemiBold" style={styles.posText}>
+            {user.position}
+          </ThemedText>
         </View>
 
         {/* AVATAR */}
@@ -27,16 +29,20 @@ export function UserRankingCard({
       </View>
 
       <View style={styles.center}>
-        <ThemedText style={styles.username}>{user.username}</ThemedText>
+        <ThemedText type="subtitle">
+          {user?.display_name?.slice(0, 12) ?? user.username?.slice(0, 12)}
+        </ThemedText>
         <View style={styles.row}>
-          <Octicons name="star-fill" size={16} color={TOKENS.accent} />
-          <ThemedText style={styles.points}>{user.experience} pts</ThemedText>
+          <Octicons name="star-fill" size={14} color={TOKENS.accent} />
+          <ThemedText type="muted" style={styles.points}>
+            {user.experience} puntos
+          </ThemedText>
         </View>
       </View>
 
       <View style={styles.badge}>
-        <FontAwesome5 name="medal" size={20} color={TOKENS.progress} solid />
-        <ThemedText style={styles.badgeText}>{userLevel}</ThemedText>
+        <FontAwesome5 name="medal" size={12} color={TOKENS.progress} solid />
+        <ThemedText>{userLevel}</ThemedText>
       </View>
     </View>
   );
@@ -46,15 +52,15 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
     backgroundColor: TOKENS.cardBackground,
-    padding: 12,
+    paddingVertical: 13,
+    paddingHorizontal: 17,
     borderRadius: 16,
     alignItems: "center",
     marginBottom: 20,
   },
-  center: { flex: 1, marginLeft: 10 },
+  center: { flex: 1, marginLeft: 10, gap: 4 },
   row: { flexDirection: "row", alignItems: "center" },
-  username: { fontWeight: "bold", fontSize: 16 },
-  points: { marginLeft: 4, color: TOKENS.iconCoin },
+  points: { marginLeft: 4 },
   badge: {
     flexDirection: "row",
     alignItems: "center",
@@ -63,13 +69,6 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 10,
     backgroundColor: TOKENS.primary,
-  },
-  badgeText: {
-    color: TOKENS.text,
-    fontSize: 16,
-    textAlign: "center",
-    flexShrink: 1,
-    maxWidth: 100,
   },
   left: {
     position: "relative",
@@ -82,7 +81,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    borderWidth: 4,
+    borderWidth: 2,
     borderColor: TOKENS.muted,
   },
 
@@ -103,9 +102,6 @@ const styles = StyleSheet.create({
 
   posText: {
     color: TOKENS.text,
-    fontWeight: "bold",
-    fontSize: 14,
     textAlign: "center",
-    lineHeight: 16,
   },
 });
