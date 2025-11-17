@@ -118,14 +118,25 @@ const PodiumItem = ({ user, position }: Props) => {
           </ThemedText>
         </View>
 
-        <ThemedText type="defaultSemiBold" style={styles.username}>{user?.display_name?.slice(0, 12) ?? user.username?.slice(0, 12)}</ThemedText>
+        <ThemedText type="defaultSemiBold" style={styles.username}>
+          {user?.display_name?.slice(0, 12) ?? user.username?.slice(0, 12)}
+        </ThemedText>
 
         <View
-          style={[styles.badge, { justifyContent: "center", alignItems: "center", height: config.sizeBadge.height, width: config.sizeBadge.width, backgroundColor: config.badgeBackground }]}>
+          style={[
+            styles.badge,
+            {
+              justifyContent: "center",
+              alignItems: "center",
+              height: config.sizeBadge.height,
+              width: config.sizeBadge.width,
+              backgroundColor: config.badgeBackground,
+            },
+          ]}
+        >
           <ThemedText
             type="subtitle"
             style={[
-
               {
                 fontSize: config.badgeFontSize,
                 color: config.textColor,

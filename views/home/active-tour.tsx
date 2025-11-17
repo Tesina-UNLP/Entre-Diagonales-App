@@ -191,7 +191,11 @@ const ActiveTour = ({
           </View>
 
           {/* Call to action */}
-          <ThemedButton variant="gold" size="small" onPress={() => router.navigate({ pathname: "/(tabs)/tours" })}>
+          <ThemedButton
+            variant="gold"
+            size="small"
+            onPress={() => router.navigate({ pathname: "/(tabs)/tours" })}
+          >
             Explorar rutas disponibles
           </ThemedButton>
         </View>
@@ -270,7 +274,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   levelText: {
-    color: TOKENS.background
+    color: TOKENS.background,
   },
   gamificationTitle: {
     fontSize: 18,
