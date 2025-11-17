@@ -23,6 +23,12 @@ export type Tokens = {
   accent: string;
   cardBackground: string;
   secretBackground: string;
+  firstPlace: string;
+  firstPlaceLight: string;
+  secondPlace: string;
+  secondPlaceLight: string;
+  thirdPlace: string;
+  thirdPlaceLight: string;
 };
 
 export const TOKENS: Tokens = {
@@ -46,6 +52,12 @@ export const TOKENS: Tokens = {
   accent: "#F9BC60",
   cardBackground: "rgba(146, 146, 146, 0.07)",
   secretBackground: "#974215",
+  firstPlace: "#A19A03",
+  firstPlaceLight: "#E9D50E",
+  secondPlace: "#71646A",
+  secondPlaceLight: "#E8E4E6",
+  thirdPlace: "#BE5310",
+  thirdPlaceLight: "#F4881B",
 };
 
 export type AppTheme = {

@@ -4,6 +4,7 @@ import {
   IndividualSpotApiResponse,
   LevelApiResponse,
   QuizApiResponse,
+  RankingApiResponse,
   SecretItemApiResponse,
   TourApiResponse,
   TourInfoApiResponse,
@@ -554,5 +555,38 @@ export const api = {
       throw new Error(message);
     }
     return data;
+  },
+
+  getRanking: async (
+    token: string,
+    level?: string,
+  ): Promise<RankingApiResponse[]> => {
+    const url = new URL(`${apiBaseUrl}/ranking/`);
+
+    // Solo agrego level si está definido
+    if (level != null) {
+      url.searchParams.append("level", String(level));
+    }
+
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const message =
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Fetching ranking failed";
+      throw new Error(message);
+    }
+
+    return data as RankingApiResponse[];
   },
 };

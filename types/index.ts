@@ -177,3 +177,11 @@ export type UserAchievementApiResponse = {
   experience_reward: number;
   gems_reward: number;
 };
+
+export type RankingApiResponse = {
+  id: number;
+  username: string;
+  experience: number;
+  character: string;
+  position?: number | null;
+};
