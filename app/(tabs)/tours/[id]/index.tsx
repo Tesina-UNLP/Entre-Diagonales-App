@@ -1,3 +1,4 @@
+import { FadeInView } from "@/components/animations/fade-in-view";
 import Header from "@/components/header";
 import { ThemedBackground } from "@/components/themed-background";
 import { TOKENS } from "@/constants/colors";
@@ -122,40 +123,48 @@ const RouteDetails = () => {
           >
             <View style={styles.content}>
               {/* Progress bar */}
-              <Progression
-                completedSpots={completedSpots}
-                currentSpot={currentSpot}
-                notCompletedSpots={notCompletedSpots}
-                spotsQuantity={routeInfo?.spots.length || 0}
-              />
+              <FadeInView delay={100}>
+                <Progression
+                  completedSpots={completedSpots}
+                  currentSpot={currentSpot}
+                  notCompletedSpots={notCompletedSpots}
+                  spotsQuantity={routeInfo?.spots.length || 0}
+                />
+              </FadeInView>
               {/* Next Stop */}
-              <NextStop
-                routeInfo={routeInfo}
-                currentSpot={currentSpot}
-                stopsDistanceInfo={
-                  stopsDistanceInfo.find(
-                    (info) => info.order === currentSpot?.order,
-                  ) || null
-                }
-                handleStartTour={handleStartTour}
-                isTourCompleted={isTourCompleted}
-              />
+              <FadeInView delay={200}>
+                <NextStop
+                  routeInfo={routeInfo}
+                  currentSpot={currentSpot}
+                  stopsDistanceInfo={
+                    stopsDistanceInfo.find(
+                      (info) => info.order === currentSpot?.order,
+                    ) || null
+                  }
+                  handleStartTour={handleStartTour}
+                  isTourCompleted={isTourCompleted}
+                />
+              </FadeInView>
               {/* Spots List */}
-              <SpotList
-                completedSpots={completedSpots}
-                currentSpot={currentSpot}
-                notCompletedSpots={notCompletedSpots}
-                tourId={parseInt(idStr)}
-              />
-              <RewardCard
-                spots={routeInfo?.spots.length || 0}
-                secrets={
-                  routeInfo?.spots.reduce(
-                    (acc, spot) => acc + spot.spot.secret_items.length,
-                    0,
-                  ) || 0
-                }
-              />
+              <FadeInView delay={300}>
+                <SpotList
+                  completedSpots={completedSpots}
+                  currentSpot={currentSpot}
+                  notCompletedSpots={notCompletedSpots}
+                  tourId={parseInt(idStr)}
+                />
+              </FadeInView>
+              <FadeInView delay={400}>
+                <RewardCard
+                  spots={routeInfo?.spots.length || 0}
+                  secrets={
+                    routeInfo?.spots.reduce(
+                      (acc, spot) => acc + spot.spot.secret_items.length,
+                      0,
+                    ) || 0
+                  }
+                />
+              </FadeInView>
             </View>
           </ScrollView>
         </>

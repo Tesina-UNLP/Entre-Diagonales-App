@@ -1,3 +1,4 @@
+import { FadeInView } from "@/components/animations/fade-in-view";
 import Header from "@/components/header";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedText } from "@/components/themed-text";
@@ -52,41 +53,44 @@ const Settings = () => {
         onBack={() => router.back()}
       />
       <View style={styles.content}>
-        {sections.map((section) => (
+        {sections.map((section, index) => (
+          <FadeInView key={section.title} delay={100 * (index + 1)}>
+            <TouchableOpacity
+              onPress={section.onPress}
+              style={styles.sectionContainer}
+            >
+              <View style={styles.sectionLeft}>
+                <Ionicons
+                  name={section.icon as any}
+                  size={24}
+                  color={TOKENS.text}
+                />
+                <ThemedText type="defaultSemiBold">{section.title}</ThemedText>
+              </View>
+              <View style={styles.sectionRight}>
+                <Ionicons
+                  name="chevron-forward-outline"
+                  size={20}
+                  color={TOKENS.text}
+                />
+              </View>
+            </TouchableOpacity>
+          </FadeInView>
+        ))}
+
+        <FadeInView delay={600}>
           <TouchableOpacity
-            key={section.title}
-            onPress={section.onPress}
+            onPress={handleSignOut}
             style={styles.sectionContainer}
           >
             <View style={styles.sectionLeft}>
-              <Ionicons
-                name={section.icon as any}
-                size={24}
-                color={TOKENS.text}
-              />
-              <ThemedText type="defaultSemiBold">{section.title}</ThemedText>
-            </View>
-            <View style={styles.sectionRight}>
-              <Ionicons
-                name="chevron-forward-outline"
-                size={20}
-                color={TOKENS.text}
-              />
+              <Ionicons name="log-out" size={24} color={TOKENS.error} />
+              <ThemedText type="defaultSemiBold" style={styles.logoutText}>
+                Cerrar sesión
+              </ThemedText>
             </View>
           </TouchableOpacity>
-        ))}
-
-        <TouchableOpacity
-          onPress={handleSignOut}
-          style={styles.sectionContainer}
-        >
-          <View style={styles.sectionLeft}>
-            <Ionicons name="log-out" size={24} color={TOKENS.error} />
-            <ThemedText type="defaultSemiBold" style={styles.logoutText}>
-              Cerrar sesión
-            </ThemedText>
-          </View>
-        </TouchableOpacity>
+        </FadeInView>
       </View>
     </ThemedBackground>
   );

@@ -1,3 +1,4 @@
+import { FadeInView } from "@/components/animations/fade-in-view";
 import {
   QuizActions,
   QuizAnswersList,
@@ -93,30 +94,40 @@ const QuizPage = () => {
   return (
     <ThemedBackground style={styles.container}>
       {/* Encabezado del quiz con título y recompensas */}
-      <QuizHeader />
+      <FadeInView delay={100}>
+        <QuizHeader />
+      </FadeInView>
 
       {/* Contenido principal del quiz */}
       <View style={styles.content}>
         {/* Pregunta del quiz */}
-        {quiz && <QuizQuestion question={quiz.name} />}
+        {quiz && (
+          <FadeInView delay={200}>
+            <QuizQuestion question={quiz.name} />
+          </FadeInView>
+        )}
 
         {/* Lista de respuestas */}
         {quiz && (
-          <QuizAnswersList
-            answers={quiz.answers}
-            selectedAnswer={selectedAnswer}
-            correctAnswer={correctAnswer}
-            onAnswerPress={handleAnswer}
-          />
+          <FadeInView delay={300}>
+            <QuizAnswersList
+              answers={quiz.answers}
+              selectedAnswer={selectedAnswer}
+              correctAnswer={correctAnswer}
+              onAnswerPress={handleAnswer}
+            />
+          </FadeInView>
         )}
       </View>
 
       {/* Botones de acción */}
-      <QuizActions
-        selectedAnswer={selectedAnswer}
-        correctAnswer={correctAnswer}
-        onCheckAnswer={handleCheckAnswer}
-      />
+      <FadeInView delay={400}>
+        <QuizActions
+          selectedAnswer={selectedAnswer}
+          correctAnswer={correctAnswer}
+          onCheckAnswer={handleCheckAnswer}
+        />
+      </FadeInView>
     </ThemedBackground>
   );
 };

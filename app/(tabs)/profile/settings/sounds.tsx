@@ -1,3 +1,4 @@
+import { FadeInView } from "@/components/animations/fade-in-view";
 import Header from "@/components/header";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedText } from "@/components/themed-text";
@@ -18,24 +19,28 @@ const Notifications = () => {
         onBack={() => router.back()}
       />
       <View style={styles.content}>
-        <View style={styles.sectionContainer}>
-          <View style={styles.textContainer}>
-            <ThemedText type="defaultSemiBold">Vibración</ThemedText>
-            <ThemedText type="default" style={styles.description}>
-              Habilita o deshabilita la vibración en la app
-            </ThemedText>
+        <FadeInView delay={100}>
+          <View style={styles.sectionContainer}>
+            <View style={styles.textContainer}>
+              <ThemedText type="defaultSemiBold">Vibración</ThemedText>
+              <ThemedText type="default" style={styles.description}>
+                Habilita o deshabilita la vibración en la app
+              </ThemedText>
+            </View>
+            <Switch value={hapticsEnabled} onValueChange={toggleHaptics} />
           </View>
-          <Switch value={hapticsEnabled} onValueChange={toggleHaptics} />
-        </View>
-        <View style={styles.sectionContainer}>
-          <View style={styles.textContainer}>
-            <ThemedText type="defaultSemiBold">Efectos de sonido</ThemedText>
-            <ThemedText type="default" style={styles.description}>
-              Habilita o deshabilita los efectos de sonido en la app
-            </ThemedText>
+        </FadeInView>
+        <FadeInView delay={200}>
+          <View style={styles.sectionContainer}>
+            <View style={styles.textContainer}>
+              <ThemedText type="defaultSemiBold">Efectos de sonido</ThemedText>
+              <ThemedText type="default" style={styles.description}>
+                Habilita o deshabilita los efectos de sonido en la app
+              </ThemedText>
+            </View>
+            <Switch value={soundsEnabled} onValueChange={toggleSounds} />
           </View>
-          <Switch value={soundsEnabled} onValueChange={toggleSounds} />
-        </View>
+        </FadeInView>
       </View>
     </ThemedBackground>
   );

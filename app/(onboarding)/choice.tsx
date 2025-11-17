@@ -1,3 +1,4 @@
+import { FadeInView } from "@/components/animations/fade-in-view";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedButton } from "@/components/themed-button";
 import { ThemedText } from "@/components/themed-text";
@@ -90,7 +91,7 @@ const Choice = () => {
 
   return (
     <ThemedBackground style={styles.container}>
-      <View style={styles.header}>
+      <FadeInView delay={100} style={styles.header}>
         <View style={styles.actionBack}>
           <TouchableOpacity onPress={() => back()}>
             <MaterialIcons name="arrow-back" size={24} color={TOKENS.muted} />
@@ -102,8 +103,8 @@ const Choice = () => {
         </View>
 
         <View style={styles.actionNext} />
-      </View>
-      <View style={styles.content}>
+      </FadeInView>
+      <FadeInView delay={300} style={styles.content}>
         <ThemedText type="title">Elige tu personaje</ThemedText>
         <ThemedText type="muted" style={styles.description}>
           Selecciona el personaje que más te guste para acompañarte en tu viaje
@@ -142,13 +143,13 @@ const Choice = () => {
           style={styles.xImage}
           resizeMode="contain"
         />
-      </View>
+      </FadeInView>
       {selectedNpc && (
-        <View style={styles.navigationContainer}>
+        <FadeInView delay={400} style={styles.navigationContainer}>
           <ThemedButton variant="primary" onPress={complete}>
             Iniciar aventuras
           </ThemedButton>
-        </View>
+        </FadeInView>
       )}
     </ThemedBackground>
   );

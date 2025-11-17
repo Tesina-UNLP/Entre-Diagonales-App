@@ -1,3 +1,4 @@
+import { FadeInView } from "@/components/animations/fade-in-view";
 import Header from "@/components/header";
 import { ThemedBackground } from "@/components/themed-background";
 import { TOKENS } from "@/constants/colors";
@@ -60,25 +61,37 @@ const SecretsScreen = () => {
         </View>
       ) : (
         <>
-          <Header
-            title={"Secretos"}
-            description={"Descubre los secretos de la ciudad"}
-            onBack={() => router.back()}
-          />
+          {/* Header con animación fade-in */}
+          <FadeInView delay={100}>
+            <Header
+              title={"Secretos"}
+              description={"Descubre los secretos de la ciudad"}
+              onBack={() => router.back()}
+            />
+          </FadeInView>
+
           {/* Usamos FlatList en lugar de ScrollView para evitar problemas con listas anidadas */}
           <FlatList
             data={secrets}
             numColumns={3}
-            renderItem={({ item }) => <SecretItemCard secret={item} />}
+            renderItem={({ item, index }) => (
+              // Cada tarjeta aparece con un delay incremental
+              // Como son 3 columnas, limitamos el delay para no hacerlo muy largo
+              <FadeInView delay={300 + Math.min(index * 30, 150)}>
+                <SecretItemCard secret={item} />
+              </FadeInView>
+            )}
             keyExtractor={(item) => item.id.toString()}
-            // Header con la sección de progreso
+            // Header con la sección de progreso animada
             ListHeaderComponent={
-              <View style={styles.headerContainer}>
-                <ProgressSection
-                  obtained={secretsProgress.obtained}
-                  total={secretsProgress.total}
-                />
-              </View>
+              <FadeInView delay={200}>
+                <View style={styles.headerContainer}>
+                  <ProgressSection
+                    obtained={secretsProgress.obtained}
+                    total={secretsProgress.total}
+                  />
+                </View>
+              </FadeInView>
             }
             // Estilos para el contenido y columnas
             contentContainerStyle={styles.content}

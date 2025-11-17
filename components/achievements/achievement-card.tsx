@@ -66,13 +66,7 @@ const AchievementCard = ({
         achievement.achievement.id,
       );
       playSound("success");
-      Toast.show({
-        type: "success",
-        text1: "Logro canjeado correctamente",
-      });
-
       setIsClaiming(new Date().toISOString());
-
       await checkAuthState?.();
     } catch (error) {
       Toast.show({
