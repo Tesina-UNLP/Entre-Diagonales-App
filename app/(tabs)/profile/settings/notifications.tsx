@@ -1,3 +1,4 @@
+import { FadeInView } from "@/components/animations/fade-in-view";
 import Header from "@/components/header";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedText } from "@/components/themed-text";
@@ -137,24 +138,28 @@ const Notifications = () => {
         onBack={() => router.back()}
       />
       <View style={styles.content}>
-        <View style={styles.sectionContainer}>
-          <View style={styles.textContainer}>
-            <ThemedText type="defaultSemiBold">Notificaciones Push</ThemedText>
-            <ThemedText type="default" style={styles.description}>
-              Recibe notificaciones sobre nuevos recorridos y actualizaciones
-            </ThemedText>
+        <FadeInView delay={100}>
+          <View style={styles.sectionContainer}>
+            <View style={styles.textContainer}>
+              <ThemedText type="defaultSemiBold">
+                Notificaciones Push
+              </ThemedText>
+              <ThemedText type="default" style={styles.description}>
+                Recibe notificaciones sobre nuevos recorridos y actualizaciones
+              </ThemedText>
+            </View>
+            {/* Si está cargando, mostramos un spinner, sino el switch */}
+            {isLoading ? (
+              <ActivityIndicator size="small" />
+            ) : (
+              <Switch
+                value={isEnabled}
+                onValueChange={handleToggleNotifications}
+                disabled={isLoading}
+              />
+            )}
           </View>
-          {/* Si está cargando, mostramos un spinner, sino el switch */}
-          {isLoading ? (
-            <ActivityIndicator size="small" />
-          ) : (
-            <Switch
-              value={isEnabled}
-              onValueChange={handleToggleNotifications}
-              disabled={isLoading}
-            />
-          )}
-        </View>
+        </FadeInView>
       </View>
     </ThemedBackground>
   );

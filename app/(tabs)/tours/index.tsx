@@ -1,3 +1,4 @@
+import { FadeInView } from "@/components/animations/fade-in-view";
 import { TourCardSkeleton } from "@/components/skeletons/tour-card-skeleton";
 import { ToursFiltersSkeleton } from "@/components/skeletons/tours-filters-skeleton";
 import { ToursHeaderSkeleton } from "@/components/skeletons/tours-header-skeleton";
@@ -93,75 +94,84 @@ export default function TabTwoScreen() {
 
   const renderHeader = () => (
     <>
-      {/* Header */}
-      <View style={styles.header}>
-        <ThemedText type="title">Explora todos los tours</ThemedText>
-        <ThemedText type="muted">Elige la ruta que deseas comenzar</ThemedText>
-      </View>
+      {/* Header con animación fade-in */}
+      <FadeInView delay={100}>
+        <View style={styles.header}>
+          <ThemedText type="title">Explora todos los tours</ThemedText>
+          <ThemedText type="muted">
+            Elige la ruta que deseas comenzar
+          </ThemedText>
+        </View>
+      </FadeInView>
 
-      {/* Scrolleable horizontal badge selector category */}
-      <View style={styles.filterSection}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.badgeContainer}
-        >
-          {TAGS.map((tag) => (
-            <TouchableOpacity
-              key={tag.id}
-              style={[
-                styles.badge,
-                selectedTag === tag.id && styles.badgeActive,
-              ]}
-              onPress={() => handleFilterByTag(tag.id)}
-            >
-              {cloneElement(tag.icon, {
-                color: selectedTag === tag.id ? TOKENS.background : TOKENS.text,
-              })}
-
-              <ThemedText
-                type="defaultSemiBold"
+      {/* Scrolleable horizontal badge selector category con fade-in */}
+      <FadeInView delay={200}>
+        <View style={styles.filterSection}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.badgeContainer}
+          >
+            {TAGS.map((tag) => (
+              <TouchableOpacity
+                key={tag.id}
                 style={[
-                  styles.badgeText,
-                  selectedTag === tag.id && styles.badgeTextActive,
+                  styles.badge,
+                  selectedTag === tag.id && styles.badgeActive,
                 ]}
+                onPress={() => handleFilterByTag(tag.id)}
               >
-                {tag.label}
-              </ThemedText>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
+                {cloneElement(tag.icon, {
+                  color:
+                    selectedTag === tag.id ? TOKENS.background : TOKENS.text,
+                })}
 
-      {/* Scrolleable horizontal badge selector level */}
-      <View style={[styles.filterSection, { marginBottom: 20 }]}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.badgeContainer}
-        >
-          {LEVELS.map((level) => (
-            <TouchableOpacity
-              key={level.id}
-              style={[
-                styles.badge,
-                selectedLevel === level.id && styles.badgeActive,
-              ]}
-              onPress={() => handleFilterByLevel(level.id)}
-            >
-              <ThemedText
-                type="defaultSemiBold"
+                <ThemedText
+                  type="defaultSemiBold"
+                  style={[
+                    styles.badgeText,
+                    selectedTag === tag.id && styles.badgeTextActive,
+                  ]}
+                >
+                  {tag.label}
+                </ThemedText>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      </FadeInView>
+
+      {/* Scrolleable horizontal badge selector level con fade-in */}
+      <FadeInView delay={300}>
+        <View style={[styles.filterSection, { marginBottom: 20 }]}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.badgeContainer}
+          >
+            {LEVELS.map((level) => (
+              <TouchableOpacity
+                key={level.id}
                 style={[
-                  styles.badgeText,
-                  selectedLevel === level.id && styles.badgeTextActive,
+                  styles.badge,
+                  selectedLevel === level.id && styles.badgeActive,
                 ]}
+                onPress={() => handleFilterByLevel(level.id)}
               >
-                {level.label}
-              </ThemedText>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
+                <ThemedText
+                  type="defaultSemiBold"
+                  style={[
+                    styles.badgeText,
+                    selectedLevel === level.id && styles.badgeTextActive,
+                  ]}
+                >
+                  {level.label}
+                </ThemedText>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      </FadeInView>
     </>
   );
 
@@ -208,20 +218,24 @@ export default function TabTwoScreen() {
         ListHeaderComponent={renderHeader}
         ListFooterComponent={() => <View style={styles.bottomSpacer}></View>}
         ListEmptyComponent={<EmptyComponent />}
-        renderItem={({ item }) => (
-          <TourCard
-            title={item.name}
-            description={item.description || ""}
-            image={
-              item.spots[0].spot.image_urls[0] ||
-              "https://images.unsplash.com/photo-1600591832245-9a9f49ec6f5a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bGElMjBwbGF0YXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=400"
-            }
-            id={item.id.toString()}
-            tag={item.tag}
-            spotsCount={item.spots.length}
-            progress={item.progress}
-            started={item.started}
-          />
+        renderItem={({ item, index }) => (
+          // Cada card aparece con un delay incremental
+          // Los primeros 3 cards tienen delays más notables, luego se estabiliza
+          <FadeInView delay={400 + Math.min(index * 50, 200)}>
+            <TourCard
+              title={item.name}
+              description={item.description || ""}
+              image={
+                item.spots[0].spot.image_urls[0] ||
+                "https://images.unsplash.com/photo-1600591832245-9a9f49ec6f5a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bGElMjBwbGF0YXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=400"
+              }
+              id={item.id.toString()}
+              tag={item.tag}
+              spotsCount={item.spots.length}
+              progress={item.progress}
+              started={item.started}
+            />
+          </FadeInView>
         )}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
@@ -232,10 +246,12 @@ export default function TabTwoScreen() {
 
 // Componente que se muestra cuando NO hay rutas después de cargar
 const EmptyComponent = () => (
-  <View style={styles.emptyContainer}>
-    <Image source={emptyImage} style={styles.emptyImage} />
-    <ThemedText type="defaultSemiBold">No hay rutas disponibles</ThemedText>
-  </View>
+  <FadeInView delay={400}>
+    <View style={styles.emptyContainer}>
+      <Image source={emptyImage} style={styles.emptyImage} />
+      <ThemedText type="defaultSemiBold">No hay rutas disponibles</ThemedText>
+    </View>
+  </FadeInView>
 );
 
 const styles = StyleSheet.create({

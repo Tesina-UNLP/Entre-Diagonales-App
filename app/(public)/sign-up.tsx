@@ -1,3 +1,4 @@
+import { FadeInView } from "@/components/animations/fade-in-view";
 import { ExternalLink } from "@/components/external-link";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedButton } from "@/components/themed-button";
@@ -121,20 +122,20 @@ const SignUp = () => {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
       >
-        <View style={styles.backButtonContainer}>
+        <FadeInView delay={100} style={styles.backButtonContainer}>
           <TouchableOpacity onPress={() => back()}>
             <MaterialIcons name="arrow-back" size={24} color={TOKENS.muted} />
           </TouchableOpacity>
-        </View>
-        <View style={styles.titleContainer}>
+        </FadeInView>
+        <FadeInView delay={200} style={styles.titleContainer}>
           <ThemedText type="title">Crear una cuenta</ThemedText>
           <View style={styles.subtitleWrapper}>
             <ThemedText type="muted">
               Unete a la red mas inversiva que hay de exploracion en La Plata
             </ThemedText>
           </View>
-        </View>
-        <View style={styles.formContainer}>
+        </FadeInView>
+        <FadeInView delay={300} style={styles.formContainer}>
           <Controller
             control={control}
             name="email"
@@ -236,8 +237,8 @@ const SignUp = () => {
               Iniciar Sesion
             </ThemedButton>
           </View>
-        </View>
-        <View style={styles.termsContainer}>
+        </FadeInView>
+        <FadeInView delay={400} style={styles.termsContainer}>
           <ThemedText type="muted" style={styles.termsText}>
             Al continuar estaras de acuerdo con los{" "}
             {/* @ts-ignore: Ignorar error de tipos del path generado por expo-router */}
@@ -254,10 +255,12 @@ const SignUp = () => {
               <ThemedText type="link">Politica de Privacidad</ThemedText>.
             </ExternalLink>
           </ThemedText>
-        </View>
-        <View style={styles.divider} />
+        </FadeInView>
+        <FadeInView delay={500} style={styles.divider}>
+          <View style={styles.divider} />
+        </FadeInView>
 
-        <View style={styles.googleButtonContainer}>
+        <FadeInView delay={600} style={styles.googleButtonContainer}>
           <ThemedButton variant="secondary" onPress={handleGoogleSignIn}>
             <View style={styles.googleButtonContent}>
               <FontAwesome name="google" size={24} color={TOKENS.primary} />
@@ -271,16 +274,18 @@ const SignUp = () => {
               </ThemedText>
             </View>
           </ThemedButton>
-        </View>
-        <ThemedText type="muted">
-          Ya tienes una cuenta?{" "}
-          <ThemedText
-            type="link"
-            onPress={() => router.navigate("/(public)/sign-in")}
-          >
-            Inicia Sesion
+        </FadeInView>
+        <FadeInView delay={700}>
+          <ThemedText type="muted">
+            Ya tienes una cuenta?{" "}
+            <ThemedText
+              type="link"
+              onPress={() => router.navigate("/(public)/sign-in")}
+            >
+              Inicia Sesion
+            </ThemedText>
           </ThemedText>
-        </ThemedText>
+        </FadeInView>
       </KeyboardAvoidingView>
     </ThemedBackground>
   );

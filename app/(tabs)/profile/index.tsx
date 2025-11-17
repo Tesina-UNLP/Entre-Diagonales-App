@@ -1,3 +1,4 @@
+import { FadeInView } from "@/components/animations/fade-in-view";
 import AchievementsProfile from "@/components/profile/achievements-profile";
 import HeaderProfile from "@/components/profile/header-profile";
 import SecretsProfile from "@/components/profile/secrets-profile";
@@ -85,18 +86,34 @@ export default function ProfileScreen() {
 
   return (
     <ThemedBackground style={styles.container} scrollable>
-      <HeaderProfile />
-      <StatsProfile />
+      {/* Cada sección del perfil aparece con un efecto fade-in escalonado */}
+      <FadeInView delay={100}>
+        <HeaderProfile />
+      </FadeInView>
+
+      <FadeInView delay={200}>
+        <StatsProfile />
+      </FadeInView>
+
       {/* Pasamos los datos y el estado de loading a cada componente hijo */}
-      <SecretsProfile
-        data={profileData.secrets}
-        loading={profileData.loading}
-      />
-      <ToursProfile data={profileData.tours} loading={profileData.loading} />
-      <AchievementsProfile
-        data={profileData.achievements}
-        loading={profileData.loading}
-      />
+      <FadeInView delay={300}>
+        <SecretsProfile
+          data={profileData.secrets}
+          loading={profileData.loading}
+        />
+      </FadeInView>
+
+      <FadeInView delay={400}>
+        <ToursProfile data={profileData.tours} loading={profileData.loading} />
+      </FadeInView>
+
+      <FadeInView delay={500}>
+        <AchievementsProfile
+          data={profileData.achievements}
+          loading={profileData.loading}
+        />
+      </FadeInView>
+
       <View style={styles.bottomSpacer}></View>
     </ThemedBackground>
   );

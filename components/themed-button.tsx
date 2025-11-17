@@ -254,11 +254,11 @@ const styles = StyleSheet.create({
   // Estilo de elevación sutil para los botones
   shadowElevation: {
     // Sombras para iOS
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    // shadowColor: "#000",
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 3,
     // Elevación para Android
-    elevation: 2,
+    // elevation: 2,
   },
 });

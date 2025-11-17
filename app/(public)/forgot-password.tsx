@@ -1,3 +1,4 @@
+import { FadeInView } from "@/components/animations/fade-in-view";
 import { ExternalLink } from "@/components/external-link";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedButton } from "@/components/themed-button";
@@ -64,20 +65,20 @@ const ForgotPassword = () => {
 
   return (
     <ThemedBackground style={styles.container}>
-      <View style={styles.header}>
+      <FadeInView delay={100} style={styles.header}>
         <TouchableOpacity onPress={() => back()}>
           <MaterialIcons name="arrow-back" size={24} color={TOKENS.muted} />
         </TouchableOpacity>
-      </View>
-      <View style={styles.content}>
+      </FadeInView>
+      <FadeInView delay={200} style={styles.content}>
         <ThemedText type="title">Olvidaste tu contraseña?</ThemedText>
         <View style={{ maxWidth: 300 }}>
           <ThemedText type="muted">
             Te enviaremos un enlace para restablecerla
           </ThemedText>
         </View>
-      </View>
-      <View style={styles.inputContainer}>
+      </FadeInView>
+      <FadeInView delay={300} style={styles.inputContainer}>
         <Controller
           control={control}
           name="email"
@@ -109,9 +110,9 @@ const ForgotPassword = () => {
             Enviar enlace
           </ThemedButton>
         </View>
-      </View>
+      </FadeInView>
 
-      <View style={styles.securityContainer}>
+      <FadeInView delay={400} style={styles.securityContainer}>
         <View style={styles.securityHeader}>
           <MaterialIcons name="security" size={24} color={TOKENS.warning} />
           <ThemedText type="subtitle">Seguridad</ThemedText>
@@ -120,11 +121,13 @@ const ForgotPassword = () => {
           Por tu seguridad, no revelaremos si el correo esta registrado o no. Si
           no recibes el email en 5 minutos, revisa tu carpeta de spam.
         </ThemedText>
-      </View>
+      </FadeInView>
       {/* @ts-ignore: Ignorar error de tipos del path generado por expo-router */}
-      <ExternalLink href={process.env.EXPO_PUBLIC_WEB_FRONTEND + "/help"}>
-        <ThemedText type="default">Necesitas ayuda?</ThemedText>
-      </ExternalLink>
+      <FadeInView delay={500}>
+        <ExternalLink href={process.env.EXPO_PUBLIC_WEB_FRONTEND + "/help"}>
+          <ThemedText type="default">Necesitas ayuda?</ThemedText>
+        </ExternalLink>
+      </FadeInView>
     </ThemedBackground>
   );
 };

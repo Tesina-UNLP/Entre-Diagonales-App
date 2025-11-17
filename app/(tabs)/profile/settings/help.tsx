@@ -1,3 +1,4 @@
+import { FadeInView } from "@/components/animations/fade-in-view";
 import Header from "@/components/header";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedButton } from "@/components/themed-button";
@@ -52,55 +53,63 @@ const Help = () => {
       />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.searchContainer}>
-          <TextInput
-            placeholder="Buscar"
-            style={styles.searchInput}
-            placeholderTextColor={TOKENS.muted}
-            value={search}
-            onChangeText={setSearch}
-          />
-          <Ionicons name="search" size={18} color={TOKENS.muted} />
-        </View>
-
-        {filteredSections.map((section) => (
-          <View key={section.question} style={styles.sectionContainer}>
-            <ThemedText type="defaultSemiBold">{section.question}</ThemedText>
-            <ThemedText type="muted">{section.answer}</ThemedText>
+        <FadeInView delay={100}>
+          <View style={styles.searchContainer}>
+            <TextInput
+              placeholder="Buscar"
+              style={styles.searchInput}
+              placeholderTextColor={TOKENS.muted}
+              value={search}
+              onChangeText={setSearch}
+            />
+            <Ionicons name="search" size={18} color={TOKENS.muted} />
           </View>
+        </FadeInView>
+
+        {filteredSections.map((section, index) => (
+          <FadeInView key={section.question} delay={200 + 100 * index}>
+            <View style={styles.sectionContainer}>
+              <ThemedText type="defaultSemiBold">{section.question}</ThemedText>
+              <ThemedText type="muted">{section.answer}</ThemedText>
+            </View>
+          </FadeInView>
         ))}
 
         {filteredSections.length === 0 && (
-          <View style={styles.noResultsContainer}>
-            <ThemedText type="muted">No se encontraron resultados</ThemedText>
-          </View>
+          <FadeInView delay={200}>
+            <View style={styles.noResultsContainer}>
+              <ThemedText type="muted">No se encontraron resultados</ThemedText>
+            </View>
+          </FadeInView>
         )}
 
-        <View style={styles.contactContainer}>
-          <Ionicons name="headset" size={24} color={TOKENS.accent} />
-          <ThemedText type="subtitle">¿Necesitas mas ayuda?</ThemedText>
-          <ThemedText type="muted" style={styles.contactDescription}>
-            No encontraste la respuesta que buscabas? Contacta a nuestro equipo
-            de soporte.
-          </ThemedText>
-          <ThemedButton
-            variant="accent"
-            size="small"
-            onPress={() =>
-              Linking.openURL("mailto:entrediagonalesunlp@gmail.com")
-            }
-          >
-            <View style={styles.contactButtonContent}>
-              <Ionicons name="mail" size={18} color={TOKENS.primaryHover} />
-              <ThemedText
-                type="defaultSemiBold"
-                style={styles.contactButtonText}
-              >
-                Contactar Soporte
-              </ThemedText>
-            </View>
-          </ThemedButton>
-        </View>
+        <FadeInView delay={800}>
+          <View style={styles.contactContainer}>
+            <Ionicons name="headset" size={24} color={TOKENS.accent} />
+            <ThemedText type="subtitle">¿Necesitas mas ayuda?</ThemedText>
+            <ThemedText type="muted" style={styles.contactDescription}>
+              No encontraste la respuesta que buscabas? Contacta a nuestro
+              equipo de soporte.
+            </ThemedText>
+            <ThemedButton
+              variant="accent"
+              size="small"
+              onPress={() =>
+                Linking.openURL("mailto:entrediagonalesunlp@gmail.com")
+              }
+            >
+              <View style={styles.contactButtonContent}>
+                <Ionicons name="mail" size={18} color={TOKENS.primaryHover} />
+                <ThemedText
+                  type="defaultSemiBold"
+                  style={styles.contactButtonText}
+                >
+                  Contactar Soporte
+                </ThemedText>
+              </View>
+            </ThemedButton>
+          </View>
+        </FadeInView>
 
         <View style={styles.bottomSpacer}></View>
       </ScrollView>

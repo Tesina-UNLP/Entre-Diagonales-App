@@ -141,7 +141,7 @@ export default function ScannerScreen() {
       Toast.show({
         type: "error",
         text1: "Error al procesar",
-        text2: "No se pudo completar la acción. Por favor, intenta de nuevo.",
+        text2: (error as any).message || "Por favor, intenta de nuevo.",
       });
 
       // Ocultamos el modal de cargando para que el usuario pueda reintentar

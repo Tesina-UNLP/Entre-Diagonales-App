@@ -1,3 +1,4 @@
+import { FadeInView } from "@/components/animations/fade-in-view";
 import AchievementCard from "@/components/achievements/achievement-card";
 import Header from "@/components/header";
 import { ThemedBackground } from "@/components/themed-background";
@@ -95,39 +96,48 @@ export default function AchievementsScreen() {
 
   return (
     <ThemedBackground style={styles.container} safeArea={false}>
-      <Header
-        title={"Logros"}
-        description={"Insignias obtenidas explorando"}
-        onBack={() => router.back()}
-      />
-      <View style={styles.filterSection}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.badgeContainer}
-        >
-          {ACHIEVEMENT_TAGS.map((tag) => (
-            <TouchableOpacity
-              key={tag.id}
-              style={[
-                styles.badge,
-                selectedTag === tag.id && styles.badgeActive,
-              ]}
-              onPress={() => handleFilterByTag(tag.id)}
-            >
-              <ThemedText
-                type="defaultSemiBold"
+      {/* Header con animación fade-in */}
+      <FadeInView delay={100}>
+        <Header
+          title={"Logros"}
+          description={"Insignias obtenidas explorando"}
+          onBack={() => router.back()}
+        />
+      </FadeInView>
+
+      {/* Filtros con animación fade-in */}
+      <FadeInView delay={200}>
+        <View style={styles.filterSection}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.badgeContainer}
+          >
+            {ACHIEVEMENT_TAGS.map((tag) => (
+              <TouchableOpacity
+                key={tag.id}
                 style={[
-                  styles.badgeText,
-                  selectedTag === tag.id && styles.badgeTextActive,
+                  styles.badge,
+                  selectedTag === tag.id && styles.badgeActive,
                 ]}
+                onPress={() => handleFilterByTag(tag.id)}
               >
-                {tag.label}
-              </ThemedText>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
+                <ThemedText
+                  type="defaultSemiBold"
+                  style={[
+                    styles.badgeText,
+                    selectedTag === tag.id && styles.badgeTextActive,
+                  ]}
+                >
+                  {tag.label}
+                </ThemedText>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      </FadeInView>
+
+      {/* Lista de logros con animación escalonada */}
       <FlatList
         data={achievements}
         refreshControl={
@@ -142,8 +152,11 @@ export default function AchievementsScreen() {
         ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
         ListFooterComponent={() => <View style={styles.bottomSpacer}></View>}
         style={styles.listContainer}
-        renderItem={({ item }) => (
-          <AchievementCard user={user!} achievement={item} />
+        renderItem={({ item, index }) => (
+          // Cada logro aparece con un delay incremental
+          <FadeInView delay={300 + Math.min(index * 50, 200)}>
+            <AchievementCard user={user!} achievement={item} />
+          </FadeInView>
         )}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}

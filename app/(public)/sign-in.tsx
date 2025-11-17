@@ -1,3 +1,4 @@
+import { FadeInView } from "@/components/animations/fade-in-view";
 import LogoWhite from "@/components/icons/logo-white";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedButton } from "@/components/themed-button";
@@ -108,20 +109,20 @@ const SignIn = () => {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
       >
-        <View style={styles.header}>
+        <FadeInView delay={100} style={styles.header}>
           <LogoWhite />
           <ThemedText type="subtitle">Entre Diagonales</ThemedText>
-        </View>
-        <View style={styles.titleContainer}>
+        </FadeInView>
+        <FadeInView delay={200} style={styles.titleContainer}>
           <ThemedText type="title">Ingresa a tu cuenta</ThemedText>
           <View style={styles.subtitleWrapper}>
             <ThemedText type="muted">
               Empieza a explorar la ciudad de una forma diferente
             </ThemedText>
           </View>
-        </View>
+        </FadeInView>
         {/* form */}
-        <View style={styles.formContainer}>
+        <FadeInView delay={300} style={styles.formContainer}>
           <Controller
             control={control}
             name="email"
@@ -197,10 +198,12 @@ const SignIn = () => {
               Iniciar Sesion
             </ThemedButton>
           </View>
-        </View>
-        <View style={styles.divider} />
+        </FadeInView>
+        <FadeInView delay={400} style={styles.divider}>
+          <View style={styles.divider} />
+        </FadeInView>
 
-        <View style={styles.googleButtonContainer}>
+        <FadeInView delay={500} style={styles.signInButtonContainer}>
           <ThemedButton variant="secondary" onPress={handleGoogleSignIn}>
             <View style={styles.googleButtonContent}>
               <FontAwesome name="google" size={24} color={TOKENS.primary} />
@@ -214,16 +217,18 @@ const SignIn = () => {
               </ThemedText>
             </View>
           </ThemedButton>
-        </View>
-        <ThemedText type="muted">
-          No tienes una cuenta?{" "}
-          <ThemedText
-            type="link"
-            onPress={() => router.navigate("/(public)/sign-up")}
-          >
-            Registrate
+        </FadeInView>
+        <FadeInView delay={600}>
+          <ThemedText type="muted">
+            No tienes una cuenta?{" "}
+            <ThemedText
+              type="link"
+              onPress={() => router.navigate("/(public)/sign-up")}
+            >
+              Registrate
+            </ThemedText>
           </ThemedText>
-        </ThemedText>
+        </FadeInView>
       </KeyboardAvoidingView>
     </ThemedBackground>
   );

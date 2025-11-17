@@ -1,3 +1,4 @@
+import { FadeInView } from "@/components/animations/fade-in-view";
 import Logo from "@/components/icons/logo";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedButton } from "@/components/themed-button";
@@ -11,18 +12,26 @@ const Welcome = () => {
   return (
     <ThemedBackground style={styles.container}>
       <View style={styles.logoContainer}>
-        <Logo />
-        <ThemedText type="title">Entre Diagonales</ThemedText>
-        <ThemedText type="subtitle" style={styles.subtitle}>
-          Explora la historia de La Plata
-        </ThemedText>
-        <ThemedText type="muted" style={styles.description}>
-          Descubre monumentos, desbloquea historia y gana recompensas mientras
-          exploras las singulares calles diagonales de la ciudad.
-        </ThemedText>
+        <FadeInView delay={100}>
+          <Logo />
+        </FadeInView>
+        <FadeInView delay={200}>
+          <ThemedText type="title">Entre Diagonales</ThemedText>
+        </FadeInView>
+        <FadeInView delay={300}>
+          <ThemedText type="subtitle" style={styles.subtitle}>
+            Explora la historia de La Plata
+          </ThemedText>
+        </FadeInView>
+        <FadeInView delay={400}>
+          <ThemedText type="muted" style={styles.description}>
+            Descubre monumentos, desbloquea historia y gana recompensas mientras
+            exploras las singulares calles diagonales de la ciudad.
+          </ThemedText>
+        </FadeInView>
       </View>
 
-      <View style={styles.buttonsContainer}>
+      <FadeInView delay={500} style={styles.buttonsContainer}>
         <ThemedButton
           variant="gold"
           onPress={() => router.navigate("/(public)/sign-in")}
@@ -35,7 +44,7 @@ const Welcome = () => {
         >
           Aun no tengo una cuenta
         </ThemedButton>
-      </View>
+      </FadeInView>
     </ThemedBackground>
   );
 };

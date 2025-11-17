@@ -1,3 +1,4 @@
+import { FadeInView } from "@/components/animations/fade-in-view";
 import Header from "@/components/header";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedText } from "@/components/themed-text";
@@ -50,35 +51,38 @@ const About = () => {
         onBack={() => router.back()}
       />
 
-      <View style={styles.logoContainer}>
-        <Image source={logo} style={styles.logo} />
-        <ThemedText type="defaultSemiBold">Entre Diagonales</ThemedText>
-        <ThemedText type="defaultSemiBold">Versión {version}</ThemedText>
-      </View>
+      <FadeInView delay={100}>
+        <View style={styles.logoContainer}>
+          <Image source={logo} style={styles.logo} />
+          <ThemedText type="defaultSemiBold">Entre Diagonales</ThemedText>
+          <ThemedText type="defaultSemiBold">Versión {version}</ThemedText>
+        </View>
+      </FadeInView>
 
       <View style={styles.content}>
-        {sections.map((section) => (
-          <TouchableOpacity
-            key={section.title}
-            onPress={() => Linking.openURL(section.href as string)}
-            style={styles.sectionContainer}
-          >
-            <View style={styles.sectionLeft}>
-              <Ionicons
-                name={section.icon as any} // Cast to any to fix type error, but ideally fix the icon typing upstream
-                size={24}
-                color={TOKENS.text}
-              />
-              <ThemedText type="defaultSemiBold">{section.title}</ThemedText>
-            </View>
-            <View style={styles.sectionRight}>
-              <Ionicons
-                name="chevron-forward-outline"
-                size={20}
-                color={TOKENS.text}
-              />
-            </View>
-          </TouchableOpacity>
+        {sections.map((section, index) => (
+          <FadeInView key={section.title} delay={200 + 100 * index}>
+            <TouchableOpacity
+              onPress={() => Linking.openURL(section.href as string)}
+              style={styles.sectionContainer}
+            >
+              <View style={styles.sectionLeft}>
+                <Ionicons
+                  name={section.icon as any} // Cast to any to fix type error, but ideally fix the icon typing upstream
+                  size={24}
+                  color={TOKENS.text}
+                />
+                <ThemedText type="defaultSemiBold">{section.title}</ThemedText>
+              </View>
+              <View style={styles.sectionRight}>
+                <Ionicons
+                  name="chevron-forward-outline"
+                  size={20}
+                  color={TOKENS.text}
+                />
+              </View>
+            </TouchableOpacity>
+          </FadeInView>
         ))}
       </View>
     </ThemedBackground>

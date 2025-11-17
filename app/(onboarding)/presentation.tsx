@@ -1,3 +1,4 @@
+import { FadeInView } from "@/components/animations/fade-in-view";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedButton } from "@/components/themed-button";
 import { ThemedText } from "@/components/themed-text";
@@ -69,7 +70,7 @@ const Presentation = () => {
 
   return (
     <ThemedBackground style={styles.container}>
-      <View style={styles.header}>
+      <FadeInView delay={100} style={styles.header}>
         <View style={styles.actionBack}>
           {step.id > 1 && (
             <TouchableOpacity onPress={() => setCurrentStep(currentStep - 1)}>
@@ -92,30 +93,32 @@ const Presentation = () => {
         <TouchableOpacity style={styles.actionNext} onPress={handleSkip}>
           <ThemedText type="default">Saltar</ThemedText>
         </TouchableOpacity>
-      </View>
+      </FadeInView>
       <View style={styles.content}>
-        <Image
-          source={presentationImages[step.id]}
-          style={styles.image}
-          resizeMode="contain"
-        />
-        <View style={styles.textContainer}>
+        <FadeInView delay={200}>
+          <Image
+            source={presentationImages[step.id]}
+            style={styles.image}
+            resizeMode="contain"
+          />
+        </FadeInView>
+        <FadeInView delay={300} style={styles.textContainer}>
           <ThemedText type="title" style={styles.title}>
             {step.title}
           </ThemedText>
           <ThemedText type="muted" style={styles.description}>
             {step.description}
           </ThemedText>
-        </View>
+        </FadeInView>
       </View>
 
-      <View style={styles.navigationContainer}>
+      <FadeInView delay={400} style={styles.navigationContainer}>
         <ThemedButton variant="primary" onPress={handleNext}>
           {currentStep === presentationSteps.length - 1
             ? "Elegir mi personaje"
             : "Siguiente"}
         </ThemedButton>
-      </View>
+      </FadeInView>
     </ThemedBackground>
   );
 };

@@ -1,3 +1,4 @@
+import { FadeInView } from "@/components/animations/fade-in-view";
 import { ActiveTourSkeleton } from "@/components/skeletons/active-tour-skeleton";
 import { HeaderHomeSkeleton } from "@/components/skeletons/header-home-skeleton";
 import { HorizontalToursSkeleton } from "@/components/skeletons/horizontal-tours-skeleton";
@@ -77,11 +78,32 @@ export default function HomeScreen() {
         </>
       ) : (
         <>
-          {isWeatherLoading ? <HeaderHomeSkeleton /> : <HeaderHome />}
-          <MessageOfTheDay />
-          <ProgressionLevel />
-          <ActiveTour currentRoute={currentRoute} />
-          <HorizontalTourList routes={routes} />
+          {/* Si está cargando el clima, muestra el skeleton sin animación */}
+          {isWeatherLoading ? (
+            <HeaderHomeSkeleton />
+          ) : (
+            // El HeaderHome aparece primero con un pequeño delay
+            <FadeInView delay={100}>
+              <HeaderHome />
+            </FadeInView>
+          )}
+
+          {/* Cada componente aparece con un delay incremental para crear un efecto escalonado */}
+          <FadeInView delay={200}>
+            <MessageOfTheDay />
+          </FadeInView>
+
+          <FadeInView delay={300}>
+            <ProgressionLevel />
+          </FadeInView>
+
+          <FadeInView delay={400}>
+            <ActiveTour currentRoute={currentRoute} />
+          </FadeInView>
+
+          <FadeInView delay={500}>
+            <HorizontalTourList routes={routes} />
+          </FadeInView>
         </>
       )}
       <View style={styles.bottomSpacer}></View>
