@@ -121,7 +121,7 @@ const QuizPage = () => {
       </View>
 
       {/* Botones de acción */}
-      <FadeInView delay={400}>
+      <FadeInView delay={400} style={styles.actionsContainer}>
         <QuizActions
           selectedAnswer={selectedAnswer}
           correctAnswer={correctAnswer}
@@ -157,6 +157,12 @@ const styles = StyleSheet.create({
   powerupsText: {
     flex: 1,
     textAlign: "center",
+  },
+  actionsContainer: {
+    width: "100%",
+    gap: 10,
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 });
 

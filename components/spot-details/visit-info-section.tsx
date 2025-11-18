@@ -68,6 +68,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12, // Espacio entre el ícono y el texto
+    maxWidth: "80%",
   },
   infoText: {
     fontSize: 14,
