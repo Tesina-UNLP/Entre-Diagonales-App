@@ -186,3 +186,14 @@ export type RankingApiResponse = {
   position?: number | null;
   display_name: string;
 };
+
+export type RemainingAnswersApiResponse = {
+  id: number;
+  name: string;
+};
+
+export type PowerUp5050ApiResponse = {
+  remaining_answers: RemainingAnswersApiResponse[];
+  coins_remaining: number;
+  coins_spent: string;
+};

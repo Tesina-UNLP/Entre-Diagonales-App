@@ -1,4 +1,4 @@
-import { QuizApiResponse } from "@/types";
+import { QuizApiResponse, RemainingAnswersApiResponse } from "@/types";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { QuizAnswer } from "./quiz-answer";
@@ -23,6 +23,7 @@ interface QuizAnswersListProps {
   selectedAnswer: number | null;
   correctAnswer: number | null;
   onAnswerPress: (answerId: number) => void;
+  remainingAnswers: RemainingAnswersApiResponse[] | null;
 }
 
 export const QuizAnswersList: React.FC<QuizAnswersListProps> = ({
@@ -30,6 +31,7 @@ export const QuizAnswersList: React.FC<QuizAnswersListProps> = ({
   selectedAnswer,
   correctAnswer,
   onAnswerPress,
+  remainingAnswers,
 }) => {
   return (
     <View style={styles.container}>
@@ -43,6 +45,13 @@ export const QuizAnswersList: React.FC<QuizAnswersListProps> = ({
         // Determinar si ya se verificó la respuesta
         const isAnswered = correctAnswer !== null;
 
+        // Determinar si esta respuesta fue eliminada por el powerup 50/50
+        // Si remainingAnswers tiene elementos, solo mostramos las que están en esa lista
+        const isEliminated =
+          !!remainingAnswers &&
+          remainingAnswers.length > 0 &&
+          !remainingAnswers.some((remaining) => remaining.id === answer.id);
+
         return (
           <QuizAnswer
             key={answer.id}
@@ -52,6 +61,7 @@ export const QuizAnswersList: React.FC<QuizAnswersListProps> = ({
             isCorrect={isCorrect}
             isIncorrect={isIncorrect}
             isAnswered={isAnswered}
+            isEliminated={isEliminated}
             onPress={() => onAnswerPress(answer.id)}
           />
         );

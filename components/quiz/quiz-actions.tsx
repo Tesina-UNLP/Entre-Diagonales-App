@@ -58,7 +58,11 @@ export const QuizActions: React.FC<QuizActionsProps> = ({
       <ThemedButton
         variant="secondary"
         size="small"
-        onPress={() => router.back()}
+        onPress={() =>
+          router.navigate({
+            pathname: "/(tabs)/tours",
+          })
+        }
         style={styles.button}
       >
         <FontAwesome name="home" size={16} color={TOKENS.primary} />
