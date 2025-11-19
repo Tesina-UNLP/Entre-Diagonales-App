@@ -6,11 +6,13 @@ import {
   QuizQuestion,
 } from "@/components/quiz";
 import { ThemedBackground } from "@/components/themed-background";
+import { ThemedButton } from "@/components/themed-button";
 import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
 import { useHaptics } from "@/hooks/use-haptics";
 import { api } from "@/libs/api";
-import { QuizApiResponse } from "@/types";
+import { QuizApiResponse, RemainingAnswersApiResponse } from "@/types";
+import { FontAwesome } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
@@ -23,7 +25,10 @@ const QuizPage = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [correctAnswer, setCorrectAnswer] = useState<number | null>(null);
-  const { playSound } = useHaptics();
+  const [remainingAnswers, setRemainingAnswers] = useState<
+    RemainingAnswersApiResponse[] | null
+  >(null);
+  const { playSound, haptic } = useHaptics();
 
   const handleGetQuiz = useCallback(async () => {
     setLoading(true);
@@ -83,6 +88,18 @@ const QuizPage = () => {
     }
   };
 
+  const handleUsePowerUp5050 = async () => {
+    if (user) {
+      const response = await api.usePowerUp5050(user.access, parseInt(idStr));
+
+      if (response) {
+        // Activar vibración y sonido una sola vez cuando se eliminan las respuestas
+        await haptic("heavy"); // Vibración fuerte para indicar eliminación
+        setRemainingAnswers(response.remaining_answers);
+      }
+    }
+  };
+
   if (loading || !quiz) {
     return (
       <ThemedBackground style={styles.container}>
@@ -115,13 +132,32 @@ const QuizPage = () => {
               selectedAnswer={selectedAnswer}
               correctAnswer={correctAnswer}
               onAnswerPress={handleAnswer}
+              remainingAnswers={remainingAnswers}
             />
+          </FadeInView>
+        )}
+
+        {/* Botón para usar el power up 5050 */}
+        {user?.coins && user.coins >= 400 && (
+          <FadeInView delay={400}>
+            <ThemedButton
+              variant="primary"
+              style={styles.powerupsContainer}
+              onPress={handleUsePowerUp5050}
+              disabled={remainingAnswers !== null}
+            >
+              <FontAwesome
+                name="bomb"
+                size={16}
+                color={remainingAnswers !== null ? TOKENS.text : TOKENS.muted}
+              />
+            </ThemedButton>
           </FadeInView>
         )}
       </View>
 
       {/* Botones de acción */}
-      <FadeInView delay={400} style={styles.actionsContainer}>
+      <FadeInView delay={500} style={styles.actionsContainer}>
         <QuizActions
           selectedAnswer={selectedAnswer}
           correctAnswer={correctAnswer}
@@ -146,12 +182,12 @@ const styles = StyleSheet.create({
   powerupsContainer: {
     flexDirection: "row",
     paddingVertical: 14,
-    paddingHorizontal: 18,
+    paddingHorizontal: 14,
     alignItems: "center",
     backgroundColor: TOKENS.cardBackground,
     borderRadius: 18,
     gap: 20,
-    width: 85,
+    width: 70,
     justifyContent: "center",
   },
   powerupsText: {
