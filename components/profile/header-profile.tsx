@@ -29,7 +29,7 @@ const HeaderHome = () => {
           </ThemedText>
           <View style={styles.headerLocation}>
             <View style={styles.headerIconContainer}>
-              <GemIcon height={35} width={35} />
+              <GemIcon height={30} width={30} />
               <ThemedText type="default">{user?.gems}</ThemedText>
             </View>
             <View style={styles.headerIconContainer}>
@@ -88,6 +88,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 3,
+    backgroundColor: TOKENS.primary + "60",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 12,
   },
   avatar: {
     width: 64,

@@ -34,7 +34,7 @@ export const TourRewards = ({ xp, coins }: TourRewardsProps) => {
 
       {/* Sección de monedas */}
       <View style={styles.rewardsItem}>
-        <CoinIcon height={40} width={40} />
+        <CoinIcon height={30} width={30} />
         <ThemedText type="default" style={styles.valueText}>
           {" "}
           {coins}
@@ -55,17 +55,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 10,
+    gap: 5,
   },
   xpText: {
     color: TOKENS.accent,
-    fontSize: 40,
+    fontSize: 28,
+    height: 30,
+    lineHeight: 30,
+    textAlignVertical: "center",
   },
   valueText: {
-    fontSize: 24,
+    fontSize: 28,
   },
   coinImage: {
-    width: 40,
-    height: 40,
+    width: 30,
+    height: 30,
   },
 });
