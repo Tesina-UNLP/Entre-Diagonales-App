@@ -3,6 +3,7 @@ import {
   FeedbackApiData,
   IndividualSpotApiResponse,
   LevelApiResponse,
+  PowerUp5050ApiResponse,
   QuizApiResponse,
   RankingApiResponse,
   SecretItemApiResponse,
@@ -588,5 +589,28 @@ export const api = {
     }
 
     return data as RankingApiResponse[];
+  },
+
+  usePowerUp5050: async (
+    token: string,
+    id: number,
+  ): Promise<PowerUp5050ApiResponse> => {
+    const response = await fetch(`${apiBaseUrl}/quizzes/${id}/powerup/5050/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Using power up 5050 failed";
+      throw new Error(message);
+    }
+    return data as PowerUp5050ApiResponse;
   },
 };

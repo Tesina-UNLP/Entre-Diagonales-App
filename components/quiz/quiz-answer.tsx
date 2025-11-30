@@ -16,6 +16,7 @@ import { StyleSheet, TouchableOpacity } from "react-native";
  * @param isCorrect - Si esta es la respuesta correcta
  * @param isIncorrect - Si esta respuesta fue seleccionada pero es incorrecta
  * @param isAnswered - Si el quiz ya fue respondido (deshabilita la interacción)
+ * @param isEliminated - Si esta respuesta fue eliminada por el powerup 50/50
  * @param onPress - Función a ejecutar cuando se presiona la respuesta
  */
 interface QuizAnswerProps {
@@ -25,6 +26,7 @@ interface QuizAnswerProps {
   isCorrect: boolean;
   isIncorrect: boolean;
   isAnswered: boolean;
+  isEliminated?: boolean; // Nueva prop para el powerup 50/50
   onPress: () => void;
 }
 
@@ -35,6 +37,7 @@ export const QuizAnswer: React.FC<QuizAnswerProps> = ({
   isCorrect,
   isIncorrect,
   isAnswered,
+  isEliminated = false,
   onPress,
 }) => {
   return (
@@ -47,12 +50,22 @@ export const QuizAnswer: React.FC<QuizAnswerProps> = ({
         isCorrect && isAnswered && styles.correct,
         // Mostrar fondo rojo si es incorrecta
         isIncorrect && styles.incorrect,
+        // Aplicar estilo de eliminada (opacidad reducida)
+        isEliminated && styles.eliminated,
       ]}
       onPress={onPress}
-      disabled={isAnswered} // Deshabilitar después de verificar
+      disabled={isAnswered || isEliminated} // Deshabilitar después de verificar o si está eliminada
     >
-      <ThemedText type="defaultSemiBold">{letter}</ThemedText>
-      <ThemedText type="defaultSemiBold" style={styles.text}>
+      <ThemedText
+        type="defaultSemiBold"
+        style={isEliminated && styles.eliminatedText}
+      >
+        {letter}
+      </ThemedText>
+      <ThemedText
+        type="defaultSemiBold"
+        style={[styles.text, isEliminated && styles.eliminatedText]}
+      >
         {text}
       </ThemedText>
 
@@ -88,6 +101,14 @@ const styles = StyleSheet.create({
   },
   incorrect: {
     backgroundColor: TOKENS.error,
+  },
+  eliminated: {
+    opacity: 0.4,
+    backgroundColor: TOKENS.cardBackground,
+  },
+  eliminatedText: {
+    textDecorationLine: "line-through",
+    opacity: 0.6,
   },
   text: {
     flex: 1,
