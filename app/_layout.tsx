@@ -11,12 +11,13 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
 
+import { LevelUpToast } from "@/components/toasts/level-up-toast";
 import { AuthProvider } from "@/contexts/auth";
 import { HapticsProvider } from "@/contexts/haptics";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Slot } from "expo-router";
 import { useEffect } from "react";
-import { LevelUpToast } from "@/components/toasts/level-up-toast";
+import { ConfettiProvider } from "typegpu-confetti/react-native";
 
 SplashScreen.setOptions({
   duration: 1000,
@@ -72,12 +73,22 @@ export default function RootLayout() {
     levelUp: (props: any) => <LevelUpToast {...props} />,
   };
 
+  const confettiPalette: [number, number, number, number][] = [
+    [190, 83, 16, 1],
+    [247, 163, 64, 1],
+    [140, 188, 176, 1],
+    [249, 188, 96, 1],
+    [38, 90, 85, 1],
+  ];
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <HapticsProvider>
           <AuthProvider>
-            <Slot screenOptions={{ animation: "fade" }} />
+            <ConfettiProvider initParticleAmount={0} colorPalette={confettiPalette}>
+              <Slot screenOptions={{ animation: "fade" }} />
+            </ConfettiProvider>
           </AuthProvider>
           <Toast config={toastConfig} />
           <StatusBar style="light" />

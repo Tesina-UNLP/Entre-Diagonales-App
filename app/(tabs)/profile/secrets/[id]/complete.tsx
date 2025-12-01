@@ -1,4 +1,3 @@
-import { Confetti } from "@/components/animations/confetti";
 import { ThemedBackground } from "@/components/themed-background";
 import { useAuth } from "@/hooks/use-auth";
 import { useHaptics } from "@/hooks/use-haptics";
@@ -8,6 +7,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useRef } from "react";
 import { StyleSheet, View } from "react-native";
+import { useConfetti } from "typegpu-confetti/react-native";
 import * as z from "zod";
 
 /**
@@ -17,6 +17,7 @@ import * as z from "zod";
  */
 const SecretScreen = () => {
   const { checkAuthState } = useAuth();
+  const confettiRef = useConfetti();
   // Schema de validación para los parámetros de la URL
   const ParamsSchema = z.object({
     id: z.string().optional().default(""),
@@ -32,13 +33,13 @@ const SecretScreen = () => {
   const params = parsed.success
     ? parsed.data
     : {
-        id: "",
-        name: "",
-        description: "",
-        image_url: "",
-        coins: 0,
-        xp: 0,
-      };
+      id: "",
+      name: "",
+      description: "",
+      image_url: "",
+      coins: 0,
+      xp: 0,
+    };
 
   const { playSound } = useHaptics();
   const hasNavigatedAway = useRef(false);
@@ -47,6 +48,7 @@ const SecretScreen = () => {
   useEffect(() => {
     const checkAuth = async () => {
       playSound("secretFound");
+      confettiRef?.current?.addParticles(200);
       await checkAuthState?.();
     };
     checkAuth();
@@ -71,7 +73,6 @@ const SecretScreen = () => {
 
   return (
     <ThemedBackground style={styles.container}>
-      <Confetti show={true} onComplete={() => {}} particleCount={60} />
       <View style={styles.content}>
         {/* Información del secreto descubierto con recompensas */}
         <SecretCompletionInfo

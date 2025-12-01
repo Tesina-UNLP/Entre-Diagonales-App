@@ -1,4 +1,3 @@
-import { Confetti } from "@/components/animations/confetti";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedText } from "@/components/themed-text";
 import {
@@ -18,10 +17,13 @@ import {
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect } from "react";
 import { Image, StyleSheet, View } from "react-native";
+import { useConfetti } from 'typegpu-confetti/react-native';
 import * as z from "zod";
 
 const CompleteTour = () => {
   const { checkAuthState } = useAuth();
+  const confettiRef = useConfetti();
+
   const ParamsSchema = z.object({
     tour_id: z.string().optional().default(""),
     xp: z.coerce.number().optional().default(0),
@@ -37,15 +39,15 @@ const CompleteTour = () => {
   const params = parsed.success
     ? parsed.data
     : {
-        xp: 0,
-        coins: 0,
-        secrets: 0,
-        trivias: 0,
-        secrets_completed: 0,
-        trivias_completed: 0,
-        tour_name: "",
-        tour_id: "",
-      };
+      xp: 0,
+      coins: 0,
+      secrets: 0,
+      trivias: 0,
+      secrets_completed: 0,
+      trivias_completed: 0,
+      tour_name: "",
+      tour_id: "",
+    };
 
   const { user } = useAuth();
 
@@ -77,6 +79,8 @@ const CompleteTour = () => {
   useEffect(() => {
     const checkAuth = async () => {
       playSound("tourCompleted");
+      // Sincronizar el confetti con el sonido
+      confettiRef?.current?.addParticles(200);
       await checkAuthState?.();
     };
     checkAuth();
@@ -85,7 +89,6 @@ const CompleteTour = () => {
 
   return (
     <ThemedBackground style={styles.container}>
-      <Confetti show={true} onComplete={() => {}} particleCount={60} />
 
       <View style={styles.header}>
         <ThemedText type="defaultSemiBold" style={styles.headerTourName}>
