@@ -5,6 +5,7 @@ import { HorizontalToursSkeleton } from "@/components/skeletons/horizontal-tours
 import { MessageOfTheDaySkeleton } from "@/components/skeletons/message-of-the-day-skeleton";
 import { ProgressionLevelSkeleton } from "@/components/skeletons/progression-level-skeleton";
 import { ThemedBackground } from "@/components/themed-background";
+import { UpdateAvailableCard } from "@/components/update-available-card";
 import { useAuth } from "@/hooks/use-auth";
 import { useMessageOfTheDay } from "@/hooks/use-message-of-the-day";
 import { useWeather } from "@/hooks/use-weather";
@@ -88,8 +89,12 @@ export default function HomeScreen() {
             </FadeInView>
           )}
 
-          {/* Cada componente aparece con un delay incremental para crear un efecto escalonado */}
           <FadeInView delay={200}>
+            <UpdateAvailableCard />
+          </FadeInView>
+
+          {/* Cada componente aparece con un delay incremental para crear un efecto escalonado */}
+          <FadeInView delay={250}>
             <MessageOfTheDay />
           </FadeInView>
 
