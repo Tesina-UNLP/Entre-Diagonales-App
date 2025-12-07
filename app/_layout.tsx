@@ -18,6 +18,7 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Slot } from "expo-router";
 import { useEffect } from "react";
 import { ConfettiProvider } from "typegpu-confetti/react-native";
+import { vexo } from 'vexo-analytics';
 
 SplashScreen.setOptions({
   duration: 1000,
@@ -25,6 +26,12 @@ SplashScreen.setOptions({
 });
 
 SplashScreen.preventAutoHideAsync();
+
+
+// You may want to wrap this with `if (!__DEV__) { ... }` to only run Vexo in production.
+if (!__DEV__) {
+  vexo(process.env.EXPO_PUBLIC_VEXO_PROJECT_ID || '');
+}
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
