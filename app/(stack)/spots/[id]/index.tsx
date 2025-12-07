@@ -20,6 +20,7 @@ import {
   FunFactsCard,
   HistoricalSection,
   ImageCarousel,
+  QuizChallengeCard,
   SpotHeader,
   VisitInfoSection,
 } from "@/components/spot-details";
@@ -145,6 +146,11 @@ const SpotDetails = () => {
             </View>
           )}
 
+          {/* Tarjeta de Trivia Disponible - Solo si NO está resuelta y SI existe */}
+          {!spotInfo.quiz_solved && spotInfo.quiz && (
+            <QuizChallengeCard quizId={spotInfo.quiz.id} />
+          )}
+
           {/* Fun Facts - Componente modular */}
           {spotInfo.fun_facts && <FunFactsCard funFacts={spotInfo.fun_facts} />}
 
@@ -173,14 +179,23 @@ const SpotDetails = () => {
           {/* Referencias */}
           <View style={styles.section}>
             <Collapsible title="Fuentes y Referencias">
-              <View>
-                <ThemedText>Universidad Nacional De La Plata</ThemedText>
+              <View style={styles.referenceItem}>
+                <View style={styles.referenceBullet} />
+                <ThemedText style={styles.referenceText}>
+                  Universidad Nacional De La Plata
+                </ThemedText>
               </View>
-              <View>
-                <ThemedText>Municipio de La Plata</ThemedText>
+              <View style={styles.referenceItem}>
+                <View style={styles.referenceBullet} />
+                <ThemedText style={styles.referenceText}>
+                  Municipio de La Plata
+                </ThemedText>
               </View>
-              <View>
-                <ThemedText>Biblioteca Nacional de La Plata</ThemedText>
+              <View style={styles.referenceItem}>
+                <View style={styles.referenceBullet} />
+                <ThemedText style={styles.referenceText}>
+                  Biblioteca Nacional de La Plata
+                </ThemedText>
               </View>
             </Collapsible>
           </View>
@@ -226,6 +241,25 @@ const styles = StyleSheet.create({
   section: {
     marginTop: 20,
     gap: 8,
+  },
+  // Referencias
+  referenceItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 12,
+    paddingVertical: 4,
+  },
+  referenceBullet: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: TOKENS.primary,
+  },
+  referenceText: {
+    flex: 1,
+    lineHeight: 20,
+    opacity: 0.9,
   },
   bottomSpacing: {
     height: 40,

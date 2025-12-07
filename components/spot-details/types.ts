@@ -47,3 +47,8 @@ export interface ActionButtonsProps {
   hasQuiz: boolean; // Si tiene trivia disponible
   quizId?: number; // ID de la trivia (opcional)
 }
+
+// Tipo para el componente QuizChallengeCard
+export interface QuizChallengeCardProps {
+  quizId?: number; // ID de la trivia (opcional)
+}

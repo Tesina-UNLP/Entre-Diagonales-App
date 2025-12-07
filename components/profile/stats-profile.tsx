@@ -78,7 +78,7 @@ const StatsProfile = () => {
             style={styles.levelProgressPlanText}
           >
             {user?.next_level?.name
-              ? `Siguiente: ${user?.next_level?.name}`
+              ? `${user?.next_level?.name}`
               : "Nivel máximo"}
           </ThemedText>
         </View>
