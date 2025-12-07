@@ -7,10 +7,7 @@ import React, { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 
 export const UpdateAvailableCard = () => {
-  const {
-    isUpdatePending,
-    isUpdateAvailable,
-  } = Updates.useUpdates();
+  const { isUpdatePending, isUpdateAvailable } = Updates.useUpdates();
 
   useEffect(() => {
     if (isUpdatePending) {
@@ -18,17 +15,20 @@ export const UpdateAvailableCard = () => {
     }
   }, [isUpdatePending]);
 
-
   if (!isUpdateAvailable) {
     return null;
   }
 
   return (
     <View style={styles.container}>
-      <View style={{ flexDirection: "row", alignItems: "center", flex: 1, gap: 12 }}>
+      <View
+        style={{ flexDirection: "row", alignItems: "center", flex: 1, gap: 12 }}
+      >
         <MaterialIcons name="system-update" size={24} color={TOKENS.accent} />
         <View style={styles.textContainer}>
-          <ThemedText type="defaultSemiBold">Nueva versión disponible</ThemedText>
+          <ThemedText type="defaultSemiBold">
+            Nueva versión disponible
+          </ThemedText>
           <ThemedText type="muted">
             Hay una actualización lista para instalar
           </ThemedText>

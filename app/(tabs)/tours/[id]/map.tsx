@@ -156,7 +156,7 @@ const Map = () => {
       // Calculamos la ruta entre estos dos puntos
       const ruta = await getRouteCoords(
         pointsForRoute,
-        process.env.EXPO_PUBLIC_GOOGLE_MAPS || "",
+        process.env.EXPO_PUBLIC_API_ROUTES || "",
       );
       setRouteToNextSpot(ruta.coordenadas);
     };
@@ -171,7 +171,7 @@ const Map = () => {
       if (routeInfo?.spots && routeInfo.spots.length > 0) {
         const distanceInfo = await getInformationBetweenStops(
           routeInfo.spots,
-          process.env.EXPO_PUBLIC_GOOGLE_MAPS || "",
+          process.env.EXPO_PUBLIC_API_ROUTES || "",
           // Pasamos la ubicación solo si está disponible y no está cargando
           location && !isLoading
             ? { latitude: location.latitude, longitude: location.longitude }

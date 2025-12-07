@@ -17,7 +17,7 @@ import {
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect } from "react";
 import { Image, StyleSheet, View } from "react-native";
-import { useConfetti } from 'typegpu-confetti/react-native';
+import { useConfetti } from "typegpu-confetti/react-native";
 import * as z from "zod";
 
 const CompleteTour = () => {
@@ -39,15 +39,15 @@ const CompleteTour = () => {
   const params = parsed.success
     ? parsed.data
     : {
-      xp: 0,
-      coins: 0,
-      secrets: 0,
-      trivias: 0,
-      secrets_completed: 0,
-      trivias_completed: 0,
-      tour_name: "",
-      tour_id: "",
-    };
+        xp: 0,
+        coins: 0,
+        secrets: 0,
+        trivias: 0,
+        secrets_completed: 0,
+        trivias_completed: 0,
+        tour_name: "",
+        tour_id: "",
+      };
 
   const { user } = useAuth();
 
@@ -89,7 +89,6 @@ const CompleteTour = () => {
 
   return (
     <ThemedBackground style={styles.container}>
-
       <View style={styles.header}>
         <ThemedText type="defaultSemiBold" style={styles.headerTourName}>
           {params.tour_name}

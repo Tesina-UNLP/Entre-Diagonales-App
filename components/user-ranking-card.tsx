@@ -2,7 +2,7 @@
 import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
 import { RankingItem } from "@/hooks/use-ranking";
-import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { FontAwesome5 } from "@expo/vector-icons";
 import Octicons from "@expo/vector-icons/Octicons";
 import { Image, StyleSheet, View } from "react-native";
 

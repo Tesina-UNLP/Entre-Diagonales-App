@@ -26,19 +26,13 @@ export const TourRewards = ({ xp, coins }: TourRewardsProps) => {
         <ThemedText type="defaultSemiBold" style={styles.xpText}>
           XP
         </ThemedText>
-        <ThemedText type="default" style={styles.valueText}>
-          {" "}
-          +{xp}
-        </ThemedText>
+        <ThemedText type="default"> +{xp}</ThemedText>
       </View>
 
       {/* Sección de monedas */}
       <View style={styles.rewardsItem}>
-        <CoinIcon height={30} width={30} />
-        <ThemedText type="default" style={styles.valueText}>
-          {" "}
-          {coins}
-        </ThemedText>
+        <CoinIcon height={25} width={25} />
+        <ThemedText type="default"> {coins}</ThemedText>
       </View>
     </View>
   );
@@ -60,15 +54,10 @@ const styles = StyleSheet.create({
   xpText: {
     color: TOKENS.accent,
     fontSize: 28,
-    height: 30,
-    lineHeight: 30,
-    textAlignVertical: "center",
-  },
-  valueText: {
-    fontSize: 28,
+    lineHeight: 34,
   },
   coinImage: {
-    width: 30,
-    height: 30,
+    width: 25,
+    height: 25,
   },
 });

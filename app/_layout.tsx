@@ -86,7 +86,10 @@ export default function RootLayout() {
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <HapticsProvider>
           <AuthProvider>
-            <ConfettiProvider initParticleAmount={0} colorPalette={confettiPalette}>
+            <ConfettiProvider
+              initParticleAmount={0}
+              colorPalette={confettiPalette}
+            >
               <Slot screenOptions={{ animation: "fade" }} />
             </ConfettiProvider>
           </AuthProvider>

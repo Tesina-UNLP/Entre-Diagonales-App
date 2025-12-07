@@ -84,7 +84,7 @@ const RouteDetails = () => {
       if (routeInfo?.spots && routeInfo.spots.length > 0) {
         const distanceInfo = await getInformationBetweenStops(
           routeInfo.spots,
-          process.env.EXPO_PUBLIC_GOOGLE_MAPS || "",
+          process.env.EXPO_PUBLIC_API_ROUTES || "",
           location && !isLoading
             ? { latitude: location.latitude, longitude: location.longitude }
             : null,
