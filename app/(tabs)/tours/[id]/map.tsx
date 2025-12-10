@@ -2,11 +2,13 @@ import Header from "@/components/header";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
+import { MIN_LOCATION_CHANGE_METERS } from "@/constants/mapping";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "@/hooks/use-location";
 import { api } from "@/libs/api";
 import {
-  getInformationBetweenStops,
+  getDistanceInMeters,
+  getInformationBetweenStopsLocal,
   getRouteCoords,
   StopDistanceInfo,
 } from "@/libs/google-maps";
@@ -51,10 +53,24 @@ const Map = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const insets = useSafeAreaInsets();
   const sheetRef = useRef<BottomSheet>(null);
+  // Location refs para evitar re-renderizados innecesarios
+  const lastLocationForDistancesRef = useRef<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+
+  const lastLocationForRouteRef = useRef<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
   // Usamos el hook personalizado de ubicación
   const { location, isLoading } = useLocation();
   // Ruta solo hasta el siguiente punto a completar
   const [routeToNextSpot, setRouteToNextSpot] = useState<
+    { latitude: number; longitude: number }[]
+  >([]);
+  // Estado para la animación de la polyline
+  const [animatedRouteToNextSpot, setAnimatedRouteToNextSpot] = useState<
     { latitude: number; longitude: number }[]
   >([]);
   // Estado para almacenar información de distancia y duración entre stops
@@ -94,6 +110,12 @@ const Map = () => {
         setCurrentSpot(
           response.started ? response.spots[spotsQuantityCompleted] : null,
         );
+
+        // Reset de distancias y últimas ubicaciones usadas
+        setStopsDistanceInfo([]);
+        lastLocationForDistancesRef.current = null;
+        lastLocationForRouteRef.current = null;
+        setRouteToNextSpot([]);
       }
     }
     setLoading(false);
@@ -106,31 +128,56 @@ const Map = () => {
   // Efecto para calcular la ruta desde la ubicación actual hasta el siguiente punto a completar
   useEffect(() => {
     const fetchRouteToNextSpot = async () => {
-      // Solo calculamos si tenemos ubicación del usuario y spots disponibles
-      if (!location || isLoading || !routeInfo?.spots) {
+      // Si no hay spots o no hay ruta, no hacemos nada
+      if (!routeInfo?.spots) {
         setRouteToNextSpot([]);
         return;
       }
 
-      // Encontramos el índice del siguiente punto a completar
+      // Sin ubicación o cargando → limpiamos polyline y salimos
+      if (!location || isLoading) {
+        setRouteToNextSpot([]);
+        return;
+      }
+
+      const userLoc = {
+        latitude: location.latitude,
+        longitude: location.longitude,
+      };
+
       const indexNextSpot = completedSpots.length;
 
-      // Si ya completó todos los puntos, no mostramos ruta
+      // Ya completó todos los puntos
       if (indexNextSpot >= routeInfo.spots.length) {
         setRouteToNextSpot([]);
+        lastLocationForRouteRef.current = null;
         return;
       }
 
-      // Obtenemos el siguiente punto a completar
       const nextSpot = routeInfo.spots[indexNextSpot];
 
-      // Creamos un array con 2 puntos: ubicación actual → siguiente punto
-      const pointsForRoute = [
+      // Chequeamos si la ubicación cambió lo suficiente
+      if (lastLocationForRouteRef.current) {
+        const movedMeters = getDistanceInMeters(
+          lastLocationForRouteRef.current,
+          userLoc,
+        );
+
+        if (
+          movedMeters < MIN_LOCATION_CHANGE_METERS &&
+          routeToNextSpot.length
+        ) {
+          // Se movió poco y ya tenemos una ruta dibujada → no llamamos a ORS
+          return;
+        }
+      }
+
+      const pointsForRoute: StopApiResponse[] = [
         {
-          order: -1, // Order ficticio para la ubicación actual
+          order: -1,
           spot: {
-            latitude: location.latitude,
-            longitude: location.longitude,
+            latitude: userLoc.latitude,
+            longitude: userLoc.longitude,
             name: "Mi ubicación",
             tag: "ubicacion_actual",
             image_urls: [],
@@ -153,36 +200,109 @@ const Map = () => {
         },
       ];
 
-      // Calculamos la ruta entre estos dos puntos
       const ruta = await getRouteCoords(
         pointsForRoute,
         process.env.EXPO_PUBLIC_API_ROUTES || "",
       );
+
       setRouteToNextSpot(ruta.coordenadas);
+      lastLocationForRouteRef.current = userLoc;
     };
 
     fetchRouteToNextSpot();
-  }, [routeInfo, completedSpots, location, isLoading]);
+  }, [routeInfo, completedSpots, location, isLoading, routeToNextSpot.length]);
+
+  // Efecto para animar la polyline progresivamente
+  useEffect(() => {
+    if (routeToNextSpot.length === 0) {
+      setAnimatedRouteToNextSpot([]);
+      return;
+    }
+
+    // Filtrar coordenadas válidas antes de animar
+    const validCoordinates = routeToNextSpot.filter(
+      (coord) =>
+        coord &&
+        typeof coord.latitude === "number" &&
+        typeof coord.longitude === "number" &&
+        !isNaN(coord.latitude) &&
+        !isNaN(coord.longitude),
+    );
+
+    if (validCoordinates.length === 0) {
+      setAnimatedRouteToNextSpot([]);
+      return;
+    }
+
+    let currentIndex = 0;
+    setAnimatedRouteToNextSpot([]);
+
+    const interval = setInterval(() => {
+      if (currentIndex < validCoordinates.length) {
+        // Clonamos el objeto de coordenadas para evitar el error "This dynamic value has been recycled"
+        // y aseguramos que solo pasamos latitude y longitude
+        const nextCoord = {
+          latitude: validCoordinates[currentIndex].latitude,
+          longitude: validCoordinates[currentIndex].longitude,
+        };
+
+        setAnimatedRouteToNextSpot((prev) => [...prev, nextCoord]);
+        currentIndex++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 20); // Velocidad de la animación (ms por punto)
+
+    return () => clearInterval(interval);
+  }, [routeToNextSpot]);
 
   // Efecto separado para calcular distancias cuando la ubicación está disponible
   useEffect(() => {
     const calculateDistances = async () => {
-      // Solo calculamos si tenemos los datos del tour cargados
-      if (routeInfo?.spots && routeInfo.spots.length > 0) {
-        const distanceInfo = await getInformationBetweenStops(
-          routeInfo.spots,
-          process.env.EXPO_PUBLIC_API_ROUTES || "",
-          // Pasamos la ubicación solo si está disponible y no está cargando
-          location && !isLoading
-            ? { latitude: location.latitude, longitude: location.longitude }
-            : null,
+      if (!routeInfo?.spots || routeInfo.spots.length === 0) return;
+
+      if (!location) return;
+
+      const userLoc =
+        location && !isLoading
+          ? {
+              latitude: location.latitude,
+              longitude: location.longitude,
+            }
+          : null;
+
+      // Si ya tenemos distancias calculadas y tenemos ubicación,
+      // solo recalculamos si se movió lo suficiente
+      if (
+        userLoc &&
+        lastLocationForDistancesRef.current &&
+        stopsDistanceInfo.length > 0
+      ) {
+        const movedMeters = getDistanceInMeters(
+          lastLocationForDistancesRef.current,
+          userLoc,
         );
-        setStopsDistanceInfo(distanceInfo);
+
+        if (movedMeters < MIN_LOCATION_CHANGE_METERS) {
+          // Se movió poco → no recalculamos
+          return;
+        }
+      }
+
+      const distanceInfo = await getInformationBetweenStopsLocal(
+        routeInfo.spots,
+        userLoc,
+      );
+
+      setStopsDistanceInfo(distanceInfo);
+
+      if (userLoc) {
+        lastLocationForDistancesRef.current = userLoc;
       }
     };
 
     calculateDistances();
-  }, [location, isLoading, routeInfo]);
+  }, [routeInfo, location, isLoading, stopsDistanceInfo.length]);
 
   const snapPoints = useMemo(() => ["15%", "35%", "80%"], []);
 
@@ -411,7 +531,7 @@ const Map = () => {
         <>
           <Header
             title={routeInfo?.name || ""}
-            description={`${routeInfo?.spots.length} Puntos  • ${stopsDistanceInfo.reduce((acc, info) => acc + (info.durationFromPrevious || 0), 0)} min aprox.`}
+            description={`${routeInfo?.spots.length} Puntos  • ${stopsDistanceInfo ? stopsDistanceInfo.slice(completedSpots.length).reduce((acc, info) => acc + (info.durationFromPrevious || 0), 0) : 0} min aprox`}
             onBack={() => router.back()}
           />
 
@@ -420,14 +540,18 @@ const Map = () => {
               style={{ flex: 1 }}
               cameraPosition={cameraPosition}
               markers={mapMarkers}
-              polylines={[
-                {
-                  id: "ruta-hasta-siguiente",
-                  coordinates: routeToNextSpot,
-                  color: TOKENS.accent,
-                  width: 20,
-                },
-              ]}
+              polylines={
+                animatedRouteToNextSpot.length > 0
+                  ? [
+                      {
+                        id: "ruta-hasta-siguiente",
+                        coordinates: animatedRouteToNextSpot,
+                        color: TOKENS.accent,
+                        width: 20,
+                      },
+                    ]
+                  : []
+              }
               uiSettings={{
                 myLocationButtonEnabled: true,
                 compassEnabled: true,
@@ -449,17 +573,21 @@ const Map = () => {
               }}
               markers={mapMarkers}
               properties={{
-                mapType: GoogleMapsMapType.TERRAIN,
+                mapType: GoogleMapsMapType.NORMAL,
                 isMyLocationEnabled: true,
               }}
-              polylines={[
-                {
-                  id: "ruta-hasta-siguiente",
-                  coordinates: routeToNextSpot,
-                  color: TOKENS.accent,
-                  width: 20,
-                },
-              ]}
+              polylines={
+                animatedRouteToNextSpot.length > 0
+                  ? [
+                      {
+                        id: "ruta-hasta-siguiente",
+                        coordinates: animatedRouteToNextSpot,
+                        color: TOKENS.accent,
+                        width: 20,
+                      },
+                    ]
+                  : []
+              }
             />
           )}
 

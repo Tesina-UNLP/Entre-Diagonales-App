@@ -14,13 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useEffect, useRef } from "react";
-import {
-  Animated,
-  Easing,
-  Pressable,
-  StyleSheet,
-  View,
-} from "react-native";
+import { Animated, Easing, Pressable, StyleSheet, View } from "react-native";
 
 interface QuizChallengeCardProps {
   quizId?: number;
@@ -31,7 +25,6 @@ const think = require("@/assets/images/think.png");
 export const QuizChallengeCard = ({ quizId }: QuizChallengeCardProps) => {
   // Animaciones
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  const shimmerAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -52,17 +45,7 @@ export const QuizChallengeCard = ({ quizId }: QuizChallengeCardProps) => {
         }),
       ]),
     ).start();
-
-    // Animación de brillo que se desplaza
-    Animated.loop(
-      Animated.timing(shimmerAnim, {
-        toValue: 1,
-        duration: 2000,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      }),
-    ).start();
-  }, []);
+  }, [pulseAnim]);
 
   const handlePress = () => {
     if (quizId) {
@@ -88,11 +71,6 @@ export const QuizChallengeCard = ({ quizId }: QuizChallengeCardProps) => {
       useNativeDriver: true,
     }).start();
   };
-
-  const shimmerTranslate = shimmerAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [-300, 300],
-  });
 
   return (
     <Animated.View
@@ -121,9 +99,7 @@ export const QuizChallengeCard = ({ quizId }: QuizChallengeCardProps) => {
             <ThemedText type="defaultSemiBold" style={styles.title}>
               ¡Trivia Disponible!
             </ThemedText>
-            <ThemedText >
-              Demuestra tus conocimientos y gana
-            </ThemedText>
+            <ThemedText>Demuestra tus conocimientos y gana</ThemedText>
 
             {/* Recompensas */}
             <View style={styles.rewardsContainer}>

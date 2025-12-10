@@ -2,11 +2,13 @@ import { FadeInView } from "@/components/animations/fade-in-view";
 import Header from "@/components/header";
 import { ThemedBackground } from "@/components/themed-background";
 import { TOKENS } from "@/constants/colors";
+import { MIN_LOCATION_CHANGE_METERS } from "@/constants/mapping";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "@/hooks/use-location";
 import { api } from "@/libs/api";
 import {
-  getInformationBetweenStops,
+  getDistanceInMeters,
+  getInformationBetweenStopsLocal,
   StopDistanceInfo,
 } from "@/libs/google-maps";
 import { StopApiResponse, TourInfoApiResponse } from "@/types";
@@ -15,7 +17,13 @@ import Progression from "@/views/tour-details/progression";
 import RewardCard from "@/views/tour-details/reward-card";
 import SpotList from "@/views/tour-details/spot-list";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ActivityIndicator,
   RefreshControl,
@@ -40,6 +48,12 @@ const RouteDetails = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const { location, isLoading } = useLocation();
 
+  // guardamos la última ubicación usada para calcular distancias
+  const lastLocationForDistancesRef = useRef<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+
   const isTourCompleted = useMemo(() => {
     return routeInfo?.completed_at !== null;
   }, [routeInfo?.completed_at]);
@@ -53,23 +67,29 @@ const RouteDetails = () => {
 
   const handleGetRoute = useCallback(async () => {
     setLoading(true);
-    if (user) {
-      const response = await api.getRoute(user.access, parseInt(idStr));
+    if (user && idStr) {
+      const response = await api.getRoute(user.access, parseInt(idStr, 10));
 
       if (response) {
         setRouteInfo(response);
 
         const spotsQuantityCompleted = Number(response.progress);
-        const completedSpots = response.spots.slice(0, spotsQuantityCompleted);
+        const completed = response.spots.slice(0, spotsQuantityCompleted);
+
         // Si el tour comenzó, saltamos el spot actual (+1), sino comenzamos desde el primero
-        const notCompletedSpots = response.spots.slice(
+        const notCompleted = response.spots.slice(
           spotsQuantityCompleted + (response.started ? 1 : 0),
         );
-        setCompletedSpots(completedSpots);
-        setNotCompletedSpots(notCompletedSpots);
+
+        setCompletedSpots(completed);
+        setNotCompletedSpots(notCompleted);
         setCurrentSpot(
           response.started ? response.spots[spotsQuantityCompleted] : null,
         );
+
+        // Nueva ruta → reseteamos distancias y última ubicación usada
+        setStopsDistanceInfo([]);
+        lastLocationForDistancesRef.current = null;
       }
     }
     setLoading(false);
@@ -79,22 +99,53 @@ const RouteDetails = () => {
     handleGetRoute();
   }, [handleGetRoute]);
 
+  // Cálculo de distancias/tiempos con Haversine + velocidad caminando
   useEffect(() => {
     const calculateDistances = async () => {
-      if (routeInfo?.spots && routeInfo.spots.length > 0) {
-        const distanceInfo = await getInformationBetweenStops(
-          routeInfo.spots,
-          process.env.EXPO_PUBLIC_API_ROUTES || "",
-          location && !isLoading
-            ? { latitude: location.latitude, longitude: location.longitude }
-            : null,
+      if (!routeInfo?.spots || routeInfo.spots.length === 0) return;
+
+      if (!location) return;
+
+      const userLoc =
+        location && !isLoading
+          ? {
+              latitude: location.latitude,
+              longitude: location.longitude,
+            }
+          : null;
+
+      // Si ya tenemos distancias y tenemos ubicación del usuario,
+      // solo recalculamos si se movió más de MIN_LOCATION_CHANGE_METERS.
+      if (
+        userLoc &&
+        lastLocationForDistancesRef.current &&
+        stopsDistanceInfo.length > 0
+      ) {
+        const movedMeters = getDistanceInMeters(
+          lastLocationForDistancesRef.current,
+          userLoc,
         );
-        setStopsDistanceInfo(distanceInfo);
+
+        if (movedMeters < MIN_LOCATION_CHANGE_METERS) {
+          // Se movió poco → no recalculamos
+          return;
+        }
+      }
+
+      const distanceInfo = await getInformationBetweenStopsLocal(
+        routeInfo.spots,
+        userLoc,
+      );
+
+      setStopsDistanceInfo(distanceInfo);
+
+      if (userLoc) {
+        lastLocationForDistancesRef.current = userLoc;
       }
     };
 
     calculateDistances();
-  }, [location, isLoading, routeInfo]);
+  }, [routeInfo, location, isLoading, stopsDistanceInfo.length]);
 
   return (
     <ThemedBackground style={styles.container} safeArea={false}>
@@ -106,7 +157,7 @@ const RouteDetails = () => {
         <>
           <Header
             title={routeInfo?.name || ""}
-            description={`${routeInfo?.spots.length} Puntos  • ${stopsDistanceInfo.reduce((acc, info) => acc + (info.durationFromPrevious || 0), 0)} min aprox.`}
+            description={`${routeInfo?.spots.length} Puntos  • ${stopsDistanceInfo ? stopsDistanceInfo.slice(completedSpots.length).reduce((acc, info) => acc + (info.durationFromPrevious || 0), 0) : 0} min aprox`}
             onBack={() => router.navigate("/(tabs)/tours")}
           />
           <ScrollView

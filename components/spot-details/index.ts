@@ -19,4 +19,3 @@ export { QuizChallengeCard } from "./quiz-challenge-card";
 export { SpotHeader } from "./spot-header";
 export * from "./types";
 export { VisitInfoSection } from "./visit-info-section";
-

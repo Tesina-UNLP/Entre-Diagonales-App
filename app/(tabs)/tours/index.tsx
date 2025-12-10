@@ -14,6 +14,7 @@ import { cloneElement, useCallback, useEffect, useState } from "react";
 import {
   FlatList,
   Image,
+  Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -29,6 +30,9 @@ export default function TabTwoScreen() {
   const [allRoutes, setAllRoutes] = useState<TourApiResponse[]>([]);
   const [selectedTag, setSelectedTag] = useState<string | null>("todos");
   const [selectedLevel, setSelectedLevel] = useState<string | null>("1");
+  const [completionFilter, setCompletionFilter] = useState<
+    "incomplete" | "completed"
+  >("incomplete");
   const [refreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // Estado de carga
   const { user } = useAuth();
@@ -56,40 +60,42 @@ export default function TabTwoScreen() {
     handleGetRoutes();
   }, [handleGetRoutes]);
 
-  const applyFilters = useCallback(
-    (tag: string | null, level: string | null) => {
-      let result = allRoutes;
+  const applyFilters = useCallback(() => {
+    let result = allRoutes;
 
-      if (tag && tag !== "todos") {
-        result = result.filter((route) => route.tag === tag);
+    // Completion filter
+    if (completionFilter === "completed") {
+      result = result.filter((route) => route.completed_at !== null);
+    } else {
+      result = result.filter((route) => route.completed_at === null);
+    }
+
+    if (selectedTag && selectedTag !== "todos") {
+      result = result.filter((route) => route.tag === selectedTag);
+    }
+
+    if (selectedLevel && selectedLevel !== "1") {
+      const maxSpots = LEVELS.find((l) => l.id === selectedLevel)?.maxSpots;
+      if (typeof maxSpots === "number") {
+        result = result.filter(
+          (route) => (route.spots.length || 0) <= maxSpots,
+        );
       }
+    }
 
-      if (level && level !== "1") {
-        const maxSpots = LEVELS.find((l) => l.id === level)?.maxSpots;
-        if (typeof maxSpots === "number") {
-          result = result.filter(
-            (route) => (route.spots.length || 0) <= maxSpots,
-          );
-        }
-      }
-
-      setRoutes(result);
-    },
-    [allRoutes],
-  );
+    setRoutes(result);
+  }, [allRoutes, selectedTag, selectedLevel, completionFilter]);
 
   useEffect(() => {
-    applyFilters(selectedTag, selectedLevel);
-  }, [applyFilters, selectedTag, selectedLevel]);
+    applyFilters();
+  }, [applyFilters]);
 
   const handleFilterByTag = (tag: string) => {
     setSelectedTag(tag);
-    applyFilters(tag, selectedLevel);
   };
 
   const handleFilterByLevel = (level: string) => {
     setSelectedLevel(level);
-    applyFilters(selectedTag, level);
   };
 
   const renderHeader = () => (
@@ -170,6 +176,53 @@ export default function TabTwoScreen() {
               </TouchableOpacity>
             ))}
           </ScrollView>
+        </View>
+      </FadeInView>
+
+      {/* Tab Switcher - Selector de completados/no completados */}
+      <FadeInView delay={150}>
+        <View style={styles.tabContainer}>
+          {/* Tab: No completados */}
+          <Pressable
+            style={[
+              styles.tab,
+              completionFilter === "incomplete" && styles.tabActive,
+            ]}
+            onPress={() => setCompletionFilter("incomplete")}
+          >
+            <ThemedText
+              type={
+                completionFilter === "incomplete" ? "defaultSemiBold" : "muted"
+              }
+              style={[
+                styles.tabText,
+                completionFilter === "incomplete" && styles.tabTextActive,
+              ]}
+            >
+              No completados
+            </ThemedText>
+          </Pressable>
+
+          {/* Tab: Completados */}
+          <Pressable
+            style={[
+              styles.tab,
+              completionFilter === "completed" && styles.tabActive,
+            ]}
+            onPress={() => setCompletionFilter("completed")}
+          >
+            <ThemedText
+              type={
+                completionFilter === "completed" ? "defaultSemiBold" : "muted"
+              }
+              style={[
+                styles.tabText,
+                completionFilter === "completed" && styles.tabTextActive,
+              ]}
+            >
+              Completados
+            </ThemedText>
+          </Pressable>
         </View>
       </FadeInView>
     </>
@@ -309,5 +362,33 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 20,
+  },
+  // Estilos para el Tab Switcher
+  tabContainer: {
+    flexDirection: "row",
+    backgroundColor: TOKENS.cardBackground,
+    borderRadius: 12,
+    padding: 4,
+    marginBottom: 16,
+    gap: 4,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tabActive: {
+    backgroundColor: TOKENS.badgeActive,
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: TOKENS.muted,
+  },
+  tabTextActive: {
+    color: TOKENS.background,
   },
 });
