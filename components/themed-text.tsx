@@ -7,12 +7,13 @@ export type ThemedTextProps = TextProps & {
   lightColor?: string;
   darkColor?: string;
   type?:
-    | "default"
-    | "title"
-    | "defaultSemiBold"
-    | "subtitle"
-    | "link"
-    | "muted";
+  | "default"
+  | "title"
+  | "defaultSemiBold"
+  | "subtitle"
+  | "link"
+  | "muted"
+  | "bigMuted";
 };
 
 export function ThemedText({
@@ -75,6 +76,13 @@ export function ThemedText({
         return {
           fontSize: normalizeFontSize(13),
           lineHeight: normalizeLineHeight(18),
+          color: TOKENS.muted,
+          fontFamily: "ClashDisplay",
+        };
+      case "bigMuted":
+        return {
+          fontSize: normalizeFontSize(16),
+          lineHeight: normalizeLineHeight(24),
           color: TOKENS.muted,
           fontFamily: "ClashDisplay",
         };

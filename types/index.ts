@@ -58,6 +58,7 @@ export type StopApiResponse = {
     tag: string | null;
     ticket_price: number | null;
     wheelchair_accessible: boolean;
+    ranking?: number | null;
   };
 };
 

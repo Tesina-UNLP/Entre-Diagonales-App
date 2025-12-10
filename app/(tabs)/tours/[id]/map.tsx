@@ -266,9 +266,9 @@ const Map = () => {
       const userLoc =
         location && !isLoading
           ? {
-              latitude: location.latitude,
-              longitude: location.longitude,
-            }
+            latitude: location.latitude,
+            longitude: location.longitude,
+          }
           : null;
 
       // Si ya tenemos distancias calculadas y tenemos ubicación,
@@ -447,9 +447,8 @@ const Map = () => {
                 <ThemedText type="muted">
                   {distanceInfo?.distanceFromPrevious != null
                     ? `${distanceInfo.distanceFromPrevious} km`
-                    : index === 0
-                      ? "Calculando..."
-                      : "N/A"}
+                    : "Calculando..."
+                  }
                 </ThemedText>
               </View>
               <View style={styles.nextStopDescriptionItem}>
@@ -461,9 +460,8 @@ const Map = () => {
                 <ThemedText type="muted">
                   {distanceInfo?.durationFromPrevious != null
                     ? `${distanceInfo.durationFromPrevious} ${distanceInfo.durationFromPrevious === 1 ? "minuto" : "minutos"}`
-                    : index === 0
-                      ? "Calculando..."
-                      : "N/A"}
+                    : "Calculando..."
+                  }
                 </ThemedText>
               </View>
             </View>
@@ -479,33 +477,40 @@ const Map = () => {
                   <ThemedText type="defaultSemiBold">
                     {capitalizeFirstLetter(item.spot.tag || "")}
                   </ThemedText>
-                  <View style={styles.nextStopTagRating}>
+                  {item.spot?.ranking && <View style={styles.nextStopTagRating}>
                     <MaterialIcons
                       name="star"
                       size={14}
                       color={TOKENS.accent}
                     />
                     <ThemedText type="defaultSemiBold">
-                      2.3 <ThemedText type="muted">(465)</ThemedText>
+                      {item.spot.ranking.toFixed(1)}
                     </ThemedText>
-                  </View>
+                  </View>}
                 </View>
-                <ThemedText type="muted" style={styles.nextStopName}>
+                <ThemedText type="bigMuted">
                   {item.spot.name}
                 </ThemedText>
                 <View style={styles.nextStopDistance}>
                   <FontAwesome6
-                    name="location-dot"
+                    name="dollar-sign"
                     size={14}
                     color={TOKENS.accent}
                   />
-                  <ThemedText type="muted">
-                    Desde{" "}
+                  {item.spot.ticket_price !== null && item.spot.ticket_price !== undefined ? (
+                    <ThemedText type="muted">
+                      Desde{" "}
+                      <ThemedText type="defaultSemiBold">
+                        ${item.spot.ticket_price || 0}
+                      </ThemedText>{" "}
+                      por persona
+                    </ThemedText>
+                  ) : (<ThemedText type="muted">
                     <ThemedText type="defaultSemiBold">
-                      ${item.spot.ticket_price || 0}
+                      Entrada gratuita
                     </ThemedText>{" "}
-                    por persona
                   </ThemedText>
+                  )}
                 </View>
               </View>
             </View>
@@ -531,7 +536,7 @@ const Map = () => {
         <>
           <Header
             title={routeInfo?.name || ""}
-            description={`${routeInfo?.spots.length} Puntos  • ${stopsDistanceInfo ? stopsDistanceInfo.slice(completedSpots.length).reduce((acc, info) => acc + (info.durationFromPrevious || 0), 0) : 0} min aprox`}
+            description={`${routeInfo?.spots.length} Puntos  • ${stopsDistanceInfo ? stopsDistanceInfo.slice(completedSpots.length).reduce((acc, info) => acc + (info.durationFromPrevious || 0), 0) + " min aprox" : "Calculando..."}`}
             onBack={() => router.back()}
           />
 
@@ -543,13 +548,13 @@ const Map = () => {
               polylines={
                 animatedRouteToNextSpot.length > 0
                   ? [
-                      {
-                        id: "ruta-hasta-siguiente",
-                        coordinates: animatedRouteToNextSpot,
-                        color: TOKENS.accent,
-                        width: 20,
-                      },
-                    ]
+                    {
+                      id: "ruta-hasta-siguiente",
+                      coordinates: animatedRouteToNextSpot,
+                      color: TOKENS.accent,
+                      width: 20,
+                    },
+                  ]
                   : []
               }
               uiSettings={{
@@ -579,13 +584,13 @@ const Map = () => {
               polylines={
                 animatedRouteToNextSpot.length > 0
                   ? [
-                      {
-                        id: "ruta-hasta-siguiente",
-                        coordinates: animatedRouteToNextSpot,
-                        color: TOKENS.accent,
-                        width: 20,
-                      },
-                    ]
+                    {
+                      id: "ruta-hasta-siguiente",
+                      coordinates: animatedRouteToNextSpot,
+                      color: TOKENS.accent,
+                      width: 20,
+                    },
+                  ]
                   : []
               }
             />
@@ -739,9 +744,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: TOKENS.tabBarInactive,
     alignSelf: "center",
-  },
-  nextStopName: {
-    fontSize: 18,
   },
   nextStopContent: {
     flex: 1,
