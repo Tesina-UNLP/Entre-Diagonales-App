@@ -23,7 +23,7 @@ const Notifications = () => {
           <View style={styles.sectionContainer}>
             <View style={styles.textContainer}>
               <ThemedText type="defaultSemiBold">Vibración</ThemedText>
-              <ThemedText type="default" style={styles.description}>
+              <ThemedText type="muted">
                 Habilita o deshabilita la vibración en la app
               </ThemedText>
             </View>
@@ -34,7 +34,7 @@ const Notifications = () => {
           <View style={styles.sectionContainer}>
             <View style={styles.textContainer}>
               <ThemedText type="defaultSemiBold">Efectos de sonido</ThemedText>
-              <ThemedText type="default" style={styles.description}>
+              <ThemedText type="muted">
                 Habilita o deshabilita los efectos de sonido en la app
               </ThemedText>
             </View>
@@ -70,10 +70,6 @@ const styles = StyleSheet.create({
   textContainer: {
     flex: 1,
     gap: 5,
-  },
-  description: {
-    fontSize: 14,
-    opacity: 0.7,
   },
 });
 

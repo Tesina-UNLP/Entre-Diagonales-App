@@ -195,7 +195,6 @@ export default function TabTwoScreen() {
                 completionFilter === "incomplete" ? "defaultSemiBold" : "muted"
               }
               style={[
-                styles.tabText,
                 completionFilter === "incomplete" && styles.tabTextActive,
               ]}
             >
@@ -216,7 +215,6 @@ export default function TabTwoScreen() {
                 completionFilter === "completed" ? "defaultSemiBold" : "muted"
               }
               style={[
-                styles.tabText,
                 completionFilter === "completed" && styles.tabTextActive,
               ]}
             >
@@ -383,11 +381,11 @@ const styles = StyleSheet.create({
   tabActive: {
     backgroundColor: TOKENS.badgeActive,
   },
-  tabText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: TOKENS.muted,
-  },
+  // tabText: {
+  //   fontSize: 14,
+  //   fontWeight: "600",
+  //   color: TOKENS.muted,
+  // },
   tabTextActive: {
     color: TOKENS.background,
   },

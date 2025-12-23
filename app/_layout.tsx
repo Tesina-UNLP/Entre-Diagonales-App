@@ -17,6 +17,7 @@ import { HapticsProvider } from "@/contexts/haptics";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Slot } from "expo-router";
 import { useEffect } from "react";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ConfettiProvider } from "typegpu-confetti/react-native";
 import { vexo } from "vexo-analytics";
 
@@ -89,20 +90,22 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <HapticsProvider>
-          <AuthProvider>
-            <ConfettiProvider
-              initParticleAmount={0}
-              colorPalette={confettiPalette}
-            >
-              <Slot screenOptions={{ animation: "fade" }} />
-            </ConfettiProvider>
-          </AuthProvider>
-          <Toast config={toastConfig} />
-          <StatusBar style="light" />
-        </HapticsProvider>
-      </ThemeProvider>
+      <SafeAreaProvider>
+        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+          <HapticsProvider>
+            <AuthProvider>
+              <ConfettiProvider
+                initParticleAmount={0}
+                colorPalette={confettiPalette}
+              >
+                <Slot screenOptions={{ animation: "fade" }} />
+              </ConfettiProvider>
+            </AuthProvider>
+            <Toast config={toastConfig} />
+            <StatusBar style="light" />
+          </HapticsProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }

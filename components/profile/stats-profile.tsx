@@ -87,33 +87,39 @@ const StatsProfile = () => {
       {/* Stats */}
 
       <View style={styles.statsContainer}>
-        <View style={styles.statsItem}>
-          <Ionicons name="map" size={18} color={TOKENS.text} />
-          <ThemedText
-            type="defaultSemiBold"
-            style={{ fontSize: 12, lineHeight: 16 }}
-          >
-            {user?.total_tours_completed || 0} rutas{"\n"}completadas
+        <View style={styles.statCard}>
+          <View style={[styles.iconCircle, { backgroundColor: TOKENS.badgeActive }]}>
+            <Ionicons name="map" size={24} color={TOKENS.primary} />
+          </View>
+          <ThemedText type="subtitle" >
+            {user?.total_tours_completed || 0}
+          </ThemedText>
+          <ThemedText type="muted" style={styles.statLabel}>
+            Rutas completadas
           </ThemedText>
         </View>
 
-        <View style={styles.statsItem}>
-          <Ionicons name="help-circle" size={18} color={TOKENS.text} />
-          <ThemedText
-            type="defaultSemiBold"
-            style={{ fontSize: 12, lineHeight: 16 }}
-          >
-            {user?.total_quizzes_completed || 0} trivia{"\n"}casuales
+        <View style={styles.statCard}>
+          <View style={[styles.iconCircle, { backgroundColor: TOKENS.badgeActive }]}>
+            <Ionicons name="help-circle" size={24} color={TOKENS.primary} />
+          </View>
+          <ThemedText type="subtitle">
+            {user?.total_quizzes_completed || 0}
+          </ThemedText>
+          <ThemedText type="muted" style={styles.statLabel}>
+            Trivias respondidas
           </ThemedText>
         </View>
 
-        <View style={styles.statsItem}>
-          <Ionicons name="location" size={18} color={TOKENS.text} />
-          <ThemedText
-            type="defaultSemiBold"
-            style={{ fontSize: 12, lineHeight: 16 }}
-          >
-            {user?.total_secret_items_completed || 0} secretos{"\n"}encontrados
+        <View style={styles.statCard}>
+          <View style={[styles.iconCircle, { backgroundColor: TOKENS.badgeActive }]}>
+            <Ionicons name="location" size={24} color={TOKENS.primary} />
+          </View>
+          <ThemedText type="subtitle">
+            {user?.total_secret_items_completed || 0}
+          </ThemedText>
+          <ThemedText type="muted" style={styles.statLabel}>
+            Secretos encontrados
           </ThemedText>
         </View>
       </View>
@@ -159,13 +165,34 @@ const styles = StyleSheet.create({
   statsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "stretch",
     width: "100%",
+    gap: 8,
   },
-  statsItem: {
-    flexDirection: "row",
+  statCard: {
+    flex: 1,
+    flexBasis: 0,
+    minWidth: 0,
+    backgroundColor: TOKENS.cardBackground,
+    borderRadius: 12,
+    padding: 12,
     alignItems: "center",
-    gap: 5,
+    justifyContent: "center",
+    gap: 6,
+  },
+  iconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  statLabel: {
+    fontSize: 10,
+    textAlign: "center",
+    lineHeight: 12,
+    width: "100%",
+    flexShrink: 1,
   },
 });
 export default StatsProfile;

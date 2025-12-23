@@ -106,7 +106,7 @@ const Choice = () => {
       </FadeInView>
       <FadeInView delay={300} style={styles.content}>
         <ThemedText type="title">Elige tu personaje</ThemedText>
-        <ThemedText type="muted" style={styles.description}>
+        <ThemedText type="bigMuted" style={styles.description}>
           Selecciona el personaje que más te guste para acompañarte en tu viaje
           de aprendizaje.
         </ThemedText>
@@ -182,7 +182,6 @@ const styles = StyleSheet.create({
   description: {
     textAlign: "center",
     paddingHorizontal: 20,
-    fontSize: 18,
   },
   navigationContainer: {
     flexDirection: "row",

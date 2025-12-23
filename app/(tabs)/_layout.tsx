@@ -7,34 +7,20 @@ import { CustomTabBarButton } from "@/components/tab-bar/custom-tab-bar-button";
 import { HapticTab } from "@/components/tab-bar/haptic-tab";
 import Colors from "@/constants/colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { Tabs, useNavigation, usePathname } from "expo-router";
-import { useEffect } from "react";
+import { Tabs, usePathname } from "expo-router";
 import { Platform, Text } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const pathname = usePathname();
-  const nav = useNavigation();
+  const insets = useSafeAreaInsets();
 
   const hideTabs =
     (pathname.startsWith("/tours/") && pathname !== "/tours") ||
     (pathname.startsWith("/profile/") && pathname !== "/profile");
 
-  useEffect(() => {
-    nav.getParent()?.setOptions({
-      tabBarStyle: hideTabs
-        ? { display: "none" }
-        : {
-            position: "absolute",
-            backgroundColor: "transparent",
-            borderColor: "transparent",
-            height: Platform.OS === "ios" ? 75 : 70,
-            elevation: 0,
-            shadowOpacity: 0,
-            paddingTop: Platform.OS === "ios" ? 2 : 5,
-          },
-    });
-  }, [hideTabs, nav]);
+  const baseHeight = Platform.OS === "ios" ? 75 : 70;
 
   return (
     <Tabs
@@ -47,14 +33,22 @@ export default function TabLayout() {
         tabBarStyle: hideTabs
           ? { display: "none" }
           : {
-              position: "absolute",
-              backgroundColor: "transparent",
-              borderColor: "transparent",
-              height: Platform.OS === "ios" ? 75 : 70,
-              elevation: 0,
-              shadowOpacity: 0,
-              paddingTop: Platform.OS === "ios" ? 2 : 5,
-            },
+            position: "absolute",
+            left: 0,
+            right: 0,
+
+            bottom: 0,
+
+            backgroundColor: "transparent",
+            borderColor: "transparent",
+            elevation: 0,
+            shadowOpacity: 0,
+
+            paddingTop: Platform.OS === "ios" ? 2 : 5,
+
+            height: baseHeight + insets.bottom,
+            paddingBottom: Math.max(insets.bottom, 8),
+          },
       }}
     >
       <Tabs.Screen
@@ -77,7 +71,7 @@ export default function TabLayout() {
         name="scanner"
         options={{
           tabBarLabel: () => null,
-          tabBarIcon: () => null, // ocultamos el ícono default
+          tabBarIcon: () => null,
           tabBarButton: (props) => (
             <CustomTabBarButton {...props} key={"scanner"} />
           ),

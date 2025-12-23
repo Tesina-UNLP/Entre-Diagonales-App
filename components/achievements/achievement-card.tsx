@@ -11,6 +11,7 @@ import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import Toast from "react-native-toast-message";
 import GemIcon from "../icons/gem";
 import { ThemedText } from "../themed-text";
+import { Ionicons } from "@expo/vector-icons";
 
 const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString("es-ES", {
@@ -91,15 +92,15 @@ const AchievementCard = ({
       onPress={
         isClaiming
           ? () =>
-              router.navigate({
-                pathname: "/(tabs)/profile/achievements/[id]",
-                params: {
-                  id: achievement.achievement.id.toString(),
-                  name: achievement.achievement.name,
-                  description: achievement.achievement.description,
-                  image_url: achievement.achievement.image_url,
-                },
-              })
+            router.navigate({
+              pathname: "/(tabs)/profile/achievements/[id]",
+              params: {
+                id: achievement.achievement.id.toString(),
+                name: achievement.achievement.name,
+                description: achievement.achievement.description,
+                image_url: achievement.achievement.image_url,
+              },
+            })
           : handleClaimAchievement
       }
     >
@@ -152,17 +153,15 @@ const AchievementCard = ({
                 ? "Puedes canjear este logro!"
                 : achievement.achievement.expired_at
                   ? "Termina el " +
-                    formatDate(achievement.achievement.expired_at || "")
+                  formatDate(achievement.achievement.expired_at || "")
                   : getMessage()}
             </ThemedText>
 
             <View style={styles.rewardContainer}>
               {/* Sección de XP */}
               <View style={styles.rewardsItem}>
-                <ThemedText type="defaultSemiBold" style={styles.xpText}>
-                  XP
-                </ThemedText>
-                <ThemedText type="default" style={styles.valueText}>
+                <Ionicons name="star" size={20} color={TOKENS.warning} />
+                <ThemedText type="default">
                   {" "}
                   +{achievement.experience_reward}
                 </ThemedText>
@@ -171,7 +170,7 @@ const AchievementCard = ({
               {/* Sección de monedas */}
               <View style={styles.rewardsItem}>
                 <GemIcon height={20} width={20} />
-                <ThemedText type="default" style={styles.valueText}>
+                <ThemedText type="default">
                   {" "}
                   {achievement.gems_reward}
                 </ThemedText>
@@ -255,17 +254,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   rewardsItem: {
+    marginTop: 4,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 5,
+    gap: 2,
   },
   xpText: {
     color: TOKENS.accent,
     fontSize: 20,
-  },
-  valueText: {
-    fontSize: 16,
   },
 });
 

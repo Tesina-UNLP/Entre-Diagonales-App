@@ -112,7 +112,7 @@ export const QuizChallengeCard = ({ quizId }: QuizChallengeCardProps) => {
               <View style={styles.rewardItem}>
                 <Ionicons name="star" size={18} color={TOKENS.warning} />
                 <ThemedText style={styles.rewardText}>
-                  +{XP_PER_QUIZ} XP
+                  +{XP_PER_QUIZ}
                 </ThemedText>
               </View>
             </View>

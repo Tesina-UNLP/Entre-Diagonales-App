@@ -144,7 +144,7 @@ const Notifications = () => {
               <ThemedText type="defaultSemiBold">
                 Notificaciones Push
               </ThemedText>
-              <ThemedText type="default" style={styles.description}>
+              <ThemedText type="muted">
                 Recibe notificaciones sobre nuevos recorridos y actualizaciones
               </ThemedText>
             </View>
@@ -189,10 +189,6 @@ const styles = StyleSheet.create({
   textContainer: {
     flex: 1,
     gap: 5,
-  },
-  description: {
-    fontSize: 14,
-    opacity: 0.7,
   },
 });
 

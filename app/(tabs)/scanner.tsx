@@ -272,7 +272,7 @@ export default function ScannerScreen() {
         >
           <View style={styles.overlay}>
             <View style={styles.scanTextContainer}>
-              <ThemedText style={styles.scanText}>
+              <ThemedText type="defaultSemiBold" style={styles.scanText}>
                 Intenta apuntar de frente al lugar
               </ThemedText>
 
@@ -320,13 +320,10 @@ const styles = StyleSheet.create({
   },
   scanText: {
     color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
     textAlign: "center",
     backgroundColor: "rgba(15, 38, 36, 0.4)",
     paddingHorizontal: 15,
     paddingVertical: 10,
-
     borderRadius: 8,
   },
   button: {

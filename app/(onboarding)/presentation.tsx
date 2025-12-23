@@ -106,7 +106,7 @@ const Presentation = () => {
           <ThemedText type="title" style={styles.title}>
             {step.title}
           </ThemedText>
-          <ThemedText type="muted" style={styles.description}>
+          <ThemedText type="bigMuted" style={styles.description}>
             {step.description}
           </ThemedText>
         </FadeInView>
@@ -142,11 +142,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 20,
   },
-  skipText: {
-    fontSize: 16,
-    color: TOKENS.muted,
-    fontFamily: "ClashDisplayRegular",
-  },
   icon: {
     fontSize: 60,
   },
@@ -157,7 +152,6 @@ const styles = StyleSheet.create({
   description: {
     textAlign: "center",
     paddingHorizontal: 20,
-    fontSize: 18,
   },
   navigationContainer: {
     flexDirection: "row",
@@ -170,12 +164,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     borderRadius: 12,
     flex: 1,
-  },
-  nextText: {
-    color: TOKENS.text,
-    fontSize: 16,
-    textAlign: "center",
-    fontFamily: "ClashDisplaySemiBold",
   },
   progressBarContainer: {
     width: 100,

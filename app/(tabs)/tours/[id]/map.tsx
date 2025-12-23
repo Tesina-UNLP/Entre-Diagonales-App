@@ -484,7 +484,7 @@ const Map = () => {
                       color={TOKENS.accent}
                     />
                     <ThemedText type="defaultSemiBold">
-                      {item.spot.ranking.toFixed(1)}
+                      {item.spot?.ranking}
                     </ThemedText>
                   </View>}
                 </View>

@@ -33,7 +33,7 @@ export function ThemedText({
 
   // Escala base solo por ancho
   const baseScale =
-    width <= 360 ? 0.65 : width <= 392 ? 0.75 : width <= 420 ? 0.85 : 1;
+    width <= 360 ? 0.70 : width <= 392 ? 0.80 : width <= 420 ? 0.90 : 1;
 
   // Normalizamos para que el fontScale del sistema no haga todo gigante
   const normalizeFontSize = (baseSize: number) => {

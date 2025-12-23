@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 20,
     position: "absolute",
-    bottom: 120,
+    bottom: 130,
     left: 0,
     right: 0,
   },

@@ -3,6 +3,7 @@ import { TOKENS } from "@/constants/colors";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import CoinIcon from "../icons/coin";
+import { Ionicons } from "@expo/vector-icons";
 
 /**
  * Props para el componente TourRewards
@@ -23,9 +24,7 @@ export const TourRewards = ({ xp, coins }: TourRewardsProps) => {
     <View style={styles.rewardContainer}>
       {/* Sección de XP */}
       <View style={styles.rewardsItem}>
-        <ThemedText type="defaultSemiBold" style={styles.xpText}>
-          XP
-        </ThemedText>
+        <Ionicons name="star" size={20} color={TOKENS.warning} />
         <ThemedText type="default"> +{xp}</ThemedText>
       </View>
 

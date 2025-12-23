@@ -180,7 +180,7 @@ const Profile = () => {
         <BottomSheet
           ref={bottomSheetRef}
           index={-1}
-          snapPoints={["40%"]}
+          snapPoints={["50%"]}
           enablePanDownToClose
           handleIndicatorStyle={{ backgroundColor: TOKENS.muted }}
           backgroundStyle={styles.sheetBackground}
