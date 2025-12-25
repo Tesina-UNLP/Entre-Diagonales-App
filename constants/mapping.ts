@@ -8,4 +8,4 @@ export const EARTH_RADIUS_M = 6371000;
 export const ORS_PROFILE = "foot-walking";
 // Si querés usar auto: const ORS_PROFILE = "driving-car";
 
-export const MIN_LOCATION_CHANGE_METERS = 50; // o lo que te cierre más
+export const MIN_LOCATION_CHANGE_METERS = 100; // o lo que te cierre más
