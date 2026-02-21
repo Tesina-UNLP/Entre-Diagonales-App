@@ -81,10 +81,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-audio",
   ],
   updates: {
-    "url": "https://u.expo.dev/d8afb0e4-db66-480e-800f-b4d06f1368aa"
+    url: "https://u.expo.dev/d8afb0e4-db66-480e-800f-b4d06f1368aa",
   },
   runtimeVersion: {
-    "policy": "appVersion"
+    policy: "appVersion",
   },
   experiments: {
     typedRoutes: true,

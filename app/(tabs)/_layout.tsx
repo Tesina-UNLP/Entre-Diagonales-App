@@ -33,22 +33,22 @@ export default function TabLayout() {
         tabBarStyle: hideTabs
           ? { display: "none" }
           : {
-            position: "absolute",
-            left: 0,
-            right: 0,
+              position: "absolute",
+              left: 0,
+              right: 0,
 
-            bottom: 0,
+              bottom: 0,
 
-            backgroundColor: "transparent",
-            borderColor: "transparent",
-            elevation: 0,
-            shadowOpacity: 0,
+              backgroundColor: "transparent",
+              borderColor: "transparent",
+              elevation: 0,
+              shadowOpacity: 0,
 
-            paddingTop: Platform.OS === "ios" ? 2 : 5,
+              paddingTop: Platform.OS === "ios" ? 2 : 5,
 
-            height: baseHeight + insets.bottom,
-            paddingBottom: Math.max(insets.bottom, 8),
-          },
+              height: baseHeight + insets.bottom,
+              paddingBottom: Math.max(insets.bottom, 8),
+            },
       }}
     >
       <Tabs.Screen

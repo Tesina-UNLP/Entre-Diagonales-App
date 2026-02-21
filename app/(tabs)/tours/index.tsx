@@ -214,9 +214,7 @@ export default function TabTwoScreen() {
               type={
                 completionFilter === "completed" ? "defaultSemiBold" : "muted"
               }
-              style={[
-                completionFilter === "completed" && styles.tabTextActive,
-              ]}
+              style={[completionFilter === "completed" && styles.tabTextActive]}
             >
               Completados
             </ThemedText>

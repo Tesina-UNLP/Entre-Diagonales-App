@@ -92,15 +92,15 @@ const AchievementCard = ({
       onPress={
         isClaiming
           ? () =>
-            router.navigate({
-              pathname: "/(tabs)/profile/achievements/[id]",
-              params: {
-                id: achievement.achievement.id.toString(),
-                name: achievement.achievement.name,
-                description: achievement.achievement.description,
-                image_url: achievement.achievement.image_url,
-              },
-            })
+              router.navigate({
+                pathname: "/(tabs)/profile/achievements/[id]",
+                params: {
+                  id: achievement.achievement.id.toString(),
+                  name: achievement.achievement.name,
+                  description: achievement.achievement.description,
+                  image_url: achievement.achievement.image_url,
+                },
+              })
           : handleClaimAchievement
       }
     >
@@ -153,7 +153,7 @@ const AchievementCard = ({
                 ? "Puedes canjear este logro!"
                 : achievement.achievement.expired_at
                   ? "Termina el " +
-                  formatDate(achievement.achievement.expired_at || "")
+                    formatDate(achievement.achievement.expired_at || "")
                   : getMessage()}
             </ThemedText>
 

@@ -1,19 +1,20 @@
 import { Text, type TextProps, useWindowDimensions } from "react-native";
 
 import { TOKENS } from "@/constants/colors";
+import { useFontScale } from "@/hooks/use-font-scale";
 import { useThemeColor } from "@/hooks/use-theme-color";
 
 export type ThemedTextProps = TextProps & {
   lightColor?: string;
   darkColor?: string;
   type?:
-  | "default"
-  | "title"
-  | "defaultSemiBold"
-  | "subtitle"
-  | "link"
-  | "muted"
-  | "bigMuted";
+    | "default"
+    | "title"
+    | "defaultSemiBold"
+    | "subtitle"
+    | "link"
+    | "muted"
+    | "bigMuted";
 };
 
 export function ThemedText({
@@ -24,24 +25,20 @@ export function ThemedText({
   ...rest
 }: ThemedTextProps) {
   const { theme } = useThemeColor();
-
-  // Calculamos un factor de escala basado en el ancho de la pantalla
-  // Para pantallas pequeñas (como 1080x2400 que tiene ~360 puntos de ancho), reducimos el tamaño
-  // Para pantallas medianas, reducimos ligeramente
-  // Para pantallas grandes, mantenemos el tamaño original
+  const { userFontScale } = useFontScale();
   const { width, fontScale } = useWindowDimensions();
 
-  // Escala base solo por ancho
+  // Escala base por ancho de pantalla
   const baseScale =
-    width <= 360 ? 0.70 : width <= 392 ? 0.80 : width <= 420 ? 0.90 : 1;
+    width <= 360 ? 0.7 : width <= 392 ? 0.8 : width <= 420 ? 0.9 : 1;
 
-  // Normalizamos para que el fontScale del sistema no haga todo gigante
+  // Normalizamos neutralizando el fontScale del sistema y aplicando el del usuario
   const normalizeFontSize = (baseSize: number) => {
-    return Math.round((baseSize * baseScale) / fontScale);
+    return Math.round((baseSize * baseScale * userFontScale) / fontScale);
   };
 
   const normalizeLineHeight = (baseLineHeight: number) => {
-    return Math.round((baseLineHeight * baseScale) / fontScale);
+    return Math.round((baseLineHeight * baseScale * userFontScale) / fontScale);
   };
 
   // Estilos dinámicos basados en el tipo y el tamaño de pantalla

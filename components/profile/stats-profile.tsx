@@ -88,10 +88,12 @@ const StatsProfile = () => {
 
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
-          <View style={[styles.iconCircle, { backgroundColor: TOKENS.badgeActive }]}>
+          <View
+            style={[styles.iconCircle, { backgroundColor: TOKENS.badgeActive }]}
+          >
             <Ionicons name="map" size={24} color={TOKENS.primary} />
           </View>
-          <ThemedText type="subtitle" >
+          <ThemedText type="subtitle">
             {user?.total_tours_completed || 0}
           </ThemedText>
           <ThemedText type="muted" style={styles.statLabel}>
@@ -100,7 +102,9 @@ const StatsProfile = () => {
         </View>
 
         <View style={styles.statCard}>
-          <View style={[styles.iconCircle, { backgroundColor: TOKENS.badgeActive }]}>
+          <View
+            style={[styles.iconCircle, { backgroundColor: TOKENS.badgeActive }]}
+          >
             <Ionicons name="help-circle" size={24} color={TOKENS.primary} />
           </View>
           <ThemedText type="subtitle">
@@ -112,7 +116,9 @@ const StatsProfile = () => {
         </View>
 
         <View style={styles.statCard}>
-          <View style={[styles.iconCircle, { backgroundColor: TOKENS.badgeActive }]}>
+          <View
+            style={[styles.iconCircle, { backgroundColor: TOKENS.badgeActive }]}
+          >
             <Ionicons name="location" size={24} color={TOKENS.primary} />
           </View>
           <ThemedText type="subtitle">

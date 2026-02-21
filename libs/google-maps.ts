@@ -1,4 +1,8 @@
-import { EARTH_RADIUS_M, ORS_PROFILE, WALK_SPEED_M_PER_MIN } from "@/constants/mapping";
+import {
+  EARTH_RADIUS_M,
+  ORS_PROFILE,
+  WALK_SPEED_M_PER_MIN,
+} from "@/constants/mapping";
 import { StopApiResponse } from "../types";
 
 export interface StopDistanceInfo {
@@ -24,8 +28,7 @@ export const getDistanceInMeters = (a: LatLng, b: LatLng): number => {
   const sinDLon = Math.sin(dLon / 2);
 
   const h =
-    sinDLat * sinDLat +
-    Math.cos(lat1) * Math.cos(lat2) * sinDLon * sinDLon;
+    sinDLat * sinDLat + Math.cos(lat1) * Math.cos(lat2) * sinDLon * sinDLon;
 
   const c = 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
 
@@ -223,9 +226,7 @@ export const getInformationBetweenStops = async (
 
   // Filtramos spots válidos y los ordenamos
   const validSpots = spots
-    .filter(
-      (s) => s.spot.latitude != null && s.spot.longitude != null,
-    )
+    .filter((s) => s.spot.latitude != null && s.spot.longitude != null)
     .sort((a, b) => a.order - b.order);
 
   if (validSpots.length < 2 && !userLocation) {

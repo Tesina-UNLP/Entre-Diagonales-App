@@ -13,6 +13,7 @@ import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
 
 import { LevelUpToast } from "@/components/toasts/level-up-toast";
 import { AuthProvider } from "@/contexts/auth";
+import { FontScaleProvider } from "@/contexts/font-scale";
 import { HapticsProvider } from "@/contexts/haptics";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Slot } from "expo-router";
@@ -91,19 +92,23 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-          <HapticsProvider>
-            <AuthProvider>
-              <ConfettiProvider
-                initParticleAmount={0}
-                colorPalette={confettiPalette}
-              >
-                <Slot screenOptions={{ animation: "fade" }} />
-              </ConfettiProvider>
-            </AuthProvider>
-            <Toast config={toastConfig} />
-            <StatusBar style="light" />
-          </HapticsProvider>
+        <ThemeProvider
+          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        >
+          <FontScaleProvider>
+            <HapticsProvider>
+              <AuthProvider>
+                <ConfettiProvider
+                  initParticleAmount={0}
+                  colorPalette={confettiPalette}
+                >
+                  <Slot screenOptions={{ animation: "fade" }} />
+                </ConfettiProvider>
+              </AuthProvider>
+              <Toast config={toastConfig} />
+              <StatusBar style="light" />
+            </HapticsProvider>
+          </FontScaleProvider>
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

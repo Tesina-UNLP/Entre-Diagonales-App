@@ -26,6 +26,11 @@ const sections = [
     onPress: () => router.navigate("/(tabs)/profile/settings/sounds"),
   },
   {
+    title: "Apariencia",
+    icon: "text",
+    onPress: () => router.navigate("/(tabs)/profile/settings/appearance"),
+  },
+  {
     title: "Centro de ayuda",
     icon: "help-circle",
     onPress: () => router.navigate("/(tabs)/profile/settings/help"),

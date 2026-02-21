@@ -109,9 +109,9 @@ const RouteDetails = () => {
       const userLoc =
         location && !isLoading
           ? {
-            latitude: location.latitude,
-            longitude: location.longitude,
-          }
+              latitude: location.latitude,
+              longitude: location.longitude,
+            }
           : null;
 
       // Si ya tenemos distancias y tenemos ubicación del usuario,
