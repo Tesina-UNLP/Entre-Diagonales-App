@@ -95,7 +95,6 @@ export const SecretItemCard = ({
   tourId: number;
   completed: boolean;
 }) => {
-  console.log({ secret, actual, spot, completed, tourId });
   const urlToRedirect = secret.obtained
     ? `/(tabs)/profile/secrets/${secret.id}?id=${secret.id}&name=${secret.name}&description=${secret.description}&image_url=${secret.image_url}`
     : actual || completed
