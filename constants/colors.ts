@@ -51,7 +51,7 @@ export const TOKENS: Tokens = {
   badgeActive: "#8CBCB0",
   accent: "#F9BC60",
   cardBackground: "rgba(146, 146, 146, 0.07)",
-  secretBackground: "#974215",
+  secretBackground: "#7A330F",
   firstPlace: "#A19A03",
   firstPlaceLight: "#E9D50E",
   secondPlace: "#71646A",

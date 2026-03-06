@@ -20,13 +20,14 @@ export const SpotCard = ({
   currentSpot: StopApiResponse | null;
   tourId: number;
 }) => {
-  const urlToRedirect = `/(stack)/spots/${spot.spot.id}`;
+  const urlToRedirect = {
+    pathname: "/(stack)/spots/[id]" as const,
+    params: { id: spot.spot.id, tourId: tourId },
+  };
   return (
     <>
       <TouchableOpacity
-        {...(completed
-          ? { onPress: () => router.navigate(urlToRedirect as any) }
-          : {})}
+        {...(completed ? { onPress: () => router.push(urlToRedirect) } : {})}
         style={[
           styles.spotCard,
           !completed && !actual && styles.spotIconInactive,
@@ -94,6 +95,7 @@ export const SecretItemCard = ({
   tourId: number;
   completed: boolean;
 }) => {
+  console.log({ secret, actual, spot, completed, tourId });
   const urlToRedirect = secret.obtained
     ? `/(tabs)/profile/secrets/${secret.id}?id=${secret.id}&name=${secret.name}&description=${secret.description}&image_url=${secret.image_url}`
     : actual || completed
@@ -106,7 +108,7 @@ export const SecretItemCard = ({
       }
       style={[
         styles.secretCard,
-        !secret.obtained && !actual && styles.secretIconInactive,
+        !secret.obtained && !actual && !completed && styles.secretIconInactive,
       ]}
     >
       <View style={styles.secretIconContainer}>
@@ -117,10 +119,10 @@ export const SecretItemCard = ({
         />
       </View>
       <View style={styles.secretContent}>
-        <ThemedText type="defaultSemiBold" style={{ color: "#F7A340" }}>
+        <ThemedText type="defaultSemiBold" style={{ color: "#FAF9F8" }}>
           {secret.obtained ? secret.name : "Objeto secreto"}
         </ThemedText>
-        <ThemedText type="muted" style={{ color: "#F7A340" }}>
+        <ThemedText type="muted" style={{ color: "#FAF9F8" }}>
           {secret.obtained
             ? "Obtuviste este objeto secreto"
             : actual
@@ -130,9 +132,9 @@ export const SecretItemCard = ({
       </View>
       <View style={styles.secretAction}>
         {secret.obtained ? (
-          <MaterialIcons name="check" size={14} color={"#F7A340"} />
+          <MaterialIcons name="check" size={14} color={"#FAF9F8"} />
         ) : (
-          <Feather name="search" size={14} color={"#F7A340"} />
+          <Feather name="search" size={14} color={"#FAF9F8"} />
         )}
       </View>
     </TouchableOpacity>
@@ -188,7 +190,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 20,
-    backgroundColor: "#FCDEAC",
+    backgroundColor: "#FAF9F8",
     alignSelf: "center",
   },
   secretIconInactive: {

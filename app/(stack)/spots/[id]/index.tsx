@@ -26,7 +26,10 @@ import {
 } from "@/components/spot-details";
 
 const SpotDetails = () => {
-  const { id } = useLocalSearchParams<{ id?: string }>();
+  const { id, tourId } = useLocalSearchParams<{
+    id?: string;
+    tourId?: string;
+  }>();
   const idStr = useMemo(() => (Array.isArray(id) ? id?.[0] : id), [id]);
   const { user } = useAuth();
   const [spotInfo, setSpotInfo] = useState<IndividualSpotApiResponse | null>(
@@ -88,7 +91,13 @@ const SpotDetails = () => {
    * Función para cerrar la pantalla y volver atrás.
    */
   const handleClose = () => {
-    router.back();
+    if (tourId) {
+      router.navigate(`/(tabs)/tours/${tourId}` as any);
+    } else if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.navigate("/(tabs)/tours" as any);
+    }
   };
 
   // Si está cargando, mostramos un indicador

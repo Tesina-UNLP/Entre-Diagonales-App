@@ -282,7 +282,7 @@ const SignUp = () => {
               type="link"
               onPress={() => router.navigate("/(public)/sign-in")}
             >
-              Inicia Sesion
+              Registrarme
             </ThemedText>
           </ThemedText>
         </FadeInView>

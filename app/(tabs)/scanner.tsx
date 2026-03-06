@@ -112,7 +112,7 @@ export default function ScannerScreen() {
         if (response.tour_completed) {
           urlToRedirect = `/(tabs)/tours/${params.tour_id}/complete?tour_id=${params.tour_id}&xp=${response.rewards.experience}&coins=${response.rewards.coins}&secrets=${response.total_secret_items}&trivias=${response.total_quizzes}&secrets_completed=${response.secret_items_completed}&trivias_completed=${response.quizzes_completed}&tour_name=${response.tour_name}`;
         } else {
-          urlToRedirect = `/(stack)/spots/${params.spot_id}`;
+          urlToRedirect = `/(stack)/spots/${params.spot_id}?tourId=${params.tour_id}`;
         }
       } else {
         // Intentamos completar el objeto secreto
