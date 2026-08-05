@@ -1,11 +1,11 @@
 import { TOKENS } from "@/constants/colors";
 import React, { useEffect, useRef } from "react";
-import { Animated, StyleSheet, ViewStyle } from "react-native";
+import { Animated, DimensionValue, StyleSheet, ViewStyle } from "react-native";
 
 // Componente base para crear skeletons con animación shimmer
 interface SkeletonProps {
-  width?: number | string;
-  height?: number | string;
+  width?: DimensionValue;
+  height?: DimensionValue;
   borderRadius?: number;
   style?: ViewStyle;
 }

@@ -4,11 +4,21 @@ function base64UrlDecode(input: string) {
   input = input.replace(/-/g, "+").replace(/_/g, "/");
   const pad = input.length % 4;
   if (pad) input += "=".repeat(4 - pad);
+  const bufferCtor = (
+    globalThis as {
+      Buffer?: {
+        from: (
+          value: string,
+          encoding: "base64",
+        ) => { toString: (encoding: "binary") => string };
+      };
+    }
+  ).Buffer;
   const decoded =
     typeof globalThis !== "undefined" &&
     typeof (globalThis as any).atob === "function"
       ? (globalThis as any).atob(input)
-      : Buffer.from(input, "base64").toString("binary");
+      : (bufferCtor?.from(input, "base64").toString("binary") ?? "");
   try {
     // convierte "binary string" a UTF-8
     return decodeURIComponent(

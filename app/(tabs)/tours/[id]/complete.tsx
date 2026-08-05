@@ -17,7 +17,7 @@ import {
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect } from "react";
 import { Image, StyleSheet, View } from "react-native";
-import { useConfetti } from "typegpu-confetti/react-native";
+import { useConfetti } from "@/components/confetti";
 import * as z from "zod";
 
 const CompleteTour = () => {

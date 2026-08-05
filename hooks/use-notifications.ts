@@ -32,8 +32,8 @@ export function useNotifications(config?: {
 }) {
   // Usamos useRef para guardar las suscripciones
   // Esto evita que se creen múltiples listeners
-  const notificationListener = useRef<Notifications.Subscription>();
-  const responseListener = useRef<Notifications.Subscription>();
+  const notificationListener = useRef<Notifications.Subscription | null>(null);
+  const responseListener = useRef<Notifications.Subscription | null>(null);
 
   useEffect(() => {
     // Configurar listener para notificaciones recibidas
@@ -55,9 +55,11 @@ export function useNotifications(config?: {
     return () => {
       if (notificationListener.current) {
         notificationListener.current.remove();
+        notificationListener.current = null;
       }
       if (responseListener.current) {
         responseListener.current.remove();
+        responseListener.current = null;
       }
     };
   }, [config?.onNotificationReceived, config?.onNotificationTapped]);

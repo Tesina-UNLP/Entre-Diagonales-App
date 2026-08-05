@@ -234,7 +234,7 @@ const SignUp = () => {
               onPress={handleSubmit(handleSignUp)}
               disabled={isSubmitting}
             >
-              Iniciar Sesion
+              Crear cuenta
             </ThemedButton>
           </View>
         </FadeInView>

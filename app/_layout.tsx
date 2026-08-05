@@ -1,10 +1,6 @@
 import { TOKENS } from "@/constants/colors";
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
 import { useFonts } from "expo-font";
+import { DarkTheme, DefaultTheme, Slot, ThemeProvider } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -16,10 +12,9 @@ import { AuthProvider } from "@/contexts/auth";
 import { FontScaleProvider } from "@/contexts/font-scale";
 import { HapticsProvider } from "@/contexts/haptics";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { Slot } from "expo-router";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { ConfettiProvider } from "typegpu-confetti/react-native";
+import { ConfettiProvider } from "@/components/confetti";
 import { vexo } from "vexo-analytics";
 
 SplashScreen.setOptions({

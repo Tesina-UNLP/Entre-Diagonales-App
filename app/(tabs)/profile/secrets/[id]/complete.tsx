@@ -3,11 +3,10 @@ import { useAuth } from "@/hooks/use-auth";
 import { useHaptics } from "@/hooks/use-haptics";
 import { SecretCompletionActions } from "@/views/secret-detail/secret-completion-actions";
 import { SecretCompletionInfo } from "@/views/secret-detail/secret-completion-info";
-import { useFocusEffect } from "@react-navigation/native";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useRef } from "react";
 import { StyleSheet, View } from "react-native";
-import { useConfetti } from "typegpu-confetti/react-native";
+import { useConfetti } from "@/components/confetti";
 import * as z from "zod";
 
 /**

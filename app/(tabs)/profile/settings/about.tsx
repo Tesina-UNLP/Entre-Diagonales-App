@@ -19,7 +19,7 @@ const sections = [
   {
     title: "Desarrolladores",
     icon: "people",
-    href: process.env.EXPO_PUBLIC_WEB_FRONTEND + "/developers",
+    href: process.env.EXPO_PUBLIC_WEB_FRONTEND,
   },
   {
     title: "Política de privacidad",
