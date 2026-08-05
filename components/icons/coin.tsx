@@ -17,11 +17,10 @@ const SvgComponent = (
     width = 30,
     ...props
   }: SvgProps & SVGRProps,
-  ref: Ref<SVGSVGElement>,
+  ref: Ref<React.ComponentRef<typeof Svg>>,
 ) => (
   <Svg
     {...props}
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 1024 1024"
     width={width}
     height={height}

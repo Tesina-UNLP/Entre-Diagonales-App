@@ -9,6 +9,12 @@ import { BaseToastProps } from "react-native-toast-message";
 // Obtenemos el ancho de la pantalla para hacer el toast responsive
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
+type LevelUpToastProps = BaseToastProps & {
+  props?: {
+    levelImage?: string;
+  };
+};
+
 /**
  * Componente de toast personalizado que se muestra cuando el usuario sube de nivel
  *
@@ -17,7 +23,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
  * - Un mensaje de felicitación animado
  * - Efectos visuales para hacer la celebración más atractiva
  */
-export const LevelUpToast = (props: BaseToastProps) => {
+export const LevelUpToast = (props: LevelUpToastProps) => {
   // Valores animados para crear efectos visuales
   const scaleAnim = useRef(new Animated.Value(0)).current; // Animación de escala (aparece desde pequeño)
   const rotateAnim = useRef(new Animated.Value(0)).current; // Animación de rotación para las estrellas

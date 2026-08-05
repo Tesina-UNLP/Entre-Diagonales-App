@@ -6,6 +6,9 @@ import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import React, { createContext, useEffect, useState } from "react";
 import Toast from "react-native-toast-message";
 
+const googleWebClientId = process.env.EXPO_PUBLIC_WEB_CLIENT_ID?.trim();
+const googleIosClientId = process.env.EXPO_PUBLIC_IOS_CLIENT_ID?.trim();
+
 interface AuthContextType {
   user: AppUser | null;
   isLoading: boolean;
@@ -110,7 +113,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         await removeSession();
         setUser(null);
       }
-    } catch (error) {
+    } catch {
       Toast.show({
         type: "error",
         text1: "Error al verificar",
@@ -123,10 +126,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     GoogleSignin.configure({
-      webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID || "",
-      offlineAccess: true,
+      ...(googleWebClientId ? { webClientId: googleWebClientId } : {}),
+      ...(googleIosClientId ? { iosClientId: googleIosClientId } : {}),
+      offlineAccess: Boolean(googleWebClientId),
       hostedDomain: "",
-      forceCodeForRefreshToken: true,
+      forceCodeForRefreshToken: Boolean(googleWebClientId),
       profileImageSize: 150,
     });
     checkAuthState();
@@ -193,6 +197,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const loginWithGoogle = async () => {
     try {
       setIsLoading(true);
+
+      if (!googleWebClientId) {
+        throw new Error("Falta configurar EXPO_PUBLIC_WEB_CLIENT_ID");
+      }
 
       // Verificar si Google Play Services están disponibles (solo Android)
       await GoogleSignin.hasPlayServices();
