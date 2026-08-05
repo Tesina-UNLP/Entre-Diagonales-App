@@ -1,5 +1,5 @@
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { BlurView } from "expo-blur";
+import { useBottomTabBarHeight } from "expo-router/build/react-navigation/bottom-tabs";
 import { StyleSheet } from "react-native";
 
 export default function BlurTabBarBackground() {
@@ -9,7 +9,7 @@ export default function BlurTabBarBackground() {
       // and matches the native tab bar appearance on iOS.
       tint="dark"
       intensity={50}
-      style={StyleSheet.absoluteFillObject}
+      style={StyleSheet.absoluteFill}
     />
   );
 }

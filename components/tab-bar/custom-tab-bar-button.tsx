@@ -3,6 +3,7 @@ import { useThemeColor } from "@/hooks/use-theme-color";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import ScannerIcon from "../icons/scanner";
+import { SCANNER_BUTTON_TOP_OFFSET } from "./tab-bar-metrics";
 
 type Props = {
   children?: React.ReactNode;
@@ -30,7 +31,7 @@ export function CustomTabBarButton({ children, onPress }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    top: -20, // Ajustamos la posición para que se alinee mejor
+    top: SCANNER_BUTTON_TOP_OFFSET,
     justifyContent: "center",
     alignItems: "center",
   },
