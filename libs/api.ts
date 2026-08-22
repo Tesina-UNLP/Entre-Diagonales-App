@@ -455,6 +455,28 @@ export const api = {
     return data;
   },
 
+  updateNotificationToken: async (token: string, expoToken: string) => {
+    const response = await fetch(`${apiBaseUrl}/profile/notifications/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ notification_token: expoToken }),
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Updating notification token failed";
+      throw new Error(message);
+    }
+    return data;
+  },
+
   updateActivity: async (token: string, notificationToken?: string) => {
     const response = await fetch(`${apiBaseUrl}/profile/activity/`, {
       method: "POST",
