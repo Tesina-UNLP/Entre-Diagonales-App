@@ -15,7 +15,8 @@ import {
 } from "expo-camera";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useRef, useState } from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
 import Toast from "react-native-toast-message";
 import { z } from "zod";
 
@@ -60,6 +61,15 @@ export default function ScannerScreen() {
   const params = parsed.success
     ? parsed.data
     : { mode: "qr", from: "/(tabs)", secret_id: "", spot_id: "", tour_id: "" };
+
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+
+    router.replace(params.from as any);
+  };
 
   const handleComplete = async () => {
     setIsLoading(true);
@@ -232,6 +242,15 @@ export default function ScannerScreen() {
         >
           <View style={styles.overlay}>
             <View style={styles.scanTextContainer}>
+              <TouchableOpacity
+                style={styles.cameraBackButton}
+                onPress={handleBack}
+                accessibilityRole="button"
+                accessibilityLabel="Volver al recorrido"
+                hitSlop={8}
+              >
+                <Ionicons name="chevron-back" size={26} color="white" />
+              </TouchableOpacity>
               <ThemedText style={styles.scanText}>
                 Escanea un código QR o de barras
               </ThemedText>
@@ -272,6 +291,15 @@ export default function ScannerScreen() {
         >
           <View style={styles.overlay}>
             <View style={styles.scanTextContainer}>
+              <TouchableOpacity
+                style={styles.cameraBackButton}
+                onPress={handleBack}
+                accessibilityRole="button"
+                accessibilityLabel="Volver al recorrido"
+                hitSlop={8}
+              >
+                <Ionicons name="chevron-back" size={26} color="white" />
+              </TouchableOpacity>
               <ThemedText type="defaultSemiBold" style={styles.scanText}>
                 Intenta apuntar de frente al lugar
               </ThemedText>
@@ -281,6 +309,12 @@ export default function ScannerScreen() {
                 enabled={flashEnabled}
                 onPress={() => setFlashEnabled(!flashEnabled)}
               />
+            </View>
+
+            <View pointerEvents="none" style={styles.monumentGuide}>
+              <ThemedText style={styles.monumentGuideLabel}>
+                Encuadrá el monumento acá
+              </ThemedText>
             </View>
 
             {/* Botón para tomar foto */}
@@ -312,6 +346,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    gap: 12,
     position: "absolute",
     top: 50,
     left: 0,
@@ -319,12 +354,44 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   scanText: {
+    flex: 1,
     color: "white",
     textAlign: "center",
     backgroundColor: "rgba(15, 38, 36, 0.4)",
     paddingHorizontal: 15,
     paddingVertical: 10,
     borderRadius: 8,
+  },
+  cameraBackButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(15, 38, 36, 0.72)",
+  },
+  monumentGuide: {
+    position: "absolute",
+    top: "20%",
+    left: "10%",
+    right: "10%",
+    aspectRatio: 0.82,
+    borderWidth: 2,
+    borderRadius: 20,
+    borderColor: "rgba(217, 236, 235, 0.72)",
+    backgroundColor: "rgba(15, 38, 36, 0.08)",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    paddingBottom: 14,
+  },
+  monumentGuideLabel: {
+    color: "rgba(217, 236, 235, 0.9)",
+    fontSize: 13,
+    fontWeight: "700",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: "rgba(15, 38, 36, 0.72)",
   },
   button: {
     backgroundColor: "#007AFF",

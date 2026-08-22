@@ -104,13 +104,17 @@ export default ({ config }: ConfigContext): ExpoConfig =>
           recordAudioAndroid: true,
         },
       ],
-      "expo-location",
       [
-        "expo-maps",
+        "expo-location",
         {
-          requestLocationPermission: true,
-          locationPermission:
+          locationWhenInUsePermission:
             "Permiso para usar la ubicación de Entre Diagonales",
+        },
+      ],
+      [
+        "react-native-maps",
+        {
+          androidGoogleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS,
         },
       ],
       [
@@ -138,4 +142,4 @@ export default ({ config }: ConfigContext): ExpoConfig =>
         projectId: "d8afb0e4-db66-480e-800f-b4d06f1368aa",
       },
     },
-  } as ExpoConfigWithNativeFlags);
+  }) as ExpoConfigWithNativeFlags;
