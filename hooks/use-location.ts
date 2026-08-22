@@ -7,6 +7,8 @@ export interface LocationData {
   timestamp: number;
 }
 
+const INITIAL_LOCATION_TIMEOUT_MS = 8_000;
+
 // Hook personalizado para manejar la ubicación del usuario
 export const useLocation = () => {
   // Estado para almacenar la ubicación actual
@@ -44,12 +46,34 @@ export const useLocation = () => {
 
         setHasPermission(true);
 
-        // Obtenemos la ubicación actual una sola vez
-        const ubicacionActual = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.High,
-        });
+        // Usamos la última ubicación disponible de inmediato, si existe. Esto evita
+        // que la UI quede sin referencia mientras el GPS obtiene una lectura nueva.
+        const lastKnownLocation = await Location.getLastKnownPositionAsync();
+        if (lastKnownLocation) {
+          setLocation(lastKnownLocation.coords);
+        }
 
-        setLocation(ubicacionActual.coords);
+        // En simuladores o interiores una lectura de alta precisión puede tardar
+        // indefinidamente. Esperamos un tiempo acotado y dejamos que el watcher
+        // continúe actualizando cuando haya señal.
+        let timeoutId: ReturnType<typeof setTimeout> | undefined;
+        const ubicacionActual = await Promise.race([
+          Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.Balanced,
+          }),
+          new Promise<null>((resolve) => {
+            timeoutId = setTimeout(
+              () => resolve(null),
+              INITIAL_LOCATION_TIMEOUT_MS,
+            );
+          }),
+        ]);
+
+        if (timeoutId) clearTimeout(timeoutId);
+
+        if (ubicacionActual) {
+          setLocation(ubicacionActual.coords);
+        }
         setIsLoading(false);
 
         // Observamos los cambios en la ubicación

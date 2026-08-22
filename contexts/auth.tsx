@@ -128,9 +128,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     GoogleSignin.configure({
       ...(googleWebClientId ? { webClientId: googleWebClientId } : {}),
       ...(googleIosClientId ? { iosClientId: googleIosClientId } : {}),
-      offlineAccess: Boolean(googleWebClientId),
-      hostedDomain: "",
-      forceCodeForRefreshToken: Boolean(googleWebClientId),
+      // El backend consume solamente el idToken; no solicitamos serverAuthCode
+      // ni refresh token, que requieren un flujo OAuth offline adicional.
+      offlineAccess: false,
+      forceCodeForRefreshToken: false,
       profileImageSize: 150,
     });
     checkAuthState();

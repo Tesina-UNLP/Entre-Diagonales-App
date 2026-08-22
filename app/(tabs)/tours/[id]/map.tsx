@@ -2,7 +2,11 @@ import Header from "@/components/header";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
-import { MIN_LOCATION_CHANGE_METERS } from "@/constants/mapping";
+import { ENTRE_DIAGONALES_MAP_STYLE } from "@/constants/map-styles";
+import {
+  MAX_ORS_WALKING_ROUTE_DISTANCE_METERS,
+  MIN_LOCATION_CHANGE_METERS,
+} from "@/constants/mapping";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "@/hooks/use-location";
 import { api } from "@/libs/api";
@@ -20,9 +24,6 @@ import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetScrollView,
 } from "@gorhom/bottom-sheet";
-import { AppleMaps, GoogleMaps } from "expo-maps";
-import { AppleMapsMapType } from "expo-maps/build/apple/AppleMaps.types";
-import { GoogleMapsMapType } from "expo-maps/build/google/GoogleMaps.types";
 import { router, useLocalSearchParams } from "expo-router";
 import React, {
   useCallback,
@@ -31,6 +32,14 @@ import React, {
   useRef,
   useState,
 } from "react";
+import ClusteredMapView from "react-native-map-clustering";
+import MapView, {
+  Callout,
+  Marker,
+  Polyline,
+  PROVIDER_GOOGLE,
+  Region,
+} from "react-native-maps";
 
 import {
   ActivityIndicator,
@@ -41,6 +50,17 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const DEFAULT_REGION: Region = {
+  latitude: -34.9206,
+  longitude: -57.9537,
+  latitudeDelta: 0.04,
+  longitudeDelta: 0.04,
+};
+
+const UserLocationMarker = Marker as React.ComponentType<
+  React.ComponentProps<typeof Marker> & { cluster?: boolean }
+>;
 
 const Map = () => {
   const { id } = useLocalSearchParams<{ id?: string }>();
@@ -53,6 +73,7 @@ const Map = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const insets = useSafeAreaInsets();
   const sheetRef = useRef<BottomSheet>(null);
+  const mapRef = useRef<MapView>(null);
   // Location refs para evitar re-renderizados innecesarios
   const lastLocationForDistancesRef = useRef<{
     latitude: number;
@@ -64,7 +85,7 @@ const Map = () => {
     longitude: number;
   } | null>(null);
   // Usamos el hook personalizado de ubicación
-  const { location, isLoading } = useLocation();
+  const { location } = useLocation();
   // Ruta solo hasta el siguiente punto a completar
   const [routeToNextSpot, setRouteToNextSpot] = useState<
     { latitude: number; longitude: number }[]
@@ -77,23 +98,22 @@ const Map = () => {
   const [stopsDistanceInfo, setStopsDistanceInfo] = useState<
     StopDistanceInfo[]
   >([]);
-  // Estado para controlar la posición de la cámara del mapa
-  const [cameraPosition, setCameraPosition] = useState({
-    coordinates: { latitude: 0, longitude: 0 },
-    zoom: 15,
-  });
+  // Región controlada para mantener clustering y movimientos programáticos sincronizados.
+  const [mapRegion, setMapRegion] = useState<Region>(DEFAULT_REGION);
 
   useEffect(() => {
-    if (location && !isLoading) {
-      setCameraPosition({
-        coordinates: {
-          latitude: location.latitude,
-          longitude: location.longitude,
-        },
-        zoom: 15,
-      });
+    if (location) {
+      const nextRegion = {
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.02,
+        longitudeDelta: 0.02,
+      };
+
+      setMapRegion(nextRegion);
+      mapRef.current?.animateToRegion(nextRegion, 500);
     }
-  }, [location, isLoading]);
+  }, [location]);
 
   const handleGetRoute = useCallback(async () => {
     setLoading(true);
@@ -134,8 +154,8 @@ const Map = () => {
         return;
       }
 
-      // Sin ubicación o cargando → limpiamos polyline y salimos
-      if (!location || isLoading) {
+      // Sin ubicación → limpiamos polyline y salimos.
+      if (!location) {
         setRouteToNextSpot([]);
         return;
       }
@@ -155,6 +175,32 @@ const Map = () => {
       }
 
       const nextSpot = routeInfo.spots[indexNextSpot];
+
+      const nextSpotCoordinates = {
+        latitude: nextSpot.spot.latitude,
+        longitude: nextSpot.spot.longitude,
+      };
+
+      if (
+        nextSpotCoordinates.latitude == null ||
+        nextSpotCoordinates.longitude == null
+      ) {
+        setRouteToNextSpot([]);
+        return;
+      }
+
+      const distanceToNextSpot = getDistanceInMeters(userLoc, {
+        latitude: nextSpotCoordinates.latitude,
+        longitude: nextSpotCoordinates.longitude,
+      });
+
+      if (distanceToNextSpot > MAX_ORS_WALKING_ROUTE_DISTANCE_METERS) {
+        // Dejamos visibles los puntos y las distancias locales, pero no pedimos
+        // a ORS una ruta a pie que excede el alcance del recorrido.
+        setRouteToNextSpot([]);
+        lastLocationForRouteRef.current = userLoc;
+        return;
+      }
 
       // Chequeamos si la ubicación cambió lo suficiente
       if (lastLocationForRouteRef.current) {
@@ -210,7 +256,7 @@ const Map = () => {
     };
 
     fetchRouteToNextSpot();
-  }, [routeInfo, completedSpots, location, isLoading, routeToNextSpot.length]);
+  }, [routeInfo, completedSpots, location, routeToNextSpot.length]);
 
   // Efecto para animar la polyline progresivamente
   useEffect(() => {
@@ -263,13 +309,10 @@ const Map = () => {
 
       if (!location) return;
 
-      const userLoc =
-        location && !isLoading
-          ? {
-              latitude: location.latitude,
-              longitude: location.longitude,
-            }
-          : null;
+      const userLoc = {
+        latitude: location.latitude,
+        longitude: location.longitude,
+      };
 
       // Si ya tenemos distancias calculadas y tenemos ubicación,
       // solo recalculamos si se movió lo suficiente
@@ -302,7 +345,7 @@ const Map = () => {
     };
 
     calculateDistances();
-  }, [routeInfo, location, isLoading, stopsDistanceInfo.length]);
+  }, [routeInfo, location, stopsDistanceInfo.length]);
 
   const snapPoints = useMemo(() => ["15%", "35%", "80%"], []);
 
@@ -334,55 +377,32 @@ const Map = () => {
   const handleSpotPress = useCallback((item: StopApiResponse) => {
     if (item.spot.latitude && item.spot.longitude) {
       // Actualizamos la posición de la cámara para movernos a las coordenadas del punto
-      setCameraPosition({
-        coordinates: {
-          latitude: item.spot.latitude,
-          longitude: item.spot.longitude,
-        },
-        zoom: 17, // Nivel de zoom alto para ver el punto con detalle
-      });
+      const nextRegion = {
+        latitude: item.spot.latitude,
+        longitude: item.spot.longitude,
+        latitudeDelta: 0.008,
+        longitudeDelta: 0.008,
+      };
+
+      setMapRegion(nextRegion);
+      mapRef.current?.animateToRegion(nextRegion, 450);
 
       // Colapsamos el bottomsheet para mostrar más del mapa
       sheetRef.current?.snapToIndex(0);
     }
   }, []);
 
-  // Crear markers para mostrar en el mapa
-  const mapMarkers = useMemo(() => {
-    if (!routeInfo || routeInfo.spots.length === 0) return [];
-
-    return routeInfo.spots
-      .filter(
+  const mappableSpots = useMemo(
+    () =>
+      routeInfo?.spots.filter(
         (spot) =>
           spot.spot.latitude !== null &&
           spot.spot.latitude !== undefined &&
           spot.spot.longitude !== null &&
           spot.spot.longitude !== undefined,
-      )
-      .map((spot) => {
-        const { isCompleted, isCurrent } = getSpotStatus(spot);
-
-        let markerColor = TOKENS.badgeActive;
-
-        if (isCompleted) {
-          markerColor = TOKENS.primary;
-        } else if (isCurrent) {
-          markerColor = TOKENS.accent;
-        }
-
-        return {
-          id: `marker-${spot.order}`,
-          coordinates: {
-            latitude: spot.spot.latitude as number,
-            longitude: spot.spot.longitude as number,
-          },
-          title: spot.spot.name,
-          snippet: spot.spot.tag || "",
-          showCallout: true,
-          color: markerColor,
-        };
-      });
-  }, [routeInfo, getSpotStatus]);
+      ) ?? [],
+    [routeInfo],
+  );
 
   const renderItem = useCallback(
     ({ item, index }: { item: StopApiResponse; index: number }) => {
@@ -540,61 +560,108 @@ const Map = () => {
             onBack={() => router.back()}
           />
 
-          {Platform.OS === "ios" ? (
-            <AppleMaps.View
-              style={{ flex: 1 }}
-              cameraPosition={cameraPosition}
-              markers={mapMarkers}
-              polylines={
-                animatedRouteToNextSpot.length > 0
-                  ? [
-                      {
-                        id: "ruta-hasta-siguiente",
-                        coordinates: animatedRouteToNextSpot,
-                        color: TOKENS.accent,
-                        width: 20,
-                      },
-                    ]
-                  : []
-              }
-              uiSettings={{
-                myLocationButtonEnabled: true,
-                compassEnabled: true,
-              }}
-              properties={{
-                mapType: AppleMapsMapType.IMAGERY,
-                isMyLocationEnabled: true,
-              }}
-            />
-          ) : (
-            <GoogleMaps.View
-              style={{ flex: 1 }}
-              cameraPosition={cameraPosition}
-              uiSettings={{
-                myLocationButtonEnabled: true,
-                zoomControlsEnabled: true,
-                mapToolbarEnabled: true,
-                compassEnabled: true,
-              }}
-              markers={mapMarkers}
-              properties={{
-                mapType: GoogleMapsMapType.NORMAL,
-                isMyLocationEnabled: true,
-              }}
-              polylines={
-                animatedRouteToNextSpot.length > 0
-                  ? [
-                      {
-                        id: "ruta-hasta-siguiente",
-                        coordinates: animatedRouteToNextSpot,
-                        color: TOKENS.accent,
-                        width: 20,
-                      },
-                    ]
-                  : []
-              }
-            />
-          )}
+          <ClusteredMapView
+            ref={mapRef}
+            style={styles.map}
+            provider={Platform.OS === "android" ? PROVIDER_GOOGLE : undefined}
+            initialRegion={mapRegion}
+            onRegionChangeComplete={setMapRegion}
+            customMapStyle={
+              Platform.OS === "android" ? ENTRE_DIAGONALES_MAP_STYLE : undefined
+            }
+            userInterfaceStyle="dark"
+            clusterColor={TOKENS.accent}
+            clusterTextColor={TOKENS.background}
+            radius={48}
+            minPoints={2}
+            showsUserLocation={false}
+            showsMyLocationButton={false}
+            showsCompass
+            toolbarEnabled={false}
+            moveOnMarkerPress={false}
+          >
+            {location && (
+              <UserLocationMarker
+                identifier="user-location"
+                cluster={false}
+                coordinate={{
+                  latitude: location.latitude,
+                  longitude: location.longitude,
+                }}
+                anchor={{ x: 0.5, y: 0.5 }}
+                tracksViewChanges={false}
+                zIndex={100}
+              >
+                <View style={styles.userMarkerRing}>
+                  <View style={styles.userMarkerDot} />
+                </View>
+              </UserLocationMarker>
+            )}
+
+            {mappableSpots.map((spot) => {
+              let { isCompleted, isCurrent } = getSpotStatus(spot);
+              const markerStyle = [
+                styles.spotMarker,
+                isCompleted && styles.spotMarkerCompleted,
+                isCurrent && styles.spotMarkerCurrent,
+              ];
+
+              return (
+                <Marker
+                  key={`marker-${spot.order}`}
+                  identifier={`marker-${spot.order}`}
+                  coordinate={{
+                    latitude: spot.spot.latitude as number,
+                    longitude: spot.spot.longitude as number,
+                  }}
+                  anchor={{ x: 0.5, y: 0.5 }}
+                  onPress={() => handleSpotPress(spot)}
+                  tracksViewChanges={false}
+                >
+                  <View style={markerStyle}>
+                    {isCompleted ? (
+                      <FontAwesome6
+                        name="check"
+                        size={16}
+                        color={TOKENS.text}
+                      />
+                    ) : (
+                      <ThemedText
+                        style={[
+                          styles.spotMarkerOrder,
+                          isCurrent && styles.spotMarkerOrderCurrent,
+                        ]}
+                      >
+                        {spot.order}
+                      </ThemedText>
+                    )}
+                  </View>
+                  <Callout tooltip>
+                    <View style={styles.mapCallout}>
+                      <ThemedText type="defaultSemiBold">
+                        {spot.spot.name}
+                      </ThemedText>
+                      {!!spot.spot.tag && (
+                        <ThemedText type="muted">
+                          {capitalizeFirstLetter(spot.spot.tag)}
+                        </ThemedText>
+                      )}
+                    </View>
+                  </Callout>
+                </Marker>
+              );
+            })}
+
+            {animatedRouteToNextSpot.length > 0 && (
+              <Polyline
+                coordinates={animatedRouteToNextSpot}
+                strokeColor={TOKENS.accent}
+                strokeWidth={6}
+                lineCap="round"
+                lineJoin="round"
+              />
+            )}
+          </ClusteredMapView>
 
           <BottomSheet
             ref={sheetRef}
@@ -635,6 +702,71 @@ const Map = () => {
 const styles = StyleSheet.create({
   map: {
     flex: 1,
+  },
+  userMarkerRing: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(249, 188, 96, 0.25)",
+    borderWidth: 2,
+    borderColor: TOKENS.text,
+  },
+  userMarkerDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: TOKENS.accent,
+  },
+  spotMarker: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: TOKENS.badgeActive,
+    borderWidth: 2,
+    borderColor: TOKENS.text,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.24,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+  spotMarkerCompleted: {
+    backgroundColor: TOKENS.primary,
+    borderColor: TOKENS.text,
+  },
+  spotMarkerCurrent: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: TOKENS.accent,
+    borderColor: TOKENS.accent,
+    borderWidth: 3,
+  },
+  spotMarkerOrder: {
+    color: TOKENS.text,
+    fontSize: 14,
+    fontWeight: "800",
+    lineHeight: 17,
+  },
+  spotMarkerOrderCurrent: {
+    color: TOKENS.background,
+    fontSize: 16,
+    lineHeight: 19,
+  },
+  mapCallout: {
+    minWidth: 160,
+    maxWidth: 240,
+    gap: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: TOKENS.background,
+    borderWidth: 1,
+    borderColor: TOKENS.primary,
   },
   container: {
     flex: 1,

@@ -4,11 +4,14 @@ import { ThemedBackground } from "@/components/themed-background";
 import { ThemedButton } from "@/components/themed-button";
 import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
+import { useMarkInteractive } from "@/hooks/use-mark-interactive";
 import { router } from "expo-router";
 import React from "react";
 import { Platform, StyleSheet, View } from "react-native";
 
 const Welcome = () => {
+  useMarkInteractive();
+
   return (
     <ThemedBackground style={styles.container}>
       <View style={styles.logoContainer}>

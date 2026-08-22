@@ -8,14 +8,24 @@ import "react-native-reanimated";
 import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
 
 import { LevelUpToast } from "@/components/toasts/level-up-toast";
+import { NotificationLifecycle } from "@/components/notification-lifecycle";
 import { AuthProvider } from "@/contexts/auth";
 import { FontScaleProvider } from "@/contexts/font-scale";
 import { HapticsProvider } from "@/contexts/haptics";
+import { StartupProvider } from "@/contexts/startup";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { useEffect } from "react";
+import { Observe, ObserveRoot } from "expo-observe";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ConfettiProvider } from "@/components/confetti";
 import { vexo } from "vexo-analytics";
+
+Observe.configure({
+  integrations: {
+    "expo-router": {
+      filteredParams: ["access", "refresh", "token"],
+    },
+  },
+});
 
 SplashScreen.setOptions({
   duration: 1000,
@@ -29,7 +39,7 @@ if (!__DEV__) {
   vexo(process.env.EXPO_PUBLIC_VEXO_PROJECT_ID || "");
 }
 
-export default function RootLayout() {
+function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
@@ -38,12 +48,6 @@ export default function RootLayout() {
     ClashDisplaySemiBold: require("../assets/fonts/ClashDisplay-Semibold.otf"),
     ClashDisplayMedium: require("../assets/fonts/ClashDisplay-Medium.otf"),
   });
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hide();
-    }
-  }, [loaded]);
 
   if (!loaded) {
     return null;
@@ -93,12 +97,15 @@ export default function RootLayout() {
           <FontScaleProvider>
             <HapticsProvider>
               <AuthProvider>
-                <ConfettiProvider
-                  initParticleAmount={0}
-                  colorPalette={confettiPalette}
-                >
-                  <Slot screenOptions={{ animation: "fade" }} />
-                </ConfettiProvider>
+                <NotificationLifecycle />
+                <StartupProvider>
+                  <ConfettiProvider
+                    initParticleAmount={0}
+                    colorPalette={confettiPalette}
+                  >
+                    <Slot screenOptions={{ animation: "fade" }} />
+                  </ConfettiProvider>
+                </StartupProvider>
               </AuthProvider>
               <Toast config={toastConfig} />
               <StatusBar style="light" />
@@ -109,3 +116,5 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+export default ObserveRoot.wrap(RootLayout);

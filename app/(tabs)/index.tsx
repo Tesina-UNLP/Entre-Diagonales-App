@@ -7,6 +7,7 @@ import { ProgressionLevelSkeleton } from "@/components/skeletons/progression-lev
 import { ThemedBackground } from "@/components/themed-background";
 import { UpdateAvailableCard } from "@/components/update-available-card";
 import { useAuth } from "@/hooks/use-auth";
+import { useMarkInteractive } from "@/hooks/use-mark-interactive";
 import { useMessageOfTheDay } from "@/hooks/use-message-of-the-day";
 import { useWeather } from "@/hooks/use-weather";
 import { api } from "@/libs/api";
@@ -29,6 +30,8 @@ export default function HomeScreen() {
     null,
   );
   const [loading, setLoading] = useState(true);
+
+  useMarkInteractive(!loading && !isWeatherLoading);
 
   const handleGetRoutes = useCallback(async () => {
     try {
