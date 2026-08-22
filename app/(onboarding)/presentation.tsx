@@ -3,6 +3,7 @@ import { ThemedBackground } from "@/components/themed-background";
 import { ThemedButton } from "@/components/themed-button";
 import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
+import { useMarkInteractive } from "@/hooks/use-mark-interactive";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -49,6 +50,7 @@ const presentationSteps: PresentationStep[] = [
 
 const Presentation = () => {
   const [currentStep, setCurrentStep] = useState(0);
+  useMarkInteractive();
 
   const handleNext = () => {
     if (currentStep < presentationSteps.length - 1) {

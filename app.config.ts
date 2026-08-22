@@ -12,6 +12,34 @@ type ExpoConfigWithNativeFlags = ExpoConfig & {
 
 const googleServicesFile = "./google-services.json";
 
+const requireGoogleClientId = (name: string): string => {
+  const clientId = process.env[name]?.trim();
+
+  if (!clientId?.endsWith(".apps.googleusercontent.com")) {
+    throw new Error(
+      `${name} debe contener un Client ID OAuth válido de Google.`,
+    );
+  }
+
+  return clientId;
+};
+
+const googleWebClientId = requireGoogleClientId("EXPO_PUBLIC_WEB_CLIENT_ID");
+const googleIosClientId = requireGoogleClientId("EXPO_PUBLIC_IOS_CLIENT_ID");
+const googleWebProjectNumber = googleWebClientId.split("-", 1)[0];
+const googleIosProjectNumber = googleIosClientId.split("-", 1)[0];
+
+if (googleWebProjectNumber !== googleIosProjectNumber) {
+  throw new Error(
+    "EXPO_PUBLIC_WEB_CLIENT_ID y EXPO_PUBLIC_IOS_CLIENT_ID deben pertenecer al mismo proyecto de Google Cloud.",
+  );
+}
+
+const googleIosUrlScheme = `com.googleusercontent.apps.${googleIosClientId.replace(
+  ".apps.googleusercontent.com",
+  "",
+)}`;
+
 export default ({ config }: ConfigContext): ExpoConfig =>
   ({
     ...config,
@@ -63,8 +91,7 @@ export default ({ config }: ConfigContext): ExpoConfig =>
       [
         "@react-native-google-signin/google-signin",
         {
-          iosUrlScheme:
-            "com.googleusercontent.apps.769784730737-7rokmmf9brdn9ade99u9eeum191pmbvj",
+          iosUrlScheme: googleIosUrlScheme,
         },
       ],
       "./plugins/with-google-signin-modular-headers",
