@@ -8,6 +8,7 @@ import "react-native-reanimated";
 import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
 
 import { LevelUpToast } from "@/components/toasts/level-up-toast";
+import { NotificationLifecycle } from "@/components/notification-lifecycle";
 import { AuthProvider } from "@/contexts/auth";
 import { FontScaleProvider } from "@/contexts/font-scale";
 import { HapticsProvider } from "@/contexts/haptics";
@@ -96,6 +97,7 @@ function RootLayout() {
           <FontScaleProvider>
             <HapticsProvider>
               <AuthProvider>
+                <NotificationLifecycle />
                 <StartupProvider>
                   <ConfettiProvider
                     initParticleAmount={0}

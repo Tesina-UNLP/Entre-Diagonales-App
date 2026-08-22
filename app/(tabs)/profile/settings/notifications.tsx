@@ -145,7 +145,8 @@ const Notifications = () => {
                 Notificaciones Push
               </ThemedText>
               <ThemedText type="muted">
-                Recibe notificaciones sobre nuevos recorridos y actualizaciones
+                Recibe avisos de nuevos recorridos y recordatorios para
+                continuar
               </ThemedText>
             </View>
             {/* Si está cargando, mostramos un spinner, sino el switch */}
