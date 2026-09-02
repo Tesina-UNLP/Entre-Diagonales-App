@@ -95,7 +95,7 @@ const Help = () => {
               variant="accent"
               size="small"
               onPress={() =>
-                Linking.openURL("mailto:entrediagonalesunlp@gmail.com")
+                Linking.openURL("mailto:entrediagonalesunlp1@gmail.com")
               }
             >
               <View style={styles.contactButtonContent}>
