@@ -52,7 +52,9 @@ export default ({ config }: ConfigContext): ExpoConfig =>
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     ios: {
-      supportsTablet: true,
+      // El lanzamiento 1.0 está validado únicamente para iPhone.
+      // Evita distribuir una interfaz de teléfono sin QA ni capturas de iPad.
+      supportsTablet: false,
       bundleIdentifier: "com.entrediagonales.app",
       usesAppleSignIn: true,
       privacyManifests: {

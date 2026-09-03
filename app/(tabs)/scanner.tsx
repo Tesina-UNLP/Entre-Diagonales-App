@@ -163,15 +163,30 @@ export default function ScannerScreen() {
     }
   };
 
-  // Función que se ejecuta cuando se escanea un código QR o de barras (solo para modo "qr")
-  const handleBarcodeScanned = ({ type, data }: BarcodeScanningResult) => {
+  // El lector queda disponible para futuros canjes. Por ahora no debe intentar
+  // completar secretos ni enviar IDs inexistentes a la API.
+  const handleBarcodeScanned = ({ data }: BarcodeScanningResult) => {
     // Si ya escaneamos, no hacer nada (evita múltiples escaneos)
     if (scanned) return;
 
     // Marcamos que ya escaneamos
     setScanned(true);
 
-    handleComplete();
+    Alert.alert(
+      "Código QR detectado",
+      "Los canjes con códigos QR estarán disponibles próximamente.",
+      [
+        {
+          text: "Seguir escaneando",
+          onPress: () => setScanned(false),
+        },
+        {
+          text: "Volver",
+          style: "cancel",
+          onPress: handleBack,
+        },
+      ],
+    );
   };
 
   // Función para tomar una foto (para modos "spot" y "secret")
@@ -227,7 +242,7 @@ export default function ScannerScreen() {
     return <CameraPermissionView onRequestPermission={requestPermission} />;
   }
 
-  // MODO QR: Para escanear códigos QR/barras
+  // MODO QR: lector disponible para futuros canjes.
   if (params.mode === "qr") {
     return (
       <View style={styles.container}>
@@ -236,9 +251,7 @@ export default function ScannerScreen() {
           facing="back"
           enableTorch={flashEnabled}
           onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
-          barcodeScannerSettings={{
-            barcodeTypes: ["qr", "ean13", "ean8", "code128", "code39"],
-          }}
+          barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
         >
           <View style={styles.overlay}>
             <View style={styles.scanTextContainer}>
@@ -252,7 +265,7 @@ export default function ScannerScreen() {
                 <Ionicons name="chevron-back" size={26} color="white" />
               </TouchableOpacity>
               <ThemedText style={styles.scanText}>
-                Escanea un código QR o de barras
+                Escaneá un código QR
               </ThemedText>
 
               {/* Botón de flash */}
