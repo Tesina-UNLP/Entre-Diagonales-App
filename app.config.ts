@@ -54,6 +54,7 @@ export default ({ config }: ConfigContext): ExpoConfig =>
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.entrediagonales.app",
+      usesAppleSignIn: true,
       privacyManifests: {
         NSPrivacyTracking: false,
         NSPrivacyTrackingDomains: [],
@@ -93,6 +94,7 @@ export default ({ config }: ConfigContext): ExpoConfig =>
     },
     plugins: [
       "expo-router",
+      "expo-apple-authentication",
       "expo-asset",
       [
         "expo-splash-screen",

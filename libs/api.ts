@@ -60,6 +60,31 @@ export const api = {
     return data;
   },
 
+  loginWithApple: async (
+    idToken: string,
+    appleUser: string,
+    fullName?: string | null,
+  ) => {
+    const response = await fetch(`${apiBaseUrl}/auth/apple/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ idToken, appleUser, fullName }),
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Apple login failed";
+      throw new Error(message);
+    }
+    return data;
+  },
+
   // register
   register: async (
     email: string,
