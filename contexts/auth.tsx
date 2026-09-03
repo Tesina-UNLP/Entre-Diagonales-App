@@ -19,7 +19,8 @@ interface AuthContextType {
     password: string,
     confirmPassword: string,
   ) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
+  clearDeletedAccountSession: () => Promise<void>;
   checkAuthState?: () => Promise<void>;
   loginWithGoogle: () => Promise<AppUser | null>;
   loginWithApple: () => Promise<AppUser | null>;
@@ -37,6 +38,7 @@ export const AuthContext = createContext<AuthContextType>({
   },
   register: async () => {},
   logout: async () => {},
+  clearDeletedAccountSession: async () => {},
   loginWithGoogle: async () => {
     return null;
   },
@@ -200,6 +202,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const clearDeletedAccountSession = async () => {
+    const shouldRevokeGoogle = user?.account_deletion_auth_method === "google";
+    setUser(null);
+    previousLevelIdRef.current = undefined;
+    await removeSession();
+
+    if (shouldRevokeGoogle) {
+      try {
+        await GoogleSignin.revokeAccess();
+      } catch (error) {
+        console.warn("Could not revoke local Google access", error);
+      }
+      try {
+        await GoogleSignin.signOut();
+      } catch (error) {
+        console.warn("Could not close the local Google session", error);
+      }
+    }
+  };
+
   const loginWithGoogle = async () => {
     try {
       setIsLoading(true);
@@ -298,6 +320,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     register,
     logout,
+    clearDeletedAccountSession,
     loginWithGoogle,
     loginWithApple,
     checkAuthState,

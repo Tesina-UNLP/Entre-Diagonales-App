@@ -118,6 +118,7 @@ export type AppUser = {
   coins: number;
   notifications?: boolean; // Estado de las notificaciones push
   provider?: string;
+  account_deletion_auth_method: AccountDeletionAuthMethod;
   character?: {
     id: number;
     name: string;
@@ -143,6 +144,26 @@ export type AppUser = {
   total_tours_completed: number;
   total_secret_items_completed: number;
   total_quizzes_completed: number;
+};
+
+export type AccountDeletionAuthMethod = "password" | "google" | "apple";
+
+export type AccountDeletionPayload =
+  | { method: "password"; password: string }
+  | { method: "google"; id_token: string }
+  | {
+      method: "apple";
+      identity_token: string;
+      authorization_code: string;
+      apple_user: string;
+    };
+
+export type AccountDeletionResponse = {
+  request_id: string;
+  status: "pending";
+  deletion_scheduled_for: string;
+  deadline_at: string;
+  apple_revocation_status: "not_applicable" | "revoked" | "manual_required";
 };
 
 export type FeedbackApiData = {

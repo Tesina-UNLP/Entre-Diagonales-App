@@ -1,4 +1,6 @@
 import {
+  AccountDeletionPayload,
+  AccountDeletionResponse,
   CharacterApiResponse,
   FeedbackApiData,
   IndividualSpotApiResponse,
@@ -110,6 +112,30 @@ export const api = {
         data?.detail ||
         response.statusText ||
         "Registration failed";
+      throw new Error(message);
+    }
+    return data;
+  },
+
+  requestAccountDeletion: async (
+    token: string,
+    payload: AccountDeletionPayload,
+  ): Promise<AccountDeletionResponse> => {
+    const response = await fetch(`${apiBaseUrl}/profile/account-deletion/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        data?.detail ||
+        data?.error ||
+        data?.message ||
+        "No pudimos solicitar la eliminación de la cuenta.";
       throw new Error(message);
     }
     return data;

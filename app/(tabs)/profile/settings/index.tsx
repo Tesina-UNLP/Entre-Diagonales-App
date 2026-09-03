@@ -5,7 +5,7 @@ import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { Href, router } from "expo-router";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 
@@ -84,6 +84,30 @@ const Settings = () => {
         ))}
 
         <FadeInView delay={600}>
+          <TouchableOpacity
+            accessibilityRole="button"
+            onPress={() =>
+              router.navigate("/(tabs)/profile/settings/delete-account" as Href)
+            }
+            style={styles.sectionContainer}
+          >
+            <View style={styles.sectionLeft}>
+              <Ionicons name="trash-outline" size={24} color={TOKENS.error} />
+              <ThemedText type="defaultSemiBold" style={styles.logoutText}>
+                Eliminar cuenta
+              </ThemedText>
+            </View>
+            <View style={styles.sectionRight}>
+              <Ionicons
+                name="chevron-forward-outline"
+                size={20}
+                color={TOKENS.error}
+              />
+            </View>
+          </TouchableOpacity>
+        </FadeInView>
+
+        <FadeInView delay={700}>
           <TouchableOpacity
             onPress={handleSignOut}
             style={styles.sectionContainer}
