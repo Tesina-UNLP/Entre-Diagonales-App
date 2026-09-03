@@ -684,6 +684,28 @@ export const api = {
     return data as RankingApiResponse[];
   },
 
+  reportRankingName: async (
+    token: string,
+    userId: number,
+    reason: "offensive" | "impersonation" | "other",
+  ): Promise<{ message: string }> => {
+    const response = await fetch(`${apiBaseUrl}/ranking/${userId}/report-name/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ reason }),
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(
+        data?.detail || data?.error || data?.message || "No pudimos enviar el reporte.",
+      );
+    }
+    return data as { message: string };
+  },
+
   usePowerUp5050: async (
     token: string,
     id: number,

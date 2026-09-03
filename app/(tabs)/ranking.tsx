@@ -8,9 +8,10 @@ import { UserRankingCard } from "@/components/user-ranking-card";
 import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
 import { useRanking } from "@/hooks/use-ranking";
+import { api } from "@/libs/api";
 import { Octicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { FlatList, Image, Pressable, StyleSheet, View } from "react-native";
+import { Alert, FlatList, Image, Pressable, StyleSheet, View } from "react-native";
 
 // Tipo para los tabs disponibles
 type RankingTab = "global" | "level";
@@ -33,6 +34,45 @@ export default function RankingScreen() {
     user?.username,
     levelFilter,
   );
+
+  const reportName = (userId: number, name: string) => {
+    Alert.alert(
+      "Reportar nombre",
+      `¿Por qué querés reportar a ${name}?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Ofensivo",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await api.reportRankingName(token, userId, "offensive");
+              Alert.alert("Reporte enviado", "Gracias. Revisaremos este nombre.");
+            } catch (error) {
+              Alert.alert(
+                "No pudimos enviar el reporte",
+                error instanceof Error ? error.message : "Intentá nuevamente.",
+              );
+            }
+          },
+        },
+        {
+          text: "Suplantación u otro",
+          onPress: async () => {
+            try {
+              await api.reportRankingName(token, userId, "impersonation");
+              Alert.alert("Reporte enviado", "Gracias. Revisaremos este nombre.");
+            } catch (error) {
+              Alert.alert(
+                "No pudimos enviar el reporte",
+                error instanceof Error ? error.message : "Intentá nuevamente.",
+              );
+            }
+          },
+        },
+      ],
+    );
+  };
 
   return (
     <ThemedBackground style={styles.container}>
@@ -177,6 +217,17 @@ export default function RankingScreen() {
                     </ThemedText>
                   </View>
                 </View>
+                {String(item.id) !== user?.id && (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Reportar el nombre de ${item.display_name || item.username}`}
+                    hitSlop={8}
+                    onPress={() => reportName(item.id, item.display_name || item.username)}
+                    style={styles.reportButton}
+                  >
+                    <Octicons name="report" size={18} color={TOKENS.muted} />
+                  </Pressable>
+                )}
               </View>
             </FadeInView>
           )}
@@ -271,6 +322,10 @@ const styles = StyleSheet.create({
   rowPts: {
     marginTop: 2,
     fontSize: 13,
+  },
+  reportButton: {
+    padding: 8,
+    marginLeft: 8,
   },
   bottomSpacer: { height: 60 },
 });

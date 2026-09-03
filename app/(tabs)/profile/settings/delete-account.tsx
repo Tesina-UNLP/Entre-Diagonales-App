@@ -278,6 +278,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 0,
+    paddingInline: 0,
     paddingTop: 0,
   },
   content: {

@@ -1,4 +1,5 @@
 import { FadeInView } from "@/components/animations/fade-in-view";
+import { AppleSignInButton } from "@/components/apple-sign-in-button";
 import LogoWhite from "@/components/icons/logo-white";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedButton } from "@/components/themed-button";
@@ -249,15 +250,8 @@ const SignIn = () => {
         </FadeInView>
         {Platform.OS === "ios" && appleAvailable && (
           <FadeInView delay={550} style={styles.appleButtonContainer}>
-            <AppleAuthentication.AppleAuthenticationButton
-              buttonType={
-                AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN
-              }
-              buttonStyle={
-                AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
-              }
-              cornerRadius={12}
-              style={styles.appleButton}
+            <AppleSignInButton
+              label="Iniciar sesión con Apple"
               onPress={handleAppleSignIn}
             />
           </FadeInView>
@@ -372,10 +366,6 @@ const styles = StyleSheet.create({
   },
   appleButtonContainer: {
     width: "100%",
-  },
-  appleButton: {
-    width: "100%",
-    height: 56,
   },
   errorText: {
     color: TOKENS.error,
