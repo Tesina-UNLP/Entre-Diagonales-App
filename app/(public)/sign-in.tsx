@@ -233,7 +233,8 @@ const SignIn = () => {
           <View style={styles.divider} />
         </FadeInView>
 
-        <FadeInView delay={500} style={styles.signInButtonContainer}>
+        <View style={styles.buttonsContainer}>
+          <FadeInView delay={500} style={styles.signInButtonContainer}>
           <ThemedButton variant="secondary" onPress={handleGoogleSignIn}>
             <View style={styles.googleButtonContent}>
               <FontAwesome name="google" size={24} color={TOKENS.primary} />
@@ -256,6 +257,7 @@ const SignIn = () => {
             />
           </FadeInView>
         )}
+        </View>
         <FadeInView delay={600}>
           <ThemedText type="muted">
             No tienes una cuenta?{" "}
@@ -350,10 +352,15 @@ const styles = StyleSheet.create({
     width: "100%",
     marginBottom: 10,
   },
+  buttonsContainer: {
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 5,
+    width: "100%",
+  },
   googleButtonContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingBottom: 20,
   },
   googleButtonContent: {
     flexDirection: "row",
@@ -366,6 +373,7 @@ const styles = StyleSheet.create({
   },
   appleButtonContainer: {
     width: "100%",
+    paddingBottom: 20,
   },
   errorText: {
     color: TOKENS.error,

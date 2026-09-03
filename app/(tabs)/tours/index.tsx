@@ -10,7 +10,7 @@ import { LEVELS, TAGS } from "@/constants/lists";
 import { useAuth } from "@/hooks/use-auth";
 import { api } from "@/libs/api";
 import { TourApiResponse } from "@/types";
-import { cloneElement, useCallback, useEffect, useState } from "react";
+import { cloneElement, useCallback, useEffect, useRef, useState } from "react";
 import {
   FlatList,
   Image,
@@ -36,15 +36,31 @@ export default function TabTwoScreen() {
   const [refreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // Estado de carga
   const { user } = useAuth();
+  const currentAccessRef = useRef<string | undefined>(user?.access);
+
+  currentAccessRef.current = user?.access;
 
   const handleGetRoutes = useCallback(async () => {
+    const accessToken = user?.access;
+
+    if (!accessToken) {
+      setAllRoutes([]);
+      setRoutes([]);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       // Activar el estado de carga al inicio
       setIsLoading(true);
-      const response = await api.getRoutes(user?.access || "");
+      const response = await api.getRoutes(accessToken);
+      if (currentAccessRef.current !== accessToken) return;
+
       setAllRoutes(response);
       setRoutes(response);
     } catch {
+      if (currentAccessRef.current !== accessToken) return;
+
       Toast.show({
         type: "error",
         text1: "Error al obtener las rutas",
@@ -52,7 +68,9 @@ export default function TabTwoScreen() {
       });
     } finally {
       // Desactivar el estado de carga al finalizar (exitoso o con error)
-      setIsLoading(false);
+      if (currentAccessRef.current === accessToken) {
+        setIsLoading(false);
+      }
     }
   }, [user?.access]);
 

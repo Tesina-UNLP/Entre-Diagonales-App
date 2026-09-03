@@ -17,7 +17,7 @@ import HeaderHome from "@/views/home/header-home";
 import HorizontalTourList from "@/views/home/horizontal-tours-list";
 import MessageOfTheDay from "@/views/home/message-of-the-day";
 import ProgressionLevel from "@/views/home/progression-level";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import Toast from "react-native-toast-message";
 
@@ -30,19 +30,35 @@ export default function HomeScreen() {
     null,
   );
   const [loading, setLoading] = useState(true);
+  const currentAccessRef = useRef<string | undefined>(user?.access);
+
+  currentAccessRef.current = user?.access;
 
   useMarkInteractive(!loading && !isWeatherLoading);
 
   const handleGetRoutes = useCallback(async () => {
+    const accessToken = user?.access;
+
+    if (!accessToken) {
+      setRoutes([]);
+      setCurrentRoute(null);
+      setLoading(false);
+      return [];
+    }
+
     try {
       setLoading(true);
-      const response = await api.getRoutes(user?.access || "");
+      const response = await api.getRoutes(accessToken);
+      if (currentAccessRef.current !== accessToken) return [];
+
       const current = response.find(
         (route) => route.started && route.completed_at === null,
       );
       setRoutes(response);
       setCurrentRoute(current || null);
     } catch {
+      if (currentAccessRef.current !== accessToken) return [];
+
       Toast.show({
         type: "error",
         text1: "Error al obtener las rutas",
@@ -50,7 +66,9 @@ export default function HomeScreen() {
       });
       return [];
     } finally {
-      setLoading(false);
+      if (currentAccessRef.current === accessToken) {
+        setLoading(false);
+      }
     }
   }, [user?.access]);
 
