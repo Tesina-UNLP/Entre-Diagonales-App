@@ -102,7 +102,13 @@ export default ({ config }: ConfigContext): ExpoConfig =>
           imageWidth: 200,
         },
       ],
-      "expo-secure-store",
+      [
+        "expo-secure-store",
+        {
+          // No usamos autenticación biométrica para leer credenciales.
+          faceIDPermission: false,
+        },
+      ],
       "expo-font",
       "expo-web-browser",
       [
@@ -115,17 +121,20 @@ export default ({ config }: ConfigContext): ExpoConfig =>
       [
         "expo-camera",
         {
-          cameraPermission: "Permiso para usar la cámara de Entre Diagonales",
-          microphonePermission:
-            "Permiso para usar el micrófono de Entre Diagonales",
-          recordAudioAndroid: true,
+          cameraPermission:
+            "Entre Diagonales usa la cámara para escanear códigos y fotografiar monumentos u objetos, con el fin de validar desafíos del recorrido.",
+          microphonePermission: false,
+          recordAudioAndroid: false,
         },
       ],
       [
         "expo-location",
         {
           locationWhenInUsePermission:
-            "Permiso para usar la ubicación de Entre Diagonales",
+            "Tu ubicación se usa mientras utilizás la app para mostrarte en el mapa, calcular rutas y verificar que estés cerca de una parada.",
+          locationAlwaysAndWhenInUsePermission: false,
+          locationAlwaysPermission: false,
+          motionUsagePermission: false,
         },
       ],
       [
@@ -141,7 +150,15 @@ export default ({ config }: ConfigContext): ExpoConfig =>
           sounds: ["./assets/sfx/notifications.wav"],
         },
       ],
-      "expo-audio",
+      [
+        "expo-audio",
+        {
+          microphonePermission: false,
+          recordAudioAndroid: false,
+          enableBackgroundPlayback: false,
+          enableBackgroundRecording: false,
+        },
+      ],
     ],
     updates: {
       url: "https://u.expo.dev/d8afb0e4-db66-480e-800f-b4d06f1368aa",

@@ -15,6 +15,7 @@ import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Image,
+  Modal,
   Platform,
   StyleSheet,
   TouchableOpacity,
@@ -28,6 +29,9 @@ const Choice = () => {
   const { completeOnboarding, user } = useAuth();
   const [npcs, setNpcs] = useState<CharacterApiResponse[]>([]);
   const [selectedNpc, setSelectedNpc] = useState<number | null>(null);
+  const [showNotificationsPrompt, setShowNotificationsPrompt] =
+    useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
   // Efecto para cargar los personajes disponibles
   useEffect(() => {
     const fetchNpcs = async () => {
@@ -40,39 +44,13 @@ const Choice = () => {
     fetchNpcs();
   }, [user]);
 
-  const requestNotifications = async () => {
-    try {
-      // Paso 1: Solicitar permisos al usuario
-      const granted = await requestNotificationPermissions();
-
-      if (granted) {
-        // Paso 2: Si acepta, obtener el token del dispositivo
-        const token = await getExpoPushToken();
-
-        if (token) {
-          // Paso 3: Guardar el token en el estado
-          return token;
-        } else {
-          return null;
-        }
-      } else {
-        // El usuario rechazó los permisos, seguimos sin token (string vacío)
-        return null;
-      }
-    } catch (error) {
-      // Si hay algún error, lo registramos pero no bloqueamos el onboarding
-      console.error("Error al solicitar permisos de notificaciones:", error);
-      return null;
-    }
-  };
-
-  const complete = async () => {
+  const finishOnboarding = async (notificationToken = "") => {
     try {
       if (!selectedNpc) return;
-      const token = await requestNotifications();
-      completeOnboarding({
+      setIsCompleting(true);
+      await completeOnboarding({
         characterId: selectedNpc,
-        notificationToken: token ?? "",
+        notificationToken,
       });
       router.replace("/(tabs)");
     } catch (error: any) {
@@ -82,7 +60,26 @@ const Choice = () => {
         text1: "Error al completar el onboarding",
         text2: message,
       });
+    } finally {
+      setIsCompleting(false);
     }
+  };
+
+  const requestNotificationsAndFinish = async () => {
+    let notificationToken = "";
+
+    try {
+      const granted = await requestNotificationPermissions();
+      if (granted) {
+        notificationToken = (await getExpoPushToken()) ?? "";
+      }
+    } catch (error) {
+      // Un error al registrar notificaciones no debe impedir usar la app.
+      console.error("Error al configurar notificaciones:", error);
+    }
+
+    setShowNotificationsPrompt(false);
+    await finishOnboarding(notificationToken);
   };
 
   const back = () => {
@@ -146,11 +143,57 @@ const Choice = () => {
       </FadeInView>
       {selectedNpc && (
         <FadeInView delay={400} style={styles.navigationContainer}>
-          <ThemedButton variant="primary" onPress={complete}>
+          <ThemedButton
+            variant="primary"
+            onPress={() => setShowNotificationsPrompt(true)}
+            loading={isCompleting}
+          >
             Iniciar aventuras
           </ThemedButton>
         </FadeInView>
       )}
+      <Modal
+        visible={showNotificationsPrompt}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowNotificationsPrompt(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalContent}>
+            <MaterialIcons
+              name="notifications-active"
+              size={36}
+              color={TOKENS.primary}
+            />
+            <ThemedText type="title" style={styles.modalTitle}>
+              ¿Activar notificaciones?
+            </ThemedText>
+            <ThemedText type="muted" style={styles.modalDescription}>
+              Te avisaremos de nuevos recorridos y recordatorios para continuar
+              tus aventuras. Podés cambiarlas cuando quieras desde Ajustes.
+            </ThemedText>
+            <View style={styles.modalActions}>
+              <ThemedButton
+                variant="primary"
+                onPress={requestNotificationsAndFinish}
+                loading={isCompleting}
+              >
+                Sí, activar
+              </ThemedButton>
+              <ThemedButton
+                variant="ghost"
+                onPress={() => {
+                  setShowNotificationsPrompt(false);
+                  finishOnboarding();
+                }}
+                disabled={isCompleting}
+              >
+                Ahora no
+              </ThemedButton>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ThemedBackground>
   );
 };
@@ -210,6 +253,22 @@ const styles = StyleSheet.create({
   personImage: { width: 80, height: 80, borderRadius: 100 },
   personName: { marginTop: 8 },
   xImage: { width: 250, height: 250 },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.55)",
+    justifyContent: "center",
+    padding: 24,
+  },
+  modalContent: {
+    alignItems: "center",
+    backgroundColor: TOKENS.background,
+    borderRadius: 20,
+    gap: 16,
+    padding: 28,
+  },
+  modalTitle: { textAlign: "center" },
+  modalDescription: { textAlign: "center" },
+  modalActions: { width: "100%", gap: 8 },
 });
 
 export default Choice;
