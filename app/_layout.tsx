@@ -17,7 +17,6 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Observe, ObserveRoot } from "expo-observe";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ConfettiProvider } from "@/components/confetti";
-import { vexo } from "vexo-analytics";
 
 Observe.configure({
   integrations: {
@@ -33,11 +32,6 @@ SplashScreen.setOptions({
 });
 
 SplashScreen.preventAutoHideAsync();
-
-// You may want to wrap this with `if (!__DEV__) { ... }` to only run Vexo in production.
-if (!__DEV__) {
-  vexo(process.env.EXPO_PUBLIC_VEXO_PROJECT_ID || "");
-}
 
 function RootLayout() {
   const colorScheme = useColorScheme();
