@@ -34,6 +34,12 @@ export default function ScannerScreen() {
   // Estado para indicar si está tomando la foto
   const [isTakingPhoto, setIsTakingPhoto] = useState(false);
 
+  // Limitar la resolución evita subir fotos tomadas a la resolución nativa
+  // completa (normalmente 12 MP o más). Dos megapíxeles mantienen suficiente
+  // detalle para la verificación visual y reducen de forma considerable el
+  // tiempo de subida y el consumo de datos.
+  const [pictureSize, setPictureSize] = useState<string | undefined>();
+
   // Estado para controlar el flash/linterna de la cámara
   const [flashEnabled, setFlashEnabled] = useState(false);
 
@@ -85,7 +91,6 @@ export default function ScannerScreen() {
     if (photo) {
       // Extraemos el nombre del archivo y el tipo (extensión)
       const fileName = photo.split("/").pop() || "photo.jpg";
-      const fileType = fileName.split(".").pop();
 
       // Agregamos la foto al FormData como si fuera un archivo
       // @ts-ignore - React Native maneja FormData de forma especial
@@ -93,7 +98,7 @@ export default function ScannerScreen() {
       formData.append(params.mode === "spot" ? "file" : "image", {
         uri: photo, // La ubicación de la foto en el dispositivo
         name: fileName, // El nombre del archivo
-        type: `image/${fileType}`, // El tipo MIME (image/jpg, image/png, etc.)
+        type: "image/jpeg", // MIME estándar del JPEG creado por expo-camera
       });
     }
     if (!user?.access) {
@@ -201,9 +206,9 @@ export default function ScannerScreen() {
       // Indicamos que estamos tomando la foto (para feedback visual)
       setIsTakingPhoto(true);
 
-      // Tomamos la foto con calidad media (0.5) para no ocupar mucho espacio
+      // La resolución se limita con `pictureSize` y luego se comprime el JPEG.
       const photo = await cameraRef.current.takePictureAsync({
-        quality: 0.7,
+        quality: 0.65,
         base64: false,
       });
 
@@ -216,6 +221,34 @@ export default function ScannerScreen() {
       Alert.alert("Error", "No se pudo tomar la foto");
     } finally {
       setIsTakingPhoto(false);
+    }
+  };
+
+  const configurePictureSize = async () => {
+    try {
+      const sizes = await cameraRef.current?.getAvailablePictureSizesAsync();
+      if (!sizes?.length) return;
+
+      const targetPixels = 2_200_000;
+      const candidates = sizes
+        .map((size) => {
+          const [width, height] = size.split("x").map(Number);
+          return { size, pixels: width * height };
+        })
+        .filter(({ pixels }) => Number.isFinite(pixels) && pixels > 0)
+        .sort((a, b) => b.pixels - a.pixels);
+
+      // Elegimos la mayor resolución que no supere el objetivo. Si el equipo
+      // no ofrece una menor, usamos la más pequeña disponible.
+      const selected =
+        candidates.find(({ pixels }) => pixels <= targetPixels) ??
+        candidates[candidates.length - 1];
+
+      setPictureSize(selected?.size);
+    } catch (error) {
+      // La cámara conserva su tamaño predeterminado si el dispositivo no
+      // expone los tamaños disponibles; la compresión JPEG sigue aplicando.
+      console.warn("No se pudo configurar la resolución de la foto:", error);
     }
   };
 
@@ -301,6 +334,8 @@ export default function ScannerScreen() {
           style={styles.camera}
           facing="back"
           enableTorch={flashEnabled}
+          pictureSize={pictureSize}
+          onCameraReady={configurePictureSize}
         >
           <View style={styles.overlay}>
             <View style={styles.scanTextContainer}>
