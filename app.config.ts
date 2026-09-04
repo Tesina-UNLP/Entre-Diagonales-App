@@ -57,6 +57,10 @@ export default ({ config }: ConfigContext): ExpoConfig =>
       supportsTablet: false,
       bundleIdentifier: "com.entrediagonales.app",
       usesAppleSignIn: true,
+      infoPlist: {
+        NSMotionUsageDescription:
+          "Entre Diagonales usa los datos de movimiento para mejorar la precisión de la ubicación y verificar tu progreso durante los recorridos.",
+      },
       privacyManifests: {
         NSPrivacyTracking: false,
         NSPrivacyTrackingDomains: [],
