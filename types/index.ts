@@ -207,6 +207,25 @@ export type RankingApiResponse = {
   character: string;
   position?: number | null;
   display_name: string;
+  is_blocked: boolean;
+  name_hidden: boolean;
+};
+
+export type BlockedRankingUserApiResponse = {
+  id: number;
+  username: "***";
+  display_name: "***";
+  character: string | null;
+  blocked_at: string;
+};
+
+export type QRCodeRedemptionApiResponse = {
+  guid: string;
+  reward_type: "coins" | "gems";
+  reward_amount: number;
+  redeemed_at: string;
+  coins: number;
+  gems: number;
 };
 
 export type RemainingAnswersApiResponse = {

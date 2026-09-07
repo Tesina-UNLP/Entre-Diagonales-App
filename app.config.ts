@@ -11,6 +11,8 @@ type ExpoConfigWithNativeFlags = ExpoConfig & {
 };
 
 const googleServicesFile = "./google-services.json";
+const motionUsageDescription =
+  "Entre Diagonales usa los datos de movimiento para mejorar la precisión de la ubicación y verificar tu progreso durante los recorridos.";
 
 const requireGoogleClientId = (name: string): string => {
   const clientId = process.env[name]?.trim();
@@ -58,8 +60,8 @@ export default ({ config }: ConfigContext): ExpoConfig =>
       bundleIdentifier: "com.entrediagonales.app",
       usesAppleSignIn: true,
       infoPlist: {
-        NSMotionUsageDescription:
-          "Entre Diagonales usa los datos de movimiento para mejorar la precisión de la ubicación y verificar tu progreso durante los recorridos.",
+        ITSAppUsesNonExemptEncryption: false,
+        NSMotionUsageDescription: motionUsageDescription,
       },
       privacyManifests: {
         NSPrivacyTracking: false,
@@ -142,7 +144,7 @@ export default ({ config }: ConfigContext): ExpoConfig =>
             "Tu ubicación se usa mientras utilizás la app para mostrarte en el mapa, calcular rutas y verificar que estés cerca de una parada.",
           locationAlwaysAndWhenInUsePermission: false,
           locationAlwaysPermission: false,
-          motionUsagePermission: false,
+          motionUsagePermission: motionUsageDescription,
         },
       ],
       [

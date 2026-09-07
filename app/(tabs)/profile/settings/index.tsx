@@ -40,6 +40,12 @@ const sections = [
     icon: "information-circle",
     onPress: () => router.navigate("/(tabs)/profile/settings/about"),
   },
+  {
+    title: "Usuarios bloqueados",
+    icon: "eye-off-outline",
+    onPress: () =>
+      router.navigate("/(tabs)/profile/settings/blocked-users" as Href),
+  },
 ];
 
 const Settings = () => {

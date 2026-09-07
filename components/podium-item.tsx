@@ -1,11 +1,12 @@
 import { TOKENS } from "@/constants/colors";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import { Image, StyleSheet, View } from "react-native";
+import { Image, Pressable, StyleSheet, View } from "react-native";
 import { ThemedText } from "./themed-text";
 
 interface Props {
   user: any;
   position: 1 | 2 | 3;
+  onPress?: () => void;
 }
 
 const podiumConfig = {
@@ -78,11 +79,21 @@ const podiumConfig = {
   },
 };
 
-const PodiumItem = ({ user, position }: Props) => {
+const PodiumItem = ({ user, position, onPress }: Props) => {
   const config = podiumConfig[position];
 
   return (
-    <View style={[styles.container, { marginTop: config.offset }]}>
+    <Pressable
+      accessibilityRole={onPress ? "button" : undefined}
+      accessibilityLabel={
+        onPress
+          ? `Opciones para ${user.display_name || user.username}`
+          : undefined
+      }
+      disabled={!onPress}
+      onPress={onPress}
+      style={[styles.container, { marginTop: config.offset }]}
+    >
       {/* Avatar */}
       <View
         style={[
@@ -147,7 +158,7 @@ const PodiumItem = ({ user, position }: Props) => {
           </ThemedText>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 };
 

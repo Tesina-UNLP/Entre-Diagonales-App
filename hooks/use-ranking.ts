@@ -9,13 +9,16 @@ export type RankingItem = {
   character: string;
   position: number;
   display_name: string;
+  is_blocked: boolean;
+  name_hidden: boolean;
 };
 
-export function useRanking(token: string, username?: string, level?: string) {
+export function useRanking(token: string, userId?: string, level?: string) {
   const [top3, setTop3] = useState<RankingItem[]>([]);
   const [rest, setRest] = useState<RankingItem[]>([]);
   const [userPosition, setUserPosition] = useState<RankingItem | null>(null);
   const [loading, setLoading] = useState(true);
+  const [revision, setRevision] = useState(0);
 
   useEffect(() => {
     let mounted = true;
@@ -32,7 +35,7 @@ export function useRanking(token: string, username?: string, level?: string) {
 
         setTop3(list.slice(0, 3));
         setRest(list.slice(3, 33)); // ← máximo 30 elementos
-        setUserPosition(list.find((i) => i.username === username) || null);
+        setUserPosition(list.find((i) => String(i.id) === userId) || null);
       } catch (e) {
         console.log(e);
       } finally {
@@ -44,7 +47,13 @@ export function useRanking(token: string, username?: string, level?: string) {
     return () => {
       mounted = false;
     };
-  }, [token, level, username]);
+  }, [token, level, userId, revision]);
 
-  return { top3, rest, userPosition, loading };
+  return {
+    top3,
+    rest,
+    userPosition,
+    loading,
+    refresh: () => setRevision((current) => current + 1),
+  };
 }

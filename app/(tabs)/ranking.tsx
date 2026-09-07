@@ -7,11 +7,18 @@ import { ThemedText } from "@/components/themed-text";
 import { UserRankingCard } from "@/components/user-ranking-card";
 import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
-import { useRanking } from "@/hooks/use-ranking";
+import { RankingItem, useRanking } from "@/hooks/use-ranking";
 import { api } from "@/libs/api";
 import { Octicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { Alert, FlatList, Image, Pressable, StyleSheet, View } from "react-native";
+import {
+  Alert,
+  FlatList,
+  Image,
+  Pressable,
+  StyleSheet,
+  View,
+} from "react-native";
 
 // Tipo para los tabs disponibles
 type RankingTab = "global" | "level";
@@ -29,42 +36,63 @@ export default function RankingScreen() {
   // Si es "level", pasamos el nivel del usuario
   const levelFilter = activeTab === "level" ? String(level?.id) : undefined;
 
-  const { top3, rest, userPosition, loading } = useRanking(
+  const { top3, rest, userPosition, loading, refresh } = useRanking(
     token,
-    user?.username,
+    user?.id,
     levelFilter,
   );
 
   const reportName = (userId: number, name: string) => {
+    Alert.alert("Reportar nombre", `¿Por qué querés reportar a ${name}?`, [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Ofensivo",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await api.reportRankingName(token, userId, "offensive");
+            Alert.alert("Reporte enviado", "Gracias. Revisaremos este nombre.");
+          } catch (error) {
+            Alert.alert(
+              "No pudimos enviar el reporte",
+              error instanceof Error ? error.message : "Intentá nuevamente.",
+            );
+          }
+        },
+      },
+      {
+        text: "Suplantación u otro",
+        onPress: async () => {
+          try {
+            await api.reportRankingName(token, userId, "impersonation");
+            Alert.alert("Reporte enviado", "Gracias. Revisaremos este nombre.");
+          } catch (error) {
+            Alert.alert(
+              "No pudimos enviar el reporte",
+              error instanceof Error ? error.message : "Intentá nuevamente.",
+            );
+          }
+        },
+      },
+    ]);
+  };
+
+  const blockUser = (item: RankingItem) => {
     Alert.alert(
-      "Reportar nombre",
-      `¿Por qué querés reportar a ${name}?`,
+      "Bloquear usuario",
+      "Su nombre se mostrará como *** para vos. Su posición, personaje y puntos seguirán visibles.",
       [
         { text: "Cancelar", style: "cancel" },
         {
-          text: "Ofensivo",
+          text: "Bloquear",
           style: "destructive",
           onPress: async () => {
             try {
-              await api.reportRankingName(token, userId, "offensive");
-              Alert.alert("Reporte enviado", "Gracias. Revisaremos este nombre.");
+              await api.blockRankingUser(token, item.id);
+              refresh();
             } catch (error) {
               Alert.alert(
-                "No pudimos enviar el reporte",
-                error instanceof Error ? error.message : "Intentá nuevamente.",
-              );
-            }
-          },
-        },
-        {
-          text: "Suplantación u otro",
-          onPress: async () => {
-            try {
-              await api.reportRankingName(token, userId, "impersonation");
-              Alert.alert("Reporte enviado", "Gracias. Revisaremos este nombre.");
-            } catch (error) {
-              Alert.alert(
-                "No pudimos enviar el reporte",
+                "No pudimos bloquear al usuario",
                 error instanceof Error ? error.message : "Intentá nuevamente.",
               );
             }
@@ -72,6 +100,39 @@ export default function RankingScreen() {
         },
       ],
     );
+  };
+
+  const unblockUser = async (item: RankingItem) => {
+    try {
+      await api.unblockRankingUser(token, item.id);
+      refresh();
+    } catch (error) {
+      Alert.alert(
+        "No pudimos desbloquear al usuario",
+        error instanceof Error ? error.message : "Intentá nuevamente.",
+      );
+    }
+  };
+
+  const openUserActions = (item: RankingItem) => {
+    if (item.is_blocked) {
+      Alert.alert("Usuario bloqueado", "Su nombre está oculto para vos.", [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Desbloquear", onPress: () => void unblockUser(item) },
+      ]);
+      return;
+    }
+
+    const name = item.display_name || item.username;
+    Alert.alert("Opciones del usuario", name, [
+      { text: "Cancelar", style: "cancel" },
+      { text: "Reportar nombre", onPress: () => reportName(item.id, name) },
+      {
+        text: "Bloquear usuario",
+        style: "destructive",
+        onPress: () => blockUser(item),
+      },
+    ]);
   };
 
   return (
@@ -153,21 +214,45 @@ export default function RankingScreen() {
                 {/* Segundo lugar (izquierda) aparece tercero */}
                 {top3[1] && (
                   <FadeInView key={`podium-2-${activeTab}`} delay={400}>
-                    <PodiumItem user={top3[1]} position={2} />
+                    <PodiumItem
+                      user={top3[1]}
+                      position={2}
+                      onPress={
+                        String(top3[1].id) === user?.id
+                          ? undefined
+                          : () => openUserActions(top3[1])
+                      }
+                    />
                   </FadeInView>
                 )}
 
                 {/* Primer lugar (centro) aparece primero */}
                 {top3[0] && (
                   <FadeInView key={`podium-1-${activeTab}`} delay={300}>
-                    <PodiumItem user={top3[0]} position={1} />
+                    <PodiumItem
+                      user={top3[0]}
+                      position={1}
+                      onPress={
+                        String(top3[0].id) === user?.id
+                          ? undefined
+                          : () => openUserActions(top3[0])
+                      }
+                    />
                   </FadeInView>
                 )}
 
                 {/* Tercer lugar (derecha) aparece último */}
                 {top3[2] && (
                   <FadeInView key={`podium-3-${activeTab}`} delay={500}>
-                    <PodiumItem user={top3[2]} position={3} />
+                    <PodiumItem
+                      user={top3[2]}
+                      position={3}
+                      onPress={
+                        String(top3[2].id) === user?.id
+                          ? undefined
+                          : () => openUserActions(top3[2])
+                      }
+                    />
                   </FadeInView>
                 )}
               </View>
@@ -220,12 +305,16 @@ export default function RankingScreen() {
                 {String(item.id) !== user?.id && (
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel={`Reportar el nombre de ${item.display_name || item.username}`}
+                    accessibilityLabel={`Opciones para ${item.display_name || item.username}`}
                     hitSlop={8}
-                    onPress={() => reportName(item.id, item.display_name || item.username)}
+                    onPress={() => openUserActions(item)}
                     style={styles.reportButton}
                   >
-                    <Octicons name="report" size={18} color={TOKENS.muted} />
+                    <Octicons
+                      name="kebab-horizontal"
+                      size={18}
+                      color={TOKENS.muted}
+                    />
                   </Pressable>
                 )}
               </View>

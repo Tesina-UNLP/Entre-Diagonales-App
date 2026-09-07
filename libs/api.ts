@@ -1,12 +1,14 @@
 import {
   AccountDeletionPayload,
   AccountDeletionResponse,
+  BlockedRankingUserApiResponse,
   CharacterApiResponse,
   FeedbackApiData,
   IndividualSpotApiResponse,
   LevelApiResponse,
   PowerUp5050ApiResponse,
   QuizApiResponse,
+  QRCodeRedemptionApiResponse,
   RankingApiResponse,
   SecretItemApiResponse,
   TourApiResponse,
@@ -689,21 +691,90 @@ export const api = {
     userId: number,
     reason: "offensive" | "impersonation" | "other",
   ): Promise<{ message: string }> => {
-    const response = await fetch(`${apiBaseUrl}/ranking/${userId}/report-name/`, {
+    const response = await fetch(
+      `${apiBaseUrl}/ranking/${userId}/report-name/`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ reason }),
+      },
+    );
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(
+        data?.detail ||
+          data?.error ||
+          data?.message ||
+          "No pudimos enviar el reporte.",
+      );
+    }
+    return data as { message: string };
+  },
+
+  blockRankingUser: async (token: string, userId: number) => {
+    const response = await fetch(`${apiBaseUrl}/ranking/${userId}/block/`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(data?.detail || "No pudimos bloquear al usuario.");
+    }
+    return data as { message: string; is_blocked: true };
+  },
+
+  unblockRankingUser: async (token: string, userId: number) => {
+    const response = await fetch(`${apiBaseUrl}/ranking/${userId}/block/`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => null);
+      throw new Error(data?.detail || "No pudimos desbloquear al usuario.");
+    }
+  },
+
+  getBlockedRankingUsers: async (
+    token: string,
+  ): Promise<BlockedRankingUserApiResponse[]> => {
+    const response = await fetch(`${apiBaseUrl}/ranking/blocked/`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(
+        data?.detail || "No pudimos cargar los usuarios bloqueados.",
+      );
+    }
+    return data as BlockedRankingUserApiResponse[];
+  },
+
+  redeemQRCode: async (
+    token: string,
+    guid: string,
+  ): Promise<QRCodeRedemptionApiResponse> => {
+    const response = await fetch(`${apiBaseUrl}/qr/redeem/`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ reason }),
+      body: JSON.stringify({ guid }),
     });
     const data = await response.json().catch(() => null);
     if (!response.ok) {
-      throw new Error(
-        data?.detail || data?.error || data?.message || "No pudimos enviar el reporte.",
-      );
+      const error = new Error(
+        data?.detail || "No pudimos canjear el código.",
+      ) as Error & {
+        code?: string;
+      };
+      error.code = data?.code;
+      throw error;
     }
-    return data as { message: string };
+    return data as QRCodeRedemptionApiResponse;
   },
 
   usePowerUp5050: async (

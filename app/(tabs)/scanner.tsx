@@ -21,7 +21,7 @@ import Toast from "react-native-toast-message";
 import { z } from "zod";
 
 export default function ScannerScreen() {
-  const { user } = useAuth();
+  const { user, checkAuthState } = useAuth();
   // Camera permissions hook - nos ayuda a manejar los permisos de la cámara
   const [permission, requestPermission] = useCameraPermissions();
 
@@ -168,30 +168,65 @@ export default function ScannerScreen() {
     }
   };
 
-  // El lector queda disponible para futuros canjes. Por ahora no debe intentar
-  // completar secretos ni enviar IDs inexistentes a la API.
-  const handleBarcodeScanned = ({ data }: BarcodeScanningResult) => {
+  const handleBarcodeScanned = async ({ data }: BarcodeScanningResult) => {
     // Si ya escaneamos, no hacer nada (evita múltiples escaneos)
     if (scanned) return;
 
     // Marcamos que ya escaneamos
     setScanned(true);
 
-    Alert.alert(
-      "Código QR detectado",
-      "Los canjes con códigos QR estarán disponibles próximamente.",
-      [
-        {
-          text: "Seguir escaneando",
-          onPress: () => setScanned(false),
-        },
-        {
-          text: "Volver",
-          style: "cancel",
-          onPress: handleBack,
-        },
-      ],
-    );
+    const match = data
+      .trim()
+      .match(
+        /^entrediagonales:\/\/qr\/([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i,
+      );
+
+    if (!match) {
+      Alert.alert(
+        "Código no válido",
+        "Este código no pertenece a Entre Diagonales.",
+        [
+          { text: "Seguir escaneando", onPress: () => setScanned(false) },
+          { text: "Volver", style: "cancel", onPress: handleBack },
+        ],
+      );
+      return;
+    }
+
+    if (!user?.access) {
+      Alert.alert(
+        "Sesión requerida",
+        "Iniciá sesión para canjear recompensas.",
+        [{ text: "Volver", onPress: handleBack }],
+      );
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const redemption = await api.redeemQRCode(user.access, match[1]);
+      await checkAuthState?.().catch((error) =>
+        console.warn("No se pudieron actualizar los saldos del perfil", error),
+      );
+      const unit = redemption.reward_type === "coins" ? "monedas" : "gemas";
+      Alert.alert(
+        "Recompensa canjeada",
+        `Recibiste +${redemption.reward_amount.toLocaleString()} ${unit}.`,
+        [
+          { text: "Seguir escaneando", onPress: () => setScanned(false) },
+          { text: "Volver", style: "cancel", onPress: handleBack },
+        ],
+      );
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Intentá nuevamente.";
+      Alert.alert("No pudimos canjear el código", message, [
+        { text: "Seguir escaneando", onPress: () => setScanned(false) },
+        { text: "Volver", style: "cancel", onPress: handleBack },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Función para tomar una foto (para modos "spot" y "secret")
@@ -275,7 +310,7 @@ export default function ScannerScreen() {
     return <CameraPermissionView onRequestPermission={requestPermission} />;
   }
 
-  // MODO QR: lector disponible para futuros canjes.
+  // MODO QR: canje de recompensas configuradas desde el backend.
   if (params.mode === "qr") {
     return (
       <View style={styles.container}>
