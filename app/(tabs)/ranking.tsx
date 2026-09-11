@@ -12,10 +12,12 @@ import { api } from "@/libs/api";
 import { Octicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   Image,
   Pressable,
+  RefreshControl,
   StyleSheet,
   View,
 } from "react-native";
@@ -36,11 +38,17 @@ export default function RankingScreen() {
   // Si es "level", pasamos el nivel del usuario
   const levelFilter = activeTab === "level" ? String(level?.id) : undefined;
 
-  const { top3, rest, userPosition, loading, refresh } = useRanking(
-    token,
-    user?.id,
-    levelFilter,
-  );
+  const {
+    top3,
+    rest,
+    userPosition,
+    loading,
+    refreshing,
+    loadingMore,
+    hasNextPage,
+    loadMore,
+    refresh,
+  } = useRanking(token, levelFilter);
 
   const reportName = (userId: number, name: string) => {
     Alert.alert("Reportar nombre", `¿Por qué querés reportar a ${name}?`, [
@@ -141,7 +149,15 @@ export default function RankingScreen() {
         <RankingScreenSkeleton />
       ) : (
         <FlatList
-          ListFooterComponent={<View style={styles.bottomSpacer}></View>}
+          ListFooterComponent={
+            <>
+              {loadingMore && <ActivityIndicator color={TOKENS.primary} />}
+              {!hasNextPage && rest.length > 0 && (
+                <View style={styles.endSpacer} />
+              )}
+              <View style={styles.bottomSpacer} />
+            </>
+          }
           ListHeaderComponent={
             <>
               {/* Título y descripción con animación */}
@@ -321,6 +337,16 @@ export default function RankingScreen() {
             </FadeInView>
           )}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={refresh}
+              tintColor={TOKENS.primary}
+              colors={[TOKENS.navActive]}
+            />
+          }
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.4}
           contentContainerStyle={{ paddingBottom: 50 }}
         />
       )}
@@ -417,4 +443,5 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   bottomSpacer: { height: 60 },
+  endSpacer: { height: 8 },
 });

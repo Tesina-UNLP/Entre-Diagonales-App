@@ -7,12 +7,14 @@ import {
   IndividualSpotApiResponse,
   LevelApiResponse,
   PowerUp5050ApiResponse,
+  PaginatedRankingResponse,
+  PaginatedResponse,
   QuizApiResponse,
   QRCodeRedemptionApiResponse,
-  RankingApiResponse,
   SecretItemApiResponse,
   TourApiResponse,
   TourInfoApiResponse,
+  TourListFilters,
   UserAchievementApiResponse,
 } from "@/types";
 
@@ -255,8 +257,19 @@ export const api = {
     return data as LevelApiResponse[];
   },
 
-  getRoutes: async (token: string): Promise<TourApiResponse[]> => {
-    const response = await fetch(`${apiBaseUrl}/tours/`, {
+  getRoutesPage: async (
+    token: string,
+    filters: TourListFilters = {},
+  ): Promise<PaginatedResponse<TourApiResponse>> => {
+    const url = new URL(`${apiBaseUrl}/tours/`);
+    url.searchParams.set("page", String(filters.page ?? 1));
+    if (filters.tag) url.searchParams.set("tag", filters.tag);
+    if (filters.completion) url.searchParams.set("completion", filters.completion);
+    if (filters.maxSpots != null) {
+      url.searchParams.set("max_spots", String(filters.maxSpots));
+    }
+
+    const response = await fetch(url.toString(), {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -272,7 +285,22 @@ export const api = {
         "Fetching routes failed";
       throw new Error(message);
     }
-    return data as TourApiResponse[];
+    return data as PaginatedResponse<TourApiResponse>;
+  },
+
+  getRoutes: async (token: string): Promise<TourApiResponse[]> => {
+    const routes: TourApiResponse[] = [];
+    let page = 1;
+    let next: string | null = "initial";
+
+    while (next) {
+      const response = await api.getRoutesPage(token, { page });
+      routes.push(...response.results);
+      next = response.next;
+      page += 1;
+    }
+
+    return routes;
   },
 
   getRoute: async (token: string, id: number): Promise<TourInfoApiResponse> => {
@@ -656,13 +684,15 @@ export const api = {
   getRanking: async (
     token: string,
     level?: string,
-  ): Promise<RankingApiResponse[]> => {
+    page = 1,
+  ): Promise<PaginatedRankingResponse> => {
     const url = new URL(`${apiBaseUrl}/ranking/`);
 
     // Solo agrego level si está definido
     if (level != null) {
       url.searchParams.append("level", String(level));
     }
+    url.searchParams.set("page", String(page));
 
     const response = await fetch(url.toString(), {
       method: "GET",
@@ -683,7 +713,7 @@ export const api = {
       throw new Error(message);
     }
 
-    return data as RankingApiResponse[];
+    return data as PaginatedRankingResponse;
   },
 
   reportRankingName: async (

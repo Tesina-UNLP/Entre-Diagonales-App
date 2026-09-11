@@ -26,6 +26,20 @@ export type TourApiResponse = {
   readonly number_of_people_completed: number;
 };
 
+export type PaginatedResponse<T> = {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+};
+
+export type TourListFilters = {
+  page?: number;
+  tag?: string;
+  completion?: "completed" | "incomplete";
+  maxSpots?: number;
+};
+
 export type TourInfoApiResponse = {
   id: number;
   name: string; // minLength: 1, maxLength: 100
@@ -205,16 +219,20 @@ export type RankingApiResponse = {
   username: string;
   experience: number;
   character: string;
-  position?: number | null;
+  position: number;
   display_name: string;
   is_blocked: boolean;
   name_hidden: boolean;
 };
 
+export type PaginatedRankingResponse = PaginatedResponse<RankingApiResponse> & {
+  current_user: RankingApiResponse | null;
+};
+
 export type BlockedRankingUserApiResponse = {
   id: number;
-  username: "***";
-  display_name: "***";
+  username: string;
+  display_name: string | null;
   character: string | null;
   blocked_at: string;
 };

@@ -12,6 +12,7 @@ import { api } from "@/libs/api";
 import { TourApiResponse } from "@/types";
 import { cloneElement, useCallback, useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
   Image,
   Pressable,
@@ -27,86 +28,125 @@ const emptyImage = require("@/assets/images/empty.png");
 
 export default function TabTwoScreen() {
   const [routes, setRoutes] = useState<TourApiResponse[]>([]);
-  const [allRoutes, setAllRoutes] = useState<TourApiResponse[]>([]);
   const [selectedTag, setSelectedTag] = useState<string | null>("todos");
   const [selectedLevel, setSelectedLevel] = useState<string | null>("1");
   const [completionFilter, setCompletionFilter] = useState<
     "incomplete" | "completed"
   >("incomplete");
-  const [refreshing] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // Estado de carga
+  const [refreshing, setRefreshing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasNextPage, setHasNextPage] = useState(false);
   const { user } = useAuth();
   const currentAccessRef = useRef<string | undefined>(user?.access);
+  const requestIdRef = useRef(0);
+  const loadingMoreRef = useRef(false);
+  const hasNextPageRef = useRef(false);
 
   currentAccessRef.current = user?.access;
 
-  const handleGetRoutes = useCallback(async () => {
-    const accessToken = user?.access;
+  const selectedMaxSpots = LEVELS.find(
+    (level) => level.id === selectedLevel,
+  )?.maxSpots;
 
-    if (!accessToken) {
-      setAllRoutes([]);
-      setRoutes([]);
-      setIsLoading(false);
-      return;
-    }
+  const loadRoutes = useCallback(
+    async (page: number, replace: boolean, isRefresh = false) => {
+      const accessToken = user?.access;
 
-    try {
-      // Activar el estado de carga al inicio
-      setIsLoading(true);
-      const response = await api.getRoutes(accessToken);
-      if (currentAccessRef.current !== accessToken) return;
-
-      setAllRoutes(response);
-      setRoutes(response);
-    } catch {
-      if (currentAccessRef.current !== accessToken) return;
-
-      Toast.show({
-        type: "error",
-        text1: "Error al obtener las rutas",
-        text2: "Por favor, intente nuevamente más tarde.",
-      });
-    } finally {
-      // Desactivar el estado de carga al finalizar (exitoso o con error)
-      if (currentAccessRef.current === accessToken) {
+      if (!accessToken) {
+        setRoutes([]);
+        setHasNextPage(false);
+        hasNextPageRef.current = false;
         setIsLoading(false);
+        return;
       }
-    }
-  }, [user?.access]);
+
+      if (!replace && (!hasNextPageRef.current || loadingMoreRef.current)) {
+        return;
+      }
+
+      const requestId = ++requestIdRef.current;
+      if (isRefresh) {
+        setRefreshing(true);
+      } else if (replace) {
+        setIsLoading(true);
+      } else {
+        loadingMoreRef.current = true;
+        setLoadingMore(true);
+      }
+
+      try {
+        const response = await api.getRoutesPage(accessToken, {
+          page,
+          tag: selectedTag === "todos" ? undefined : selectedTag ?? undefined,
+          completion: completionFilter,
+          maxSpots: selectedMaxSpots,
+        });
+        if (
+          currentAccessRef.current !== accessToken ||
+          requestId !== requestIdRef.current
+        ) {
+          return;
+        }
+
+        setRoutes((current) => {
+          const merged = replace
+            ? response.results
+            : [...current, ...response.results];
+          return Array.from(
+            new Map(merged.map((route) => [route.id, route])).values(),
+          );
+        });
+        setHasNextPage(response.next !== null);
+        hasNextPageRef.current = response.next !== null;
+      } catch {
+        if (
+          currentAccessRef.current !== accessToken ||
+          requestId !== requestIdRef.current
+        ) {
+          return;
+        }
+
+        Toast.show({
+          type: "error",
+          text1: "Error al obtener las rutas",
+          text2: "Por favor, intente nuevamente más tarde.",
+        });
+      } finally {
+        if (
+          currentAccessRef.current === accessToken &&
+          requestId === requestIdRef.current
+        ) {
+          setIsLoading(false);
+          setRefreshing(false);
+          setLoadingMore(false);
+          loadingMoreRef.current = false;
+        }
+      }
+    },
+    [completionFilter, selectedMaxSpots, selectedTag, user?.access],
+  );
 
   useEffect(() => {
-    handleGetRoutes();
-  }, [handleGetRoutes]);
+    setRoutes([]);
+    setHasNextPage(false);
+    hasNextPageRef.current = false;
+    void loadRoutes(1, true);
 
-  const applyFilters = useCallback(() => {
-    let result = allRoutes;
+    return () => {
+      requestIdRef.current += 1;
+    };
+  }, [loadRoutes]);
 
-    // Completion filter
-    if (completionFilter === "completed") {
-      result = result.filter((route) => route.completed_at !== null);
-    } else {
-      result = result.filter((route) => route.completed_at === null);
+  const loadMore = useCallback(() => {
+    if (!isLoading && hasNextPage) {
+      void loadRoutes(Math.floor(routes.length / 20) + 1, false);
     }
+  }, [hasNextPage, isLoading, loadRoutes, routes.length]);
 
-    if (selectedTag && selectedTag !== "todos") {
-      result = result.filter((route) => route.tag === selectedTag);
-    }
-
-    if (selectedLevel && selectedLevel !== "1") {
-      const maxSpots = LEVELS.find((l) => l.id === selectedLevel)?.maxSpots;
-      if (typeof maxSpots === "number") {
-        result = result.filter(
-          (route) => (route.spots.length || 0) <= maxSpots,
-        );
-      }
-    }
-
-    setRoutes(result);
-  }, [allRoutes, selectedTag, selectedLevel, completionFilter]);
-
-  useEffect(() => {
-    applyFilters();
-  }, [applyFilters]);
+  const refreshRoutes = useCallback(() => {
+    void loadRoutes(1, true, true);
+  }, [loadRoutes]);
 
   const handleFilterByTag = (tag: string) => {
     setSelectedTag(tag);
@@ -276,14 +316,19 @@ export default function TabTwoScreen() {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={() => handleGetRoutes()}
+            onRefresh={refreshRoutes}
             tintColor={TOKENS.primary}
             progressBackgroundColor={TOKENS.primary}
             colors={[TOKENS.navActive]}
           />
         }
         ListHeaderComponent={renderHeader}
-        ListFooterComponent={() => <View style={styles.bottomSpacer}></View>}
+        ListFooterComponent={() => (
+          <>
+            {loadingMore && <ActivityIndicator color={TOKENS.primary} />}
+            <View style={styles.bottomSpacer} />
+          </>
+        )}
         ListEmptyComponent={<EmptyComponent />}
         renderItem={({ item, index }) => (
           // Cada card aparece con un delay incremental
@@ -293,7 +338,7 @@ export default function TabTwoScreen() {
               title={item.name}
               description={item.description || ""}
               image={
-                item.spots[0].spot.image_urls[0] ||
+                item.spots[0]?.spot.image_urls[0] ||
                 "https://images.unsplash.com/photo-1600591832245-9a9f49ec6f5a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bGElMjBwbGF0YXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=400"
               }
               id={item.id.toString()}
@@ -305,6 +350,8 @@ export default function TabTwoScreen() {
           </FadeInView>
         )}
         showsVerticalScrollIndicator={false}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.4}
         contentContainerStyle={styles.listContent}
       />
     </ThemedBackground>

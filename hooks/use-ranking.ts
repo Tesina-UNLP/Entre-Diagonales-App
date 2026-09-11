@@ -1,59 +1,111 @@
 // hooks/use-ranking.ts
 import { api } from "@/libs/api";
-import { useEffect, useState } from "react";
+import { RankingApiResponse } from "@/types";
+import { useCallback, useEffect, useRef, useState } from "react";
+import Toast from "react-native-toast-message";
 
-export type RankingItem = {
-  id: number;
-  username: string;
-  experience: number;
-  character: string;
-  position: number;
-  display_name: string;
-  is_blocked: boolean;
-  name_hidden: boolean;
-};
+export type RankingItem = RankingApiResponse;
 
-export function useRanking(token: string, userId?: string, level?: string) {
-  const [top3, setTop3] = useState<RankingItem[]>([]);
-  const [rest, setRest] = useState<RankingItem[]>([]);
+const PAGE_SIZE = 20;
+
+export function useRanking(token: string, level?: string) {
+  const [items, setItems] = useState<RankingItem[]>([]);
   const [userPosition, setUserPosition] = useState<RankingItem | null>(null);
   const [loading, setLoading] = useState(true);
-  const [revision, setRevision] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const requestIdRef = useRef(0);
+  const loadingMoreRef = useRef(false);
+  const hasNextPageRef = useRef(false);
+
+  const loadPage = useCallback(
+    async (page: number, replace: boolean, isRefresh = false) => {
+      if (!token) {
+        setItems([]);
+        setUserPosition(null);
+        setHasNextPage(false);
+        setLoading(false);
+        return;
+      }
+      if (!replace && (!hasNextPageRef.current || loadingMoreRef.current)) {
+        return;
+      }
+
+      const requestId = ++requestIdRef.current;
+      if (isRefresh) {
+        setRefreshing(true);
+      } else if (replace) {
+        setLoading(true);
+      } else {
+        loadingMoreRef.current = true;
+        setLoadingMore(true);
+      }
+
+      try {
+        const response = await api.getRanking(token, level, page);
+        if (requestId !== requestIdRef.current) return;
+
+        setItems((current) => {
+          const merged = replace
+            ? response.results
+            : [...current, ...response.results];
+          return Array.from(
+            new Map(merged.map((item) => [item.id, item])).values(),
+          );
+        });
+        setUserPosition(response.current_user);
+        setHasNextPage(response.next !== null);
+        hasNextPageRef.current = response.next !== null;
+      } catch {
+        Toast.show({
+          type: "error",
+          text1: "Error al obtener el ranking",
+          text2: "Deslizá nuevamente para reintentar.",
+        });
+      } finally {
+        if (requestId === requestIdRef.current) {
+          setLoading(false);
+          setRefreshing(false);
+          setLoadingMore(false);
+          loadingMoreRef.current = false;
+        }
+      }
+    },
+    [level, token],
+  );
+
+  const refresh = useCallback(() => {
+    void loadPage(1, true, true);
+  }, [loadPage]);
+
+  const loadMore = useCallback(() => {
+    if (!loading && hasNextPage) {
+      void loadPage(Math.floor(items.length / PAGE_SIZE) + 1, false);
+    }
+  }, [hasNextPage, items.length, loadPage, loading]);
 
   useEffect(() => {
-    let mounted = true;
+    setItems([]);
+    setUserPosition(null);
+    setHasNextPage(false);
+    hasNextPageRef.current = false;
+    void loadPage(1, true);
 
-    async function load() {
-      try {
-        const data = await api.getRanking(token, level);
-
-        const list: RankingItem[] = data.map((item, index) => ({
-          ...item,
-          position: index + 1,
-        }));
-        if (!mounted) return;
-
-        setTop3(list.slice(0, 3));
-        setRest(list.slice(3, 33)); // ← máximo 30 elementos
-        setUserPosition(list.find((i) => String(i.id) === userId) || null);
-      } catch (e) {
-        console.log(e);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    load();
     return () => {
-      mounted = false;
+      requestIdRef.current += 1;
     };
-  }, [token, level, userId, revision]);
+  }, [level, loadPage, token]);
 
   return {
-    top3,
-    rest,
+    top3: items.slice(0, 3),
+    rest: items.slice(3),
     userPosition,
     loading,
-    refresh: () => setRevision((current) => current + 1),
+    refreshing,
+    loadingMore,
+    hasNextPage,
+    loadMore,
+    refresh,
   };
 }

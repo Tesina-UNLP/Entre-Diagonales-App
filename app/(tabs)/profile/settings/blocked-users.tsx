@@ -103,7 +103,9 @@ export default function BlockedUsersScreen() {
                 </View>
               )}
               <View style={styles.info}>
-                <ThemedText type="subtitle">***</ThemedText>
+                <ThemedText type="subtitle">
+                  {item.display_name || item.username}
+                </ThemedText>
                 <ThemedText type="muted">
                   Bloqueado el{" "}
                   {new Date(item.blocked_at).toLocaleDateString("es-AR")}
@@ -128,7 +130,13 @@ export default function BlockedUsersScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: 0, paddingTop: 0 },
+  container: {
+    flex: 1,
+    marginTop: 0,
+    paddingHorizontal: 0,
+    paddingInline: 0,
+    paddingTop: 0,
+  },
   centered: { flex: 1, alignItems: "center", justifyContent: "center" },
   list: { gap: 12, padding: 20, paddingBottom: 40 },
   emptyList: { flexGrow: 1, padding: 24 },
