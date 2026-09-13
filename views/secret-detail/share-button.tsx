@@ -4,6 +4,8 @@ import { TOKENS } from "@/constants/colors";
 import { FontAwesome } from "@expo/vector-icons";
 import React from "react";
 import { Alert, Platform, Share, StyleSheet } from "react-native";
+import { useLocalizedAlert } from "@/hooks/use-localized-alert";
+import { useTranslation } from "react-i18next";
 
 /**
  * Botón para compartir el secreto descubierto
@@ -21,6 +23,8 @@ export const ShareButton = ({
   secretName,
   secretDescription,
 }: ShareButtonProps) => {
+  const showAlert = useLocalizedAlert();
+  const { t } = useTranslation();
   /**
    * Función que maneja el compartir del secreto
    * Usa la API nativa de Share para compartir en diferentes plataformas
@@ -28,7 +32,10 @@ export const ShareButton = ({
   const handleShare = async () => {
     try {
       // Preparar el mensaje para compartir
-      const message = `¡Descubrí un secreto! 🎉\n\n${secretName}\n\n${secretDescription}\n\n#EntreDigonales #SecretsApp`;
+      const message = t("secrets.shareSecret", {
+        name: secretName,
+        description: secretDescription,
+      });
 
       // Llamar a la API de Share nativa
       const result = await Share.share(
@@ -36,13 +43,13 @@ export const ShareButton = ({
           message: message,
           // En iOS, puedes agregar un título separado
           ...(Platform.OS === "ios" && {
-            title: `Secreto: ${secretName}`,
+            title: t("secrets.secretTitle", { name: secretName }),
           }),
         },
         {
           // En Android, puedes especificar el título del diálogo
           ...(Platform.OS === "android" && {
-            dialogTitle: `Compartir secreto: ${secretName}`,
+            dialogTitle: t("secrets.shareSecretTitle", { name: secretName }),
           }),
         },
       );
@@ -60,7 +67,7 @@ export const ShareButton = ({
     } catch (error) {
       // Manejar errores al compartir
       console.error("Error al compartir:", error);
-      Alert.alert(
+      showAlert(
         "Error al compartir",
         "No se pudo compartir el secreto. Por favor, intenta nuevamente.",
       );

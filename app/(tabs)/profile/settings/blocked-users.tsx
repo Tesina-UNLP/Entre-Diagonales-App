@@ -5,13 +5,14 @@ import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
 import { api } from "@/libs/api";
+import { useLocalizedAlert } from "@/hooks/use-localized-alert";
+import { useLanguage } from "@/hooks/use-language";
 import { BlockedRankingUserApiResponse } from "@/types";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Image,
   StyleSheet,
@@ -19,6 +20,8 @@ import {
 } from "react-native";
 
 export default function BlockedUsersScreen() {
+  const showAlert = useLocalizedAlert();
+  const { locale } = useLanguage();
   const { user } = useAuth();
   const [blockedUsers, setBlockedUsers] = useState<
     BlockedRankingUserApiResponse[]
@@ -32,14 +35,14 @@ export default function BlockedUsersScreen() {
       setLoading(true);
       setBlockedUsers(await api.getBlockedRankingUsers(user.access));
     } catch (error) {
-      Alert.alert(
+      showAlert(
         "No pudimos cargar los usuarios bloqueados",
         error instanceof Error ? error.message : "Intentá nuevamente.",
       );
     } finally {
       setLoading(false);
     }
-  }, [user?.access]);
+  }, [showAlert, user?.access]);
 
   useFocusEffect(
     useCallback(() => {
@@ -56,7 +59,7 @@ export default function BlockedUsersScreen() {
         current.filter((item) => item.id !== blockedUser.id),
       );
     } catch (error) {
-      Alert.alert(
+      showAlert(
         "No pudimos desbloquear al usuario",
         error instanceof Error ? error.message : "Intentá nuevamente.",
       );
@@ -108,7 +111,7 @@ export default function BlockedUsersScreen() {
                 </ThemedText>
                 <ThemedText type="muted">
                   Bloqueado el{" "}
-                  {new Date(item.blocked_at).toLocaleDateString("es-AR")}
+                  {new Date(item.blocked_at).toLocaleDateString(locale)}
                 </ThemedText>
               </View>
               <ThemedButton

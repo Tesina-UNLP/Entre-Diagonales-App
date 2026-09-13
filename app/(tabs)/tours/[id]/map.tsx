@@ -50,6 +50,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 const DEFAULT_REGION: Region = {
   latitude: -34.9206,
@@ -63,6 +64,7 @@ const UserLocationMarker = Marker as React.ComponentType<
 >;
 
 const Map = () => {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id?: string }>();
 
   const idStr = useMemo(() => (Array.isArray(id) ? id?.[0] : id), [id]);
@@ -556,7 +558,7 @@ const Map = () => {
         <>
           <Header
             title={routeInfo?.name || ""}
-            description={`${routeInfo?.spots.length} Puntos  • ${stopsDistanceInfo ? stopsDistanceInfo.slice(completedSpots.length).reduce((acc, info) => acc + (info.durationFromPrevious || 0), 0) + " min aprox" : "Calculando..."}`}
+            description={`${t("tours.stopCount", { count: routeInfo?.spots.length ?? 0 })}  • ${stopsDistanceInfo ? `${stopsDistanceInfo.slice(completedSpots.length).reduce((acc, info) => acc + (info.durationFromPrevious || 0), 0)} ${t("tours.approximateMinutes")}` : t("common.calculating")}`}
             onBack={() => router.back()}
           />
 

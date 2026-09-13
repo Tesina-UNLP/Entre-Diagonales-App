@@ -8,6 +8,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Linking, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { translateUiText } from "@/i18n";
+import { useTranslation } from "react-i18next";
 
 const sections = [
   {
@@ -39,9 +41,14 @@ const sections = [
 ];
 
 const Help = () => {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
-  const filteredSections = sections.filter((section) =>
-    section.question.toLowerCase().includes(search.toLowerCase()),
+  const localizedSections = sections.map((section) => ({
+    question: translateUiText(section.question),
+    answer: translateUiText(section.answer),
+  }));
+  const filteredSections = localizedSections.filter((section) =>
+    section.question.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
   );
 
   return (
@@ -56,7 +63,7 @@ const Help = () => {
         <FadeInView delay={100}>
           <View style={styles.searchContainer}>
             <TextInput
-              placeholder="Buscar"
+              placeholder={t("common.search")}
               style={styles.searchInput}
               placeholderTextColor={TOKENS.muted}
               value={search}

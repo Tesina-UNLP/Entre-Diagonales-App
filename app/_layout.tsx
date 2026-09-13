@@ -12,11 +12,15 @@ import { NotificationLifecycle } from "@/components/notification-lifecycle";
 import { AuthProvider } from "@/contexts/auth";
 import { FontScaleProvider } from "@/contexts/font-scale";
 import { HapticsProvider } from "@/contexts/haptics";
+import { LanguageProvider } from "@/contexts/language";
 import { StartupProvider } from "@/contexts/startup";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Observe, ObserveRoot } from "expo-observe";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ConfettiProvider } from "@/components/confetti";
+import { translateUiText } from "@/i18n";
+import { useLanguage } from "@/hooks/use-language";
+import { useTranslation } from "react-i18next";
 
 Observe.configure({
   integrations: {
@@ -33,24 +37,28 @@ SplashScreen.setOptions({
 
 SplashScreen.preventAutoHideAsync();
 
-function RootLayout() {
+function AppContent() {
   const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-    ClashDisplay: require("../assets/fonts/ClashDisplay-Regular.otf"),
-    ClashDisplayBold: require("../assets/fonts/ClashDisplay-Bold.otf"),
-    ClashDisplaySemiBold: require("../assets/fonts/ClashDisplay-Semibold.otf"),
-    ClashDisplayMedium: require("../assets/fonts/ClashDisplay-Medium.otf"),
-  });
-
-  if (!loaded) {
-    return null;
-  }
+  const { language } = useLanguage();
+  const { t } = useTranslation();
+  const localizeToastText = (value?: string) =>
+    value ? translateUiText(value) : value;
+  const localizeErrorDetail = (value?: string) => {
+    if (!value) return value;
+    const translated = translateUiText(value);
+    if (language === "en" && translated === value) {
+      console.warn("Untranslated server error hidden from English UI:", value);
+      return t("common.genericError");
+    }
+    return translated;
+  };
 
   const toastConfig = {
     success: (props: any) => (
       <BaseToast
         {...props}
+        text1={localizeToastText(props.text1)}
+        text2={localizeToastText(props.text2)}
         style={{
           borderLeftColor: TOKENS.success,
           backgroundColor: TOKENS.tabBarBackground,
@@ -63,6 +71,8 @@ function RootLayout() {
     error: (props: any) => (
       <ErrorToast
         {...props}
+        text1={localizeToastText(props.text1)}
+        text2={localizeErrorDetail(props.text2)}
         style={{
           borderLeftColor: TOKENS.error,
           backgroundColor: TOKENS.tabBarBackground,
@@ -74,38 +84,56 @@ function RootLayout() {
     levelUp: (props: any) => <LevelUpToast {...props} />,
   };
 
-  const confettiPalette: [number, number, number, number][] = [
-    [190, 83, 16, 1],
-    [247, 163, 64, 1],
-    [140, 188, 176, 1],
-    [249, 188, 96, 1],
-    [38, 90, 85, 1],
-  ];
+  return (
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <FontScaleProvider>
+        <HapticsProvider>
+          <AuthProvider>
+            <NotificationLifecycle />
+            <StartupProvider>
+              <ConfettiProvider
+                initParticleAmount={0}
+                colorPalette={confettiPalette}
+              >
+                <Slot screenOptions={{ animation: "fade" }} />
+              </ConfettiProvider>
+            </StartupProvider>
+          </AuthProvider>
+          <Toast config={toastConfig} />
+          <StatusBar style="light" />
+        </HapticsProvider>
+      </FontScaleProvider>
+    </ThemeProvider>
+  );
+}
+
+const confettiPalette: [number, number, number, number][] = [
+  [190, 83, 16, 1],
+  [247, 163, 64, 1],
+  [140, 188, 176, 1],
+  [249, 188, 96, 1],
+  [38, 90, 85, 1],
+];
+
+function RootLayout() {
+  const [loaded] = useFonts({
+    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    ClashDisplay: require("../assets/fonts/ClashDisplay-Regular.otf"),
+    ClashDisplayBold: require("../assets/fonts/ClashDisplay-Bold.otf"),
+    ClashDisplaySemiBold: require("../assets/fonts/ClashDisplay-Semibold.otf"),
+    ClashDisplayMedium: require("../assets/fonts/ClashDisplay-Medium.otf"),
+  });
+
+  if (!loaded) {
+    return null;
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <ThemeProvider
-          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        >
-          <FontScaleProvider>
-            <HapticsProvider>
-              <AuthProvider>
-                <NotificationLifecycle />
-                <StartupProvider>
-                  <ConfettiProvider
-                    initParticleAmount={0}
-                    colorPalette={confettiPalette}
-                  >
-                    <Slot screenOptions={{ animation: "fade" }} />
-                  </ConfettiProvider>
-                </StartupProvider>
-              </AuthProvider>
-              <Toast config={toastConfig} />
-              <StatusBar style="light" />
-            </HapticsProvider>
-          </FontScaleProvider>
-        </ThemeProvider>
+        <LanguageProvider>
+          <AppContent />
+        </LanguageProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

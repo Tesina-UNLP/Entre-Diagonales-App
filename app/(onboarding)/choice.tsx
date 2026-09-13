@@ -29,8 +29,7 @@ const Choice = () => {
   const { completeOnboarding, user } = useAuth();
   const [npcs, setNpcs] = useState<CharacterApiResponse[]>([]);
   const [selectedNpc, setSelectedNpc] = useState<number | null>(null);
-  const [showNotificationsPrompt, setShowNotificationsPrompt] =
-    useState(false);
+  const [showNotificationsPrompt, setShowNotificationsPrompt] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
   // Efecto para cargar los personajes disponibles
   useEffect(() => {

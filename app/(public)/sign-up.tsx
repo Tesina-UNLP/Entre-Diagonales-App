@@ -25,6 +25,7 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 
 const registerSchema = z
   .object({
@@ -46,6 +47,7 @@ const registerSchema = z
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 const SignUp = () => {
+  const { t } = useTranslation();
   const { register, loginWithApple, loginWithGoogle } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -194,7 +196,7 @@ const SignUp = () => {
             render={({ field: { onChange, onBlur, value } }) => (
               <View style={styles.passwordContainer}>
                 <TextInput
-                  placeholder="Contraseña"
+                  placeholder={t("auth.password")}
                   style={[
                     styles.passwordInput,
                     errors.password && styles.inputError,
@@ -229,7 +231,7 @@ const SignUp = () => {
             render={({ field: { onChange, onBlur, value } }) => (
               <View style={styles.passwordContainer}>
                 <TextInput
-                  placeholder="Contraseña"
+                  placeholder={t("auth.confirmPassword")}
                   style={[
                     styles.passwordInput,
                     errors.password && styles.inputError,
@@ -290,30 +292,30 @@ const SignUp = () => {
           <View style={styles.divider} />
         </FadeInView>
 
-          <View style={styles.buttonsContainer}>
-        <FadeInView delay={600} style={styles.googleButtonContainer}>
-          <ThemedButton variant="secondary" onPress={handleGoogleSignIn}>
-            <View style={styles.googleButtonContent}>
-              <FontAwesome name="google" size={24} color={TOKENS.primary} />
-              <ThemedText
-                type="defaultSemiBold"
-                style={[styles.googleButtonText, { flexShrink: 1 }]}
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                Continuar con Google
-              </ThemedText>
-            </View>
-          </ThemedButton>
-        </FadeInView>
-        {Platform.OS === "ios" && appleAvailable && (
-          <FadeInView delay={650} style={styles.appleButtonContainer}>
-            <AppleSignInButton
-              label="Continuar con Apple"
-              onPress={handleAppleSignIn}
-            />
+        <View style={styles.buttonsContainer}>
+          <FadeInView delay={600} style={styles.googleButtonContainer}>
+            <ThemedButton variant="secondary" onPress={handleGoogleSignIn}>
+              <View style={styles.googleButtonContent}>
+                <FontAwesome name="google" size={24} color={TOKENS.primary} />
+                <ThemedText
+                  type="defaultSemiBold"
+                  style={[styles.googleButtonText, { flexShrink: 1 }]}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  Continuar con Google
+                </ThemedText>
+              </View>
+            </ThemedButton>
           </FadeInView>
-        )}
+          {Platform.OS === "ios" && appleAvailable && (
+            <FadeInView delay={650} style={styles.appleButtonContainer}>
+              <AppleSignInButton
+                label={t("auth.continueApple")}
+                onPress={handleAppleSignIn}
+              />
+            </FadeInView>
+          )}
         </View>
         <FadeInView delay={700}>
           <ThemedText type="muted">
@@ -412,7 +414,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     width: "100%",
   },
-    buttonsContainer: {
+  buttonsContainer: {
     flexDirection: "column",
     alignItems: "center",
     gap: 15,

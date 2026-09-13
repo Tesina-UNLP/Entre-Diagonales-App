@@ -37,6 +37,7 @@ export default function TabTwoScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasNextPage, setHasNextPage] = useState(false);
+  const nextPageRef = useRef(2);
   const { user } = useAuth();
   const currentAccessRef = useRef<string | undefined>(user?.access);
   const requestIdRef = useRef(0);
@@ -57,6 +58,7 @@ export default function TabTwoScreen() {
         setRoutes([]);
         setHasNextPage(false);
         hasNextPageRef.current = false;
+        nextPageRef.current = 2;
         setIsLoading(false);
         return;
       }
@@ -78,7 +80,7 @@ export default function TabTwoScreen() {
       try {
         const response = await api.getRoutesPage(accessToken, {
           page,
-          tag: selectedTag === "todos" ? undefined : selectedTag ?? undefined,
+          tag: selectedTag === "todos" ? undefined : (selectedTag ?? undefined),
           completion: completionFilter,
           maxSpots: selectedMaxSpots,
         });
@@ -99,6 +101,7 @@ export default function TabTwoScreen() {
         });
         setHasNextPage(response.next !== null);
         hasNextPageRef.current = response.next !== null;
+        nextPageRef.current = page + 1;
       } catch {
         if (
           currentAccessRef.current !== accessToken ||
@@ -131,6 +134,7 @@ export default function TabTwoScreen() {
     setRoutes([]);
     setHasNextPage(false);
     hasNextPageRef.current = false;
+    nextPageRef.current = 2;
     void loadRoutes(1, true);
 
     return () => {
@@ -140,9 +144,9 @@ export default function TabTwoScreen() {
 
   const loadMore = useCallback(() => {
     if (!isLoading && hasNextPage) {
-      void loadRoutes(Math.floor(routes.length / 20) + 1, false);
+      void loadRoutes(nextPageRef.current, false);
     }
-  }, [hasNextPage, isLoading, loadRoutes, routes.length]);
+  }, [hasNextPage, isLoading, loadRoutes]);
 
   const refreshRoutes = useCallback(() => {
     void loadRoutes(1, true, true);

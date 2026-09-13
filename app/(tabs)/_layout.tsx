@@ -15,8 +15,10 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Tabs, usePathname } from "expo-router";
 import { Platform, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 export default function TabLayout() {
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const themeName = colorScheme === "dark" ? "dark" : "light";
   const pathname = usePathname();
@@ -32,6 +34,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[themeName].tint,
         tabBarInactiveTintColor: Colors[themeName].tabIconDefault,
         headerShown: false,
+        animation: "fade",
         tabBarButton: HapticTab,
         tabBarBackground: CustomTabBar,
         tabBarStyle: hideTabs
@@ -63,14 +66,18 @@ export default function TabLayout() {
         options={{
           tabBarIcon: ({ color }) => <HomeIcon color={String(color)} />,
           tabBarLabel: ({ focused, color }) =>
-            focused ? <Text style={{ color }}>Inicio</Text> : undefined,
+            focused ? (
+              <Text style={{ color }}>{t("navigation.home")}</Text>
+            ) : undefined,
         }}
       />
       <Tabs.Screen
         name="tours"
         options={{
           tabBarLabel: ({ focused, color }) =>
-            focused ? <Text style={{ color }}>Rutas</Text> : undefined,
+            focused ? (
+              <Text style={{ color }}>{t("navigation.routes")}</Text>
+            ) : undefined,
           tabBarIcon: ({ color }) => <RouteIcon color={String(color)} />,
         }}
       />
@@ -88,7 +95,9 @@ export default function TabLayout() {
         name="ranking"
         options={{
           tabBarLabel: ({ focused, color }) =>
-            focused ? <Text style={{ color }}>Ranking</Text> : undefined,
+            focused ? (
+              <Text style={{ color }}>{t("navigation.ranking")}</Text>
+            ) : undefined,
           tabBarIcon: ({ color }) => <RankingIcon color={String(color)} />,
         }}
       />
@@ -96,7 +105,9 @@ export default function TabLayout() {
         name="profile"
         options={{
           tabBarLabel: ({ focused, color }) =>
-            focused ? <Text style={{ color }}>Perfil</Text> : undefined,
+            focused ? (
+              <Text style={{ color }}>{t("navigation.profile")}</Text>
+            ) : undefined,
           tabBarIcon: ({ color }) => <ProfileIcon color={String(color)} />,
         }}
       />

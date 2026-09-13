@@ -1,20 +1,17 @@
 import { useAuth } from "@/hooks/use-auth";
+import { useLanguage } from "@/hooks/use-language";
 import * as SplashScreen from "expo-splash-screen";
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 const StartupReadyContext = createContext(false);
 
 export function StartupProvider({ children }: { children: React.ReactNode }) {
   const { isLoading: isAuthLoading } = useAuth();
+  const { isLanguageReady } = useLanguage();
   const [isStartupReady, setIsStartupReady] = useState(false);
 
   useEffect(() => {
-    if (isAuthLoading || isStartupReady) return;
+    if (isAuthLoading || !isLanguageReady || isStartupReady) return;
 
     let isMounted = true;
 
@@ -28,7 +25,7 @@ export function StartupProvider({ children }: { children: React.ReactNode }) {
     return () => {
       isMounted = false;
     };
-  }, [isAuthLoading, isStartupReady]);
+  }, [isAuthLoading, isLanguageReady, isStartupReady]);
 
   return (
     <StartupReadyContext.Provider value={isStartupReady}>

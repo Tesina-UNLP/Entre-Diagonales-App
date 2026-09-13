@@ -14,25 +14,26 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 
 const sections = [
   {
-    title: "Desarrolladores",
+    titleKey: "settings.developers",
     icon: "people",
     href: process.env.EXPO_PUBLIC_WEB_FRONTEND,
   },
   {
-    title: "Política de privacidad",
+    titleKey: "settings.privacyPolicy",
     icon: "shield-outline",
     href: process.env.EXPO_PUBLIC_WEB_FRONTEND + "/privacy",
   },
   {
-    title: "Terminos y condiciones",
+    titleKey: "settings.terms",
     icon: "document-text-outline",
     href: process.env.EXPO_PUBLIC_WEB_FRONTEND + "/terms",
   },
   {
-    title: "Visita nuestra pagina",
+    titleKey: "settings.visitWebsite",
     icon: "globe-outline",
     href: process.env.EXPO_PUBLIC_WEB_FRONTEND,
   },
@@ -41,13 +42,14 @@ const sections = [
 const logo = require("@/assets/images/splash-icon.png");
 
 const About = () => {
+  const { t } = useTranslation();
   const version = Constants.expoConfig?.version ?? "1.0.0";
 
   return (
     <ThemedBackground style={styles.container} safeArea={false}>
       <Header
-        title={"Acerca de"}
-        description={"Información sobre la aplicación"}
+        title={t("settings.about")}
+        description={t("settings.aboutSubtitle")}
         onBack={() => router.back()}
       />
 
@@ -55,13 +57,15 @@ const About = () => {
         <View style={styles.logoContainer}>
           <Image source={logo} style={styles.logo} />
           <ThemedText type="defaultSemiBold">Entre Diagonales</ThemedText>
-          <ThemedText type="defaultSemiBold">Versión {version}</ThemedText>
+          <ThemedText type="defaultSemiBold">
+            {t("common.version")} {version}
+          </ThemedText>
         </View>
       </FadeInView>
 
       <View style={styles.content}>
         {sections.map((section, index) => (
-          <FadeInView key={section.title} delay={200 + 100 * index}>
+          <FadeInView key={section.titleKey} delay={200 + 100 * index}>
             <TouchableOpacity
               onPress={() => Linking.openURL(section.href as string)}
               style={styles.sectionContainer}
@@ -72,7 +76,9 @@ const About = () => {
                   size={24}
                   color={TOKENS.text}
                 />
-                <ThemedText type="defaultSemiBold">{section.title}</ThemedText>
+                <ThemedText type="defaultSemiBold">
+                  {t(section.titleKey)}
+                </ThemedText>
               </View>
               <View style={styles.sectionRight}>
                 <Ionicons

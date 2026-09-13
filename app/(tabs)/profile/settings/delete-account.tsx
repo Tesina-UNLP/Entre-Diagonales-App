@@ -12,7 +12,6 @@ import * as AppleAuthentication from "expo-apple-authentication";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  Alert,
   Platform,
   ScrollView,
   StyleSheet,
@@ -22,12 +21,16 @@ import {
 } from "react-native";
 import { openBrowserAsync } from "expo-web-browser";
 import Toast from "react-native-toast-message";
+import { useTranslation } from "react-i18next";
+import { useLocalizedAlert } from "@/hooks/use-localized-alert";
 
 const webFrontend =
   process.env.EXPO_PUBLIC_WEB_FRONTEND || "https://entrediagonales.io";
 const deletionInfoUrl = `${webFrontend}/eliminar-cuenta`;
 
 export default function DeleteAccount() {
+  const { t } = useTranslation();
+  const showAlert = useLocalizedAlert();
   const { user, clearDeletedAccountSession } = useAuth();
   const [password, setPassword] = useState("");
   const [accepted, setAccepted] = useState(false);
@@ -120,7 +123,7 @@ export default function DeleteAccount() {
       return;
     }
 
-    Alert.alert(
+    showAlert(
       "¿Eliminar tu cuenta?",
       "Perderás tu perfil, recorridos, trivias, secretos, logros, monedas, gemas y posición en el ranking. Esta acción no se puede deshacer.",
       [
@@ -208,12 +211,12 @@ export default function DeleteAccount() {
               Ingresá tu contraseña actual para continuar.
             </ThemedText>
             <TextInput
-              accessibilityLabel="Contraseña actual"
+              accessibilityLabel={t("settings.currentPassword")}
               autoCapitalize="none"
               autoComplete="current-password"
               editable={!isSubmitting}
               onChangeText={setPassword}
-              placeholder="Contraseña actual"
+              placeholder={t("settings.currentPassword")}
               placeholderTextColor={TOKENS.muted}
               secureTextEntry
               style={styles.input}

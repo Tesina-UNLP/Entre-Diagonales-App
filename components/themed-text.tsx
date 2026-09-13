@@ -3,10 +3,14 @@ import { Text, type TextProps, useWindowDimensions } from "react-native";
 import { TOKENS } from "@/constants/colors";
 import { useFontScale } from "@/hooks/use-font-scale";
 import { useThemeColor } from "@/hooks/use-theme-color";
+import { translateUiText } from "@/i18n";
+import React from "react";
+import { useTranslation } from "react-i18next";
 
 export type ThemedTextProps = TextProps & {
   lightColor?: string;
   darkColor?: string;
+  translateContent?: boolean;
   type?:
     | "default"
     | "title"
@@ -22,8 +26,11 @@ export function ThemedText({
   lightColor,
   darkColor,
   type = "default",
+  translateContent = true,
+  children,
   ...rest
 }: ThemedTextProps) {
+  useTranslation();
   const { theme } = useThemeColor();
   const { userFontScale } = useFontScale();
   const { width, fontScale } = useWindowDimensions();
@@ -92,7 +99,15 @@ export function ThemedText({
     }
   };
 
+  const localizeNode = (node: React.ReactNode): React.ReactNode => {
+    if (typeof node === "string") return translateUiText(node);
+    if (Array.isArray(node)) return node.map(localizeNode);
+    return node;
+  };
+
   return (
-    <Text style={[{ color: theme.text }, getTypeStyle(), style]} {...rest} />
+    <Text style={[{ color: theme.text }, getTypeStyle(), style]} {...rest}>
+      {translateContent ? localizeNode(children) : children}
+    </Text>
   );
 }

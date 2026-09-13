@@ -2,9 +2,11 @@
 import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
 import { RankingItem } from "@/hooks/use-ranking";
+import { useLanguage } from "@/hooks/use-language";
 import { FontAwesome5 } from "@expo/vector-icons";
 import Octicons from "@expo/vector-icons/Octicons";
 import { Image, StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 
 export function UserRankingCard({
   user,
@@ -13,7 +15,9 @@ export function UserRankingCard({
   user: RankingItem;
   userLevel?: string;
 }) {
-  // console.log(user);
+  const { locale } = useLanguage();
+  const { t } = useTranslation();
+
   return (
     <View style={styles.card}>
       <View style={styles.left}>
@@ -35,7 +39,10 @@ export function UserRankingCard({
         <View style={styles.row}>
           <Octicons name="star-fill" size={14} color={TOKENS.accent} />
           <ThemedText type="muted" style={styles.points}>
-            {user.experience} puntos
+            {t("common.pointsCount", {
+              count: user.experience,
+              value: user.experience.toLocaleString(locale),
+            })}
           </ThemedText>
         </View>
       </View>

@@ -14,6 +14,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { runOnJS } from "react-native-reanimated";
 
 interface PresentationStep {
   id: number;
@@ -60,6 +62,12 @@ const Presentation = () => {
     }
   };
 
+  const handlePrevious = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
   const handleSkip = () => {
     handleComplete();
   };
@@ -69,6 +77,16 @@ const Presentation = () => {
   };
 
   const step = presentationSteps[currentStep];
+  const swipeGesture = Gesture.Pan()
+    .activeOffsetX([-20, 20])
+    .failOffsetY([-20, 20])
+    .onEnd((event) => {
+      if (event.translationX < -50) {
+        runOnJS(handleNext)();
+      } else if (event.translationX > 50) {
+        runOnJS(handlePrevious)();
+      }
+    });
 
   return (
     <ThemedBackground style={styles.container}>
@@ -96,23 +114,25 @@ const Presentation = () => {
           <ThemedText type="default">Saltar</ThemedText>
         </TouchableOpacity>
       </FadeInView>
-      <View style={styles.content}>
-        <FadeInView delay={200}>
-          <Image
-            source={presentationImages[step.id]}
-            style={styles.image}
-            resizeMode="contain"
-          />
-        </FadeInView>
-        <FadeInView delay={300} style={styles.textContainer}>
-          <ThemedText type="title" style={styles.title}>
-            {step.title}
-          </ThemedText>
-          <ThemedText type="bigMuted" style={styles.description}>
-            {step.description}
-          </ThemedText>
-        </FadeInView>
-      </View>
+      <GestureDetector gesture={swipeGesture}>
+        <View style={styles.content}>
+          <FadeInView delay={200}>
+            <Image
+              source={presentationImages[step.id]}
+              style={styles.image}
+              resizeMode="contain"
+            />
+          </FadeInView>
+          <FadeInView delay={300} style={styles.textContainer}>
+            <ThemedText type="title" style={styles.title}>
+              {step.title}
+            </ThemedText>
+            <ThemedText type="bigMuted" style={styles.description}>
+              {step.description}
+            </ThemedText>
+          </FadeInView>
+        </View>
+      </GestureDetector>
 
       <FadeInView delay={400} style={styles.navigationContainer}>
         <ThemedButton variant="primary" onPress={handleNext}>

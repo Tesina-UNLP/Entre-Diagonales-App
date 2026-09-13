@@ -31,6 +31,11 @@ const sections = [
     onPress: () => router.navigate("/(tabs)/profile/settings/appearance"),
   },
   {
+    title: "Idioma",
+    icon: "language",
+    onPress: () => router.navigate("/(tabs)/profile/settings/language" as Href),
+  },
+  {
     title: "Centro de ayuda",
     icon: "help-circle",
     onPress: () => router.navigate("/(tabs)/profile/settings/help"),
@@ -89,7 +94,7 @@ const Settings = () => {
           </FadeInView>
         ))}
 
-        <FadeInView delay={600}>
+        <FadeInView delay={800}>
           <TouchableOpacity
             accessibilityRole="button"
             onPress={() =>
@@ -113,7 +118,7 @@ const Settings = () => {
           </TouchableOpacity>
         </FadeInView>
 
-        <FadeInView delay={700}>
+        <FadeInView delay={900}>
           <TouchableOpacity
             onPress={handleSignOut}
             style={styles.sectionContainer}

@@ -6,6 +6,7 @@ import { StyleSheet, View } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { StopApiResponse } from "@/types";
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 const Progression = ({
   completedSpots,
@@ -18,12 +19,17 @@ const Progression = ({
   notCompletedSpots: StopApiResponse[];
   spotsQuantity: number;
 }) => {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.routeProgress}>
       <View style={styles.routeProgressHeader}>
         <ThemedText type="subtitle">Progreso del tour</ThemedText>
         <ThemedText type="muted">
-          {completedSpots.length || 0}/{spotsQuantity || 0} puntos
+          {t("tours.progressCount", {
+            completed: completedSpots.length || 0,
+            count: spotsQuantity || 0,
+          })}
         </ThemedText>
       </View>
       <View style={styles.routeProgressTrack}>

@@ -16,11 +16,17 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Toast from "react-native-toast-message";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
+import { useLocalizedAlert } from "@/hooks/use-localized-alert";
+import { useLanguage } from "@/hooks/use-language";
 
 export default function ScannerScreen() {
+  const { t } = useTranslation();
+  const showAlert = useLocalizedAlert();
+  const { locale } = useLanguage();
   const { user, checkAuthState } = useAuth();
   // Camera permissions hook - nos ayuda a manejar los permisos de la cámara
   const [permission, requestPermission] = useCameraPermissions();
@@ -182,7 +188,7 @@ export default function ScannerScreen() {
       );
 
     if (!match) {
-      Alert.alert(
+      showAlert(
         "Código no válido",
         "Este código no pertenece a Entre Diagonales.",
         [
@@ -194,11 +200,9 @@ export default function ScannerScreen() {
     }
 
     if (!user?.access) {
-      Alert.alert(
-        "Sesión requerida",
-        "Iniciá sesión para canjear recompensas.",
-        [{ text: "Volver", onPress: handleBack }],
-      );
+      showAlert("Sesión requerida", "Iniciá sesión para canjear recompensas.", [
+        { text: "Volver", onPress: handleBack },
+      ]);
       return;
     }
 
@@ -208,10 +212,15 @@ export default function ScannerScreen() {
       await checkAuthState?.().catch((error) =>
         console.warn("No se pudieron actualizar los saldos del perfil", error),
       );
-      const unit = redemption.reward_type === "coins" ? "monedas" : "gemas";
-      Alert.alert(
+      const unit = t(
+        redemption.reward_type === "coins" ? "scanner.coins" : "scanner.gems",
+      );
+      showAlert(
         "Recompensa canjeada",
-        `Recibiste +${redemption.reward_amount.toLocaleString()} ${unit}.`,
+        t("scanner.received", {
+          amount: redemption.reward_amount.toLocaleString(locale),
+          unit,
+        }),
         [
           { text: "Seguir escaneando", onPress: () => setScanned(false) },
           { text: "Volver", style: "cancel", onPress: handleBack },
@@ -220,7 +229,7 @@ export default function ScannerScreen() {
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Intentá nuevamente.";
-      Alert.alert("No pudimos canjear el código", message, [
+      showAlert("No pudimos canjear el código", message, [
         { text: "Seguir escaneando", onPress: () => setScanned(false) },
         { text: "Volver", style: "cancel", onPress: handleBack },
       ]);
@@ -233,7 +242,7 @@ export default function ScannerScreen() {
   const takePicture = async () => {
     // Verificamos que la cámara esté lista
     if (!cameraRef.current) {
-      Alert.alert("Error", "La cámara no está lista");
+      showAlert("Error", "La cámara no está lista");
       return;
     }
 
@@ -253,7 +262,7 @@ export default function ScannerScreen() {
       }
     } catch (error) {
       console.error("Error al tomar la foto:", error);
-      Alert.alert("Error", "No se pudo tomar la foto");
+      showAlert("Error", "No se pudo tomar la foto");
     } finally {
       setIsTakingPhoto(false);
     }
@@ -327,7 +336,7 @@ export default function ScannerScreen() {
                 style={styles.cameraBackButton}
                 onPress={handleBack}
                 accessibilityRole="button"
-                accessibilityLabel="Volver al recorrido"
+                accessibilityLabel={t("scanner.backToTour")}
                 hitSlop={8}
               >
                 <Ionicons name="chevron-back" size={26} color="white" />
@@ -378,7 +387,7 @@ export default function ScannerScreen() {
                 style={styles.cameraBackButton}
                 onPress={handleBack}
                 accessibilityRole="button"
-                accessibilityLabel="Volver al recorrido"
+                accessibilityLabel={t("scanner.backToTour")}
                 hitSlop={8}
               >
                 <Ionicons name="chevron-back" size={26} color="white" />

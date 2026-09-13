@@ -5,6 +5,8 @@ import { FontAwesome } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
 import { Alert, Platform, Share, StyleSheet, View } from "react-native";
+import { useLocalizedAlert } from "@/hooks/use-localized-alert";
+import { useTranslation } from "react-i18next";
 
 /**
  * Componente que muestra las acciones disponibles después de descubrir un secreto
@@ -25,6 +27,8 @@ export const SecretCompletionActions = ({
   secretDescription,
   onNavigateAway,
 }: SecretCompletionActionsProps) => {
+  const showAlert = useLocalizedAlert();
+  const { t } = useTranslation();
   /**
    * Función que maneja el compartir del secreto descubierto
    * Usa la API nativa de Share para compartir en diferentes plataformas
@@ -32,7 +36,10 @@ export const SecretCompletionActions = ({
   const handleShare = async () => {
     try {
       // Preparar el mensaje personalizado para cuando se descubre un secreto
-      const message = `¡Acabo de descubrir un secreto! 🎉✨\n\n${secretName}\n\n${secretDescription}\n\n¿Podrás encontrarlo tú también? 🔍\n\n#EntreDigonales #SecretsDiscovered`;
+      const message = t("secrets.shareDiscovery", {
+        name: secretName,
+        description: secretDescription,
+      });
 
       // Llamar a la API de Share nativa
       const result = await Share.share(
@@ -40,13 +47,13 @@ export const SecretCompletionActions = ({
           message: message,
           // En iOS, puedes agregar un título separado
           ...(Platform.OS === "ios" && {
-            title: `¡Descubrí: ${secretName}!`,
+            title: t("secrets.discoveredTitle", { name: secretName }),
           }),
         },
         {
           // En Android, puedes especificar el título del diálogo
           ...(Platform.OS === "android" && {
-            dialogTitle: `Compartir descubrimiento: ${secretName}`,
+            dialogTitle: t("secrets.shareDiscoveryTitle", { name: secretName }),
           }),
         },
       );
@@ -64,7 +71,7 @@ export const SecretCompletionActions = ({
     } catch (error) {
       // Manejar errores al compartir
       console.error("Error al compartir:", error);
-      Alert.alert(
+      showAlert(
         "Error al compartir",
         "No se pudo compartir tu descubrimiento. Por favor, intenta nuevamente.",
       );

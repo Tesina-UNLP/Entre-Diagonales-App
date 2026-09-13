@@ -13,6 +13,7 @@ import { Controller, useForm } from "react-hook-form";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import Toast from "react-native-toast-message";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 
 // Esquema de validación con Zod
 // Define las reglas de validación para el formulario de cambio de contraseña
@@ -39,6 +40,7 @@ const changePasswordSchema = z
 type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
 
 const ChangePassword = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   // Estados para mostrar/ocultar las contraseñas
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -134,7 +136,7 @@ const ChangePassword = () => {
                     value={value}
                     onChangeText={onChange}
                     onBlur={onBlur}
-                    placeholder="Ingresa tu contraseña actual"
+                    placeholder={t("settings.enterCurrentPassword")}
                     placeholderTextColor={TOKENS.muted}
                     secureTextEntry={!showCurrentPassword}
                     autoCapitalize="none"
@@ -178,7 +180,7 @@ const ChangePassword = () => {
                     value={value}
                     onChangeText={onChange}
                     onBlur={onBlur}
-                    placeholder="Ingresa tu nueva contraseña"
+                    placeholder={t("settings.enterNewPassword")}
                     placeholderTextColor={TOKENS.muted}
                     secureTextEntry={!showNewPassword}
                     autoCapitalize="none"
@@ -220,7 +222,7 @@ const ChangePassword = () => {
                     value={value}
                     onChangeText={onChange}
                     onBlur={onBlur}
-                    placeholder="Confirma tu nueva contraseña"
+                    placeholder={t("settings.confirmNewPasswordPlaceholder")}
                     placeholderTextColor={TOKENS.muted}
                     secureTextEntry={!showConfirmPassword}
                     autoCapitalize="none"

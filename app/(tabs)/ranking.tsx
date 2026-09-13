@@ -13,7 +13,6 @@ import { Octicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Image,
   Pressable,
@@ -21,11 +20,17 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
+import { useLocalizedAlert } from "@/hooks/use-localized-alert";
+import { useLanguage } from "@/hooks/use-language";
 
 // Tipo para los tabs disponibles
 type RankingTab = "global" | "level";
 
 export default function RankingScreen() {
+  const { t } = useTranslation();
+  const showAlert = useLocalizedAlert();
+  const { locale } = useLanguage();
   const { user } = useAuth();
   const token = user?.access || "";
   const level = user?.level || null;
@@ -51,7 +56,7 @@ export default function RankingScreen() {
   } = useRanking(token, levelFilter);
 
   const reportName = (userId: number, name: string) => {
-    Alert.alert("Reportar nombre", `¿Por qué querés reportar a ${name}?`, [
+    showAlert("Reportar nombre", `¿Por qué querés reportar a ${name}?`, [
       { text: "Cancelar", style: "cancel" },
       {
         text: "Ofensivo",
@@ -59,9 +64,9 @@ export default function RankingScreen() {
         onPress: async () => {
           try {
             await api.reportRankingName(token, userId, "offensive");
-            Alert.alert("Reporte enviado", "Gracias. Revisaremos este nombre.");
+            showAlert("Reporte enviado", "Gracias. Revisaremos este nombre.");
           } catch (error) {
-            Alert.alert(
+            showAlert(
               "No pudimos enviar el reporte",
               error instanceof Error ? error.message : "Intentá nuevamente.",
             );
@@ -73,9 +78,9 @@ export default function RankingScreen() {
         onPress: async () => {
           try {
             await api.reportRankingName(token, userId, "impersonation");
-            Alert.alert("Reporte enviado", "Gracias. Revisaremos este nombre.");
+            showAlert("Reporte enviado", "Gracias. Revisaremos este nombre.");
           } catch (error) {
-            Alert.alert(
+            showAlert(
               "No pudimos enviar el reporte",
               error instanceof Error ? error.message : "Intentá nuevamente.",
             );
@@ -86,7 +91,7 @@ export default function RankingScreen() {
   };
 
   const blockUser = (item: RankingItem) => {
-    Alert.alert(
+    showAlert(
       "Bloquear usuario",
       "Su nombre se mostrará como *** para vos. Su posición, personaje y puntos seguirán visibles.",
       [
@@ -99,7 +104,7 @@ export default function RankingScreen() {
               await api.blockRankingUser(token, item.id);
               refresh();
             } catch (error) {
-              Alert.alert(
+              showAlert(
                 "No pudimos bloquear al usuario",
                 error instanceof Error ? error.message : "Intentá nuevamente.",
               );
@@ -115,7 +120,7 @@ export default function RankingScreen() {
       await api.unblockRankingUser(token, item.id);
       refresh();
     } catch (error) {
-      Alert.alert(
+      showAlert(
         "No pudimos desbloquear al usuario",
         error instanceof Error ? error.message : "Intentá nuevamente.",
       );
@@ -124,7 +129,7 @@ export default function RankingScreen() {
 
   const openUserActions = (item: RankingItem) => {
     if (item.is_blocked) {
-      Alert.alert("Usuario bloqueado", "Su nombre está oculto para vos.", [
+      showAlert("Usuario bloqueado", "Su nombre está oculto para vos.", [
         { text: "Cancelar", style: "cancel" },
         { text: "Desbloquear", onPress: () => void unblockUser(item) },
       ]);
@@ -132,7 +137,7 @@ export default function RankingScreen() {
     }
 
     const name = item.display_name || item.username;
-    Alert.alert("Opciones del usuario", name, [
+    showAlert("Opciones del usuario", name, [
       { text: "Cancelar", style: "cancel" },
       { text: "Reportar nombre", onPress: () => reportName(item.id, name) },
       {
@@ -314,14 +319,17 @@ export default function RankingScreen() {
                     />
 
                     <ThemedText type="muted" style={styles.rowPts}>
-                      {item.experience.toLocaleString()} puntos
+                      {t("common.pointsCount", {
+                        count: item.experience,
+                        value: item.experience.toLocaleString(locale),
+                      })}
                     </ThemedText>
                   </View>
                 </View>
                 {String(item.id) !== user?.id && (
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel={`Opciones para ${item.display_name || item.username}`}
+                    accessibilityLabel={`${t("ranking.userOptions")}: ${item.display_name || item.username}`}
                     hitSlop={8}
                     onPress={() => openUserActions(item)}
                     style={styles.reportButton}
