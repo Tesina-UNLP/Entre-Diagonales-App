@@ -13,7 +13,8 @@ import {
   CameraView,
   useCameraPermissions,
 } from "expo-camera";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { File } from "expo-file-system";
+import { useIsFocused, useLocalSearchParams, useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
@@ -28,6 +29,7 @@ export default function ScannerScreen() {
   const showAlert = useLocalizedAlert();
   const { locale } = useLanguage();
   const { user, checkAuthState } = useAuth();
+  const isFocused = useIsFocused();
   // Camera permissions hook - nos ayuda a manejar los permisos de la cámara
   const [permission, requestPermission] = useCameraPermissions();
 
@@ -55,7 +57,11 @@ export default function ScannerScreen() {
   // Referencia a la cámara para poder tomar fotos
   const cameraRef = useRef<CameraView>(null);
 
-  const { location } = useLocation();
+  const {
+    location,
+    isLoading: isLocationLoading,
+    error: locationError,
+  } = useLocation();
 
   // Router para navegar después de escanear
   const router = useRouter();
@@ -84,29 +90,27 @@ export default function ScannerScreen() {
   };
 
   const handleComplete = async () => {
+    if (
+      params.mode === "spot" &&
+      (!location ||
+        !Number.isFinite(location.latitude) ||
+        !Number.isFinite(location.longitude))
+    ) {
+      showAlert(
+        "Ubicación no disponible",
+        isLocationLoading
+          ? "Todavía estamos obteniendo tu ubicación. Esperá unos segundos e intentá nuevamente."
+          : locationError ||
+              "Necesitamos una ubicación válida para completar esta parada.",
+      );
+      return;
+    }
+
     setIsLoading(true);
 
     // URL por defecto - apunta a la ruta correcta en (stack)
     let urlToRedirect = `/${params.mode === "spot" ? "(stack)/spots" : "(tabs)/profile/secrets"}/${params.secret_id ? params.secret_id : params.spot_id}`;
 
-    // Preparar la foto para enviarla al servidor
-    // FormData es una estructura especial que permite enviar archivos junto con otros datos
-    const formData = new FormData();
-
-    // Si hay una foto, la agregamos al FormData
-    if (photo) {
-      // Extraemos el nombre del archivo y el tipo (extensión)
-      const fileName = photo.split("/").pop() || "photo.jpg";
-
-      // Agregamos la foto al FormData como si fuera un archivo
-      // @ts-ignore - React Native maneja FormData de forma especial
-      // IMPORTANTE: El nombre 'file' debe coincidir con lo que el backend espera en request.FILES.get("file")
-      formData.append(params.mode === "spot" ? "file" : "image", {
-        uri: photo, // La ubicación de la foto en el dispositivo
-        name: fileName, // El nombre del archivo
-        type: "image/jpeg", // MIME estándar del JPEG creado por expo-camera
-      });
-    }
     if (!user?.access) {
       Toast.show({
         type: "error",
@@ -119,9 +123,30 @@ export default function ScannerScreen() {
 
     // Bloque try-catch para manejar errores de las requests
     try {
+      const formData = new FormData();
+
+      if (photo) {
+        const imageFile = new File(photo);
+
+        if (!imageFile.exists) {
+          throw new Error("No se encontró la foto capturada");
+        }
+
+        // Expo 57 serializa multipart con Blob/File. El objeto histórico
+        // `{ uri, name, type }` falla en Android con expo/fetch.
+        // El nombre 'file' debe coincidir con request.FILES.get("file") del backend.
+        formData.append(
+          params.mode === "spot" ? "file" : "image",
+          imageFile,
+          imageFile.name,
+        );
+      }
+
       if (params.mode === "spot") {
-        formData.append("latitude", location?.latitude?.toString() || "");
-        formData.append("longitude", location?.longitude?.toString() || "");
+        // La validación anterior garantiza coordenadas reales; nunca enviamos
+        // strings vacíos, que el backend rechaza como un multipart inválido.
+        formData.append("latitude", String(location!.latitude));
+        formData.append("longitude", String(location!.longitude));
         // Intentamos completar el spot
         const response = await api.completeSpot(
           user?.access,
@@ -158,12 +183,12 @@ export default function ScannerScreen() {
       // Si hay un error en cualquiera de las dos requests
       console.error("Error al completar:", error);
 
-      // Mostramos un Toast de error
-      Toast.show({
-        type: "error",
-        text1: "Error al procesar",
-        text2: (error as any).message || "Por favor, intenta de nuevo.",
-      });
+      // Un Alert queda por encima de la vista nativa de cámara y permite ver
+      // el `detail` exacto que devuelve el backend para los errores 400.
+      showAlert(
+        "No pudimos completar la parada",
+        error instanceof Error ? error.message : "Por favor, intentá de nuevo.",
+      );
 
       // Ocultamos el modal de cargando para que el usuario pueda reintentar
       setIsLoading(false);
@@ -319,6 +344,13 @@ export default function ScannerScreen() {
     return <CameraPermissionView onRequestPermission={requestPermission} />;
   }
 
+  // Las pantallas de tabs permanecen montadas al navegar. Desmontar la vista
+  // nativa cuando pierde foco evita reutilizar una sesión de cámara inválida
+  // al entrar y salir varias veces, especialmente en iOS.
+  if (!isFocused) {
+    return <View style={styles.container} />;
+  }
+
   // MODO QR: canje de recompensas configuradas desde el backend.
   if (params.mode === "qr") {
     return (
@@ -329,30 +361,33 @@ export default function ScannerScreen() {
           enableTorch={flashEnabled}
           onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
           barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
+        />
+        <View
+          collapsable={false}
+          pointerEvents="box-none"
+          style={styles.overlay}
         >
-          <View style={styles.overlay}>
-            <View style={styles.scanTextContainer}>
-              <TouchableOpacity
-                style={styles.cameraBackButton}
-                onPress={handleBack}
-                accessibilityRole="button"
-                accessibilityLabel={t("scanner.backToTour")}
-                hitSlop={8}
-              >
-                <Ionicons name="chevron-back" size={26} color="white" />
-              </TouchableOpacity>
-              <ThemedText style={styles.scanText}>
-                Escaneá un código QR
-              </ThemedText>
+          <View style={styles.scanTextContainer}>
+            <TouchableOpacity
+              style={styles.cameraBackButton}
+              onPress={handleBack}
+              accessibilityRole="button"
+              accessibilityLabel={t("scanner.backToTour")}
+              hitSlop={8}
+            >
+              <Ionicons name="chevron-back" size={26} color="white" />
+            </TouchableOpacity>
+            <ThemedText style={styles.scanText}>
+              Escaneá un código QR
+            </ThemedText>
 
-              {/* Botón de flash */}
-              <FlashButton
-                enabled={flashEnabled}
-                onPress={() => setFlashEnabled(!flashEnabled)}
-              />
-            </View>
+            {/* Botón de flash */}
+            <FlashButton
+              enabled={flashEnabled}
+              onPress={() => setFlashEnabled(!flashEnabled)}
+            />
           </View>
-        </CameraView>
+        </View>
 
         {/* Modal de cargando - Se muestra mientras se procesa */}
         <LoadingModal isLoading={isLoading} text="Procesando..." />
@@ -373,15 +408,20 @@ export default function ScannerScreen() {
         />
       ) : (
         // Mostrar cámara para tomar fotos
-        <CameraView
-          ref={cameraRef}
-          style={styles.camera}
-          facing="back"
-          enableTorch={flashEnabled}
-          pictureSize={pictureSize}
-          onCameraReady={configurePictureSize}
-        >
-          <View style={styles.overlay}>
+        <>
+          <CameraView
+            ref={cameraRef}
+            style={styles.camera}
+            facing="back"
+            enableTorch={flashEnabled}
+            pictureSize={pictureSize}
+            onCameraReady={configurePictureSize}
+          />
+          <View
+            collapsable={false}
+            pointerEvents="box-none"
+            style={styles.overlay}
+          >
             <View style={styles.scanTextContainer}>
               <TouchableOpacity
                 style={styles.cameraBackButton}
@@ -412,7 +452,7 @@ export default function ScannerScreen() {
             {/* Botón para tomar foto */}
             <CaptureButton onPress={takePicture} disabled={isTakingPhoto} />
           </View>
-        </CameraView>
+        </>
       )}
 
       {/* Modal de cargando - Se muestra mientras se procesa */}
@@ -424,12 +464,23 @@ export default function ScannerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "black",
   },
   camera: {
-    flex: 1,
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    zIndex: 0,
   },
   overlay: {
-    flex: 1,
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    zIndex: 10,
     backgroundColor: "transparent",
     justifyContent: "space-between",
     padding: 20,
