@@ -15,7 +15,7 @@ import {
 } from "expo-camera";
 import { File } from "expo-file-system";
 import { useIsFocused, useLocalSearchParams, useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Toast from "react-native-toast-message";
@@ -79,6 +79,26 @@ export default function ScannerScreen() {
   const params = parsed.success
     ? parsed.data
     : { mode: "qr", from: "/(tabs)", secret_id: "", spot_id: "", tour_id: "" };
+
+  // Las pantallas de tabs permanecen montadas. Al volver a entrar, o al
+  // cambiar de modo, no reutilizamos resultados, previews ni estados de una
+  // sesión anterior de cámara.
+  useEffect(() => {
+    if (!isFocused) return;
+
+    setScanned(false);
+    setPhoto(null);
+    setIsTakingPhoto(false);
+    setIsLoading(false);
+    setFlashEnabled(false);
+    setPictureSize(undefined);
+  }, [
+    isFocused,
+    params.mode,
+    params.secret_id,
+    params.spot_id,
+    params.tour_id,
+  ]);
 
   const handleBack = () => {
     if (router.canGoBack()) {
