@@ -1,7 +1,5 @@
 import { FadeInView } from "@/components/animations/fade-in-view";
 import { TourCardSkeleton } from "@/components/skeletons/tour-card-skeleton";
-import { ToursFiltersSkeleton } from "@/components/skeletons/tours-filters-skeleton";
-import { ToursHeaderSkeleton } from "@/components/skeletons/tours-header-skeleton";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedText } from "@/components/themed-text";
 import TourCard from "@/components/tour-card";
@@ -26,13 +24,146 @@ import Toast from "react-native-toast-message";
 
 const emptyImage = require("@/assets/images/empty.png");
 
+type CompletionFilter = "incomplete" | "completed";
+
+interface ToursHeaderProps {
+  selectedTag: string | null;
+  selectedLevel: string | null;
+  completionFilter: CompletionFilter;
+  onSelectTag: (tag: string) => void;
+  onSelectLevel: (level: string) => void;
+  onSelectCompletion: (filter: CompletionFilter) => void;
+}
+
+// Está definido fuera de la pantalla para que FlatList no lo desmonte al filtrar.
+const ToursHeader = ({
+  selectedTag,
+  selectedLevel,
+  completionFilter,
+  onSelectTag,
+  onSelectLevel,
+  onSelectCompletion,
+}: ToursHeaderProps) => (
+  <>
+    <FadeInView delay={100}>
+      <View style={styles.header}>
+        <ThemedText type="title">Explora todos los tours</ThemedText>
+        <ThemedText type="muted">Elige la ruta que deseas comenzar</ThemedText>
+      </View>
+    </FadeInView>
+
+    <FadeInView delay={200}>
+      <View style={styles.filterSection}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.badgeContainer}
+        >
+          {TAGS.map((tag) => (
+            <TouchableOpacity
+              key={tag.id}
+              style={[
+                styles.badge,
+                selectedTag === tag.id && styles.badgeActive,
+              ]}
+              onPress={() => onSelectTag(tag.id)}
+            >
+              {cloneElement(tag.icon, {
+                color: selectedTag === tag.id ? TOKENS.background : TOKENS.text,
+              })}
+
+              <ThemedText
+                type="defaultSemiBold"
+                style={[
+                  styles.badgeText,
+                  selectedTag === tag.id && styles.badgeTextActive,
+                ]}
+              >
+                {tag.label}
+              </ThemedText>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+    </FadeInView>
+
+    <FadeInView delay={300}>
+      <View style={[styles.filterSection, { marginBottom: 20 }]}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.badgeContainer}
+        >
+          {LEVELS.map((level) => (
+            <TouchableOpacity
+              key={level.id}
+              style={[
+                styles.badge,
+                selectedLevel === level.id && styles.badgeActive,
+              ]}
+              onPress={() => onSelectLevel(level.id)}
+            >
+              <ThemedText
+                type="defaultSemiBold"
+                style={[
+                  styles.badgeText,
+                  selectedLevel === level.id && styles.badgeTextActive,
+                ]}
+              >
+                {level.label}
+              </ThemedText>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+    </FadeInView>
+
+    <FadeInView delay={150}>
+      <View style={styles.tabContainer}>
+        <Pressable
+          style={[
+            styles.tab,
+            completionFilter === "incomplete" && styles.tabActive,
+          ]}
+          onPress={() => onSelectCompletion("incomplete")}
+        >
+          <ThemedText
+            type={
+              completionFilter === "incomplete" ? "defaultSemiBold" : "muted"
+            }
+            style={[completionFilter === "incomplete" && styles.tabTextActive]}
+          >
+            No completados
+          </ThemedText>
+        </Pressable>
+
+        <Pressable
+          style={[
+            styles.tab,
+            completionFilter === "completed" && styles.tabActive,
+          ]}
+          onPress={() => onSelectCompletion("completed")}
+        >
+          <ThemedText
+            type={
+              completionFilter === "completed" ? "defaultSemiBold" : "muted"
+            }
+            style={[completionFilter === "completed" && styles.tabTextActive]}
+          >
+            Completados
+          </ThemedText>
+        </Pressable>
+      </View>
+    </FadeInView>
+  </>
+);
+
 export default function TabTwoScreen() {
   const [routes, setRoutes] = useState<TourApiResponse[]>([]);
   const [selectedTag, setSelectedTag] = useState<string | null>("todos");
   const [selectedLevel, setSelectedLevel] = useState<string | null>("1");
-  const [completionFilter, setCompletionFilter] = useState<
-    "incomplete" | "completed"
-  >("incomplete");
+  const [completionFilter, setCompletionFilter] =
+    useState<CompletionFilter>("incomplete");
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -152,167 +283,6 @@ export default function TabTwoScreen() {
     void loadRoutes(1, true, true);
   }, [loadRoutes]);
 
-  const handleFilterByTag = (tag: string) => {
-    setSelectedTag(tag);
-  };
-
-  const handleFilterByLevel = (level: string) => {
-    setSelectedLevel(level);
-  };
-
-  const renderHeader = () => (
-    <>
-      {/* Header con animación fade-in */}
-      <FadeInView delay={100}>
-        <View style={styles.header}>
-          <ThemedText type="title">Explora todos los tours</ThemedText>
-          <ThemedText type="muted">
-            Elige la ruta que deseas comenzar
-          </ThemedText>
-        </View>
-      </FadeInView>
-
-      {/* Scrolleable horizontal badge selector category con fade-in */}
-      <FadeInView delay={200}>
-        <View style={styles.filterSection}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.badgeContainer}
-          >
-            {TAGS.map((tag) => (
-              <TouchableOpacity
-                key={tag.id}
-                style={[
-                  styles.badge,
-                  selectedTag === tag.id && styles.badgeActive,
-                ]}
-                onPress={() => handleFilterByTag(tag.id)}
-              >
-                {cloneElement(tag.icon, {
-                  color:
-                    selectedTag === tag.id ? TOKENS.background : TOKENS.text,
-                })}
-
-                <ThemedText
-                  type="defaultSemiBold"
-                  style={[
-                    styles.badgeText,
-                    selectedTag === tag.id && styles.badgeTextActive,
-                  ]}
-                >
-                  {tag.label}
-                </ThemedText>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      </FadeInView>
-
-      {/* Scrolleable horizontal badge selector level con fade-in */}
-      <FadeInView delay={300}>
-        <View style={[styles.filterSection, { marginBottom: 20 }]}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.badgeContainer}
-          >
-            {LEVELS.map((level) => (
-              <TouchableOpacity
-                key={level.id}
-                style={[
-                  styles.badge,
-                  selectedLevel === level.id && styles.badgeActive,
-                ]}
-                onPress={() => handleFilterByLevel(level.id)}
-              >
-                <ThemedText
-                  type="defaultSemiBold"
-                  style={[
-                    styles.badgeText,
-                    selectedLevel === level.id && styles.badgeTextActive,
-                  ]}
-                >
-                  {level.label}
-                </ThemedText>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      </FadeInView>
-
-      {/* Tab Switcher - Selector de completados/no completados */}
-      <FadeInView delay={150}>
-        <View style={styles.tabContainer}>
-          {/* Tab: No completados */}
-          <Pressable
-            style={[
-              styles.tab,
-              completionFilter === "incomplete" && styles.tabActive,
-            ]}
-            onPress={() => setCompletionFilter("incomplete")}
-          >
-            <ThemedText
-              type={
-                completionFilter === "incomplete" ? "defaultSemiBold" : "muted"
-              }
-              style={[
-                completionFilter === "incomplete" && styles.tabTextActive,
-              ]}
-            >
-              No completados
-            </ThemedText>
-          </Pressable>
-
-          {/* Tab: Completados */}
-          <Pressable
-            style={[
-              styles.tab,
-              completionFilter === "completed" && styles.tabActive,
-            ]}
-            onPress={() => setCompletionFilter("completed")}
-          >
-            <ThemedText
-              type={
-                completionFilter === "completed" ? "defaultSemiBold" : "muted"
-              }
-              style={[completionFilter === "completed" && styles.tabTextActive]}
-            >
-              Completados
-            </ThemedText>
-          </Pressable>
-        </View>
-      </FadeInView>
-    </>
-  );
-
-  // Función para renderizar el header con skeletons cuando está cargando
-  const renderSkeletonHeader = () => (
-    <>
-      <ToursHeaderSkeleton />
-      <ToursFiltersSkeleton />
-    </>
-  );
-
-  // Si está cargando, mostrar los skeletons
-  if (isLoading) {
-    return (
-      <ThemedBackground style={styles.container}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.listContent}
-        >
-          {renderSkeletonHeader()}
-          {/* Mostrar varios TourCard skeletons */}
-          {[1, 2, 3].map((item) => (
-            <TourCardSkeleton key={item} />
-          ))}
-          <View style={styles.bottomSpacer}></View>
-        </ScrollView>
-      </ThemedBackground>
-    );
-  }
-
   return (
     <ThemedBackground style={styles.container}>
       <FlatList
@@ -326,14 +296,25 @@ export default function TabTwoScreen() {
             colors={[TOKENS.navActive]}
           />
         }
-        ListHeaderComponent={renderHeader}
+        ListHeaderComponent={
+          <ToursHeader
+            selectedTag={selectedTag}
+            selectedLevel={selectedLevel}
+            completionFilter={completionFilter}
+            onSelectTag={setSelectedTag}
+            onSelectLevel={setSelectedLevel}
+            onSelectCompletion={setCompletionFilter}
+          />
+        }
         ListFooterComponent={() => (
           <>
             {loadingMore && <ActivityIndicator color={TOKENS.primary} />}
             <View style={styles.bottomSpacer} />
           </>
         )}
-        ListEmptyComponent={<EmptyComponent />}
+        ListEmptyComponent={
+          isLoading ? <ToursListSkeleton /> : <EmptyComponent />
+        }
         renderItem={({ item, index }) => (
           // Cada card aparece con un delay incremental
           // Los primeros 3 cards tienen delays más notables, luego se estabiliza
@@ -370,6 +351,15 @@ const EmptyComponent = () => (
       <ThemedText type="defaultSemiBold">No hay rutas disponibles</ThemedText>
     </View>
   </FadeInView>
+);
+
+// Skeleton exclusivo del contenido que cambia con los filtros.
+const ToursListSkeleton = () => (
+  <>
+    {[1, 2, 3].map((item) => (
+      <TourCardSkeleton key={item} />
+    ))}
+  </>
 );
 
 const styles = StyleSheet.create({
