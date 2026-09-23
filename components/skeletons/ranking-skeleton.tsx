@@ -24,24 +24,31 @@ export const RankingScreenSkeleton = () => {
         <Skeleton width="48%" height={44} borderRadius={8} />
       </View>
 
-      {/* User Ranking Card skeleton */}
+      <RankingContentSkeleton />
+    </View>
+  );
+};
+
+// Skeleton de los datos que se actualizan al cambiar de tipo de ranking.
+// Se mantiene separado para no desmontar el header ni el selector durante el cambio.
+export const RankingContentSkeleton = () => {
+  return (
+    <>
       <UserRankingCardSkeleton />
 
-      {/* Podium skeleton */}
       <View style={styles.podiumContainer}>
         <PodiumItemSkeleton position={2} />
         <PodiumItemSkeleton position={1} />
         <PodiumItemSkeleton position={3} />
       </View>
 
-      {/* Lista de usuarios skeleton */}
       <View style={styles.listContainer}>
         <RankingRowSkeleton />
         <RankingRowSkeleton />
         <RankingRowSkeleton />
         <RankingRowSkeleton />
       </View>
-    </View>
+    </>
   );
 };
 
