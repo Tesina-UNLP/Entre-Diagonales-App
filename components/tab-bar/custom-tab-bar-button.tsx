@@ -1,5 +1,6 @@
 import { TOKENS } from "@/constants/colors";
 import { useThemeColor } from "@/hooks/use-theme-color";
+import { useRouter } from "expo-router";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import ScannerIcon from "../icons/scanner";
@@ -13,12 +14,29 @@ type Props = {
   focused?: boolean;
 };
 
-export function CustomTabBarButton({ children, onPress }: Props) {
+export function CustomTabBarButton({ children }: Props) {
   const { theme } = useThemeColor();
+  const router = useRouter();
+
+  const openQrScanner = () => {
+    // El tab puede conservar los params del último escaneo (spot/secret).
+    // La entrada principal de cámara siempre debe abrir el lector de QR.
+    router.navigate({
+      pathname: "/(tabs)/scanner",
+      params: {
+        mode: "qr",
+        from: "/(tabs)",
+        secret_id: "",
+        spot_id: "",
+        tour_id: "",
+      },
+    } as any);
+  };
+
   return (
     <TouchableOpacity
       style={styles.container}
-      onPress={onPress}
+      onPress={openQrScanner}
       activeOpacity={0.9}
     >
       <View style={styles.button}>
