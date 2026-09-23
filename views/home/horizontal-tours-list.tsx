@@ -13,12 +13,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { TourTarget } from "@wrack/react-native-tour-guide";
 
 const HorizontalTourList = ({ routes }: { routes: Array<TourApiResponse> }) => {
   const { t } = useTranslation();
 
   return (
-    <View style={styles.recommendedContainer}>
+    <TourTarget id="tutorial-home-tours" style={styles.recommendedContainer}>
       <View style={styles.recommendedHeaderRow}>
         <ThemedText type="subtitle">Rutas recomendadas</ThemedText>
         <Link href={{ pathname: "/(tabs)/tours" }}>
@@ -83,7 +84,7 @@ const HorizontalTourList = ({ routes }: { routes: Array<TourApiResponse> }) => {
           </Link>
         )}
       />
-    </View>
+    </TourTarget>
   );
 };
 

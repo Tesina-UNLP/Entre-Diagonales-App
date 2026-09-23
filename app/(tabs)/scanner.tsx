@@ -22,6 +22,8 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Toast from "react-native-toast-message";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
+import { TourTarget } from "@wrack/react-native-tour-guide";
+import { useTutorial } from "@/contexts/tutorial";
 import { useLocalizedAlert } from "@/hooks/use-localized-alert";
 import { useLanguage } from "@/hooks/use-language";
 
@@ -30,6 +32,7 @@ export default function ScannerScreen() {
   const showAlert = useLocalizedAlert();
   const { locale } = useLanguage();
   const { user, checkAuthState } = useAuth();
+  const { triggerTutorial, ready: tutorialReady } = useTutorial();
   const isFocused = useIsFocused();
   // Camera permissions hook - nos ayuda a manejar los permisos de la cámara
   const [permission, requestPermission] = useCameraPermissions();
@@ -95,6 +98,23 @@ export default function ScannerScreen() {
     params.spot_id,
     params.tour_id,
     permission?.granted,
+  ]);
+
+  useEffect(() => {
+    if (
+      isFocused &&
+      permission?.granted &&
+      params.mode !== "qr" &&
+      tutorialReady
+    ) {
+      void triggerTutorial("camera");
+    }
+  }, [
+    isFocused,
+    params.mode,
+    permission?.granted,
+    triggerTutorial,
+    tutorialReady,
   ]);
 
   // Las pantallas de tabs permanecen montadas. Al volver a entrar, o al
@@ -497,14 +517,18 @@ export default function ScannerScreen() {
               />
             </View>
 
-            <View pointerEvents="none" style={styles.monumentGuide}>
+            <TourTarget id="tutorial-camera-frame" style={styles.monumentGuide}>
               <ThemedText style={styles.monumentGuideLabel}>
                 Encuadrá el monumento acá
               </ThemedText>
-            </View>
+            </TourTarget>
 
             {/* Botón para tomar foto */}
-            <CaptureButton onPress={takePicture} disabled={isTakingPhoto} />
+            <CaptureButton
+              tutorialTargetId="tutorial-camera-capture"
+              onPress={takePicture}
+              disabled={isTakingPhoto}
+            />
           </View>
         </>
       )}

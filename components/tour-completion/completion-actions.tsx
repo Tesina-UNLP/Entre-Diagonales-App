@@ -4,7 +4,8 @@ import { TOKENS } from "@/constants/colors";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { router } from "expo-router";
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
+import { TourTarget } from "@wrack/react-native-tour-guide";
 
 /**
  * Props para el componente CompletionActions
@@ -41,7 +42,7 @@ export const CompletionActions = ({
   };
 
   return (
-    <View style={styles.buttonsContainer}>
+    <TourTarget id="tutorial-rewards-actions" style={styles.buttonsContainer}>
       {/* Botón para ver el progreso del tour */}
       <ThemedButton
         variant="primary"
@@ -95,7 +96,7 @@ export const CompletionActions = ({
           Compartir logro
         </ThemedText>
       </ThemedButton>
-    </View>
+    </TourTarget>
   );
 };
 

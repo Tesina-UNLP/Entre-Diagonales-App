@@ -34,6 +34,7 @@ const SpotList = ({
           completed={false}
           currentSpot={currentSpot}
           tourId={tourId}
+          tutorialSecretTarget={currentSpot.spot.secret_items.length > 0}
         />
       )}
       {notCompletedSpots.map((spot) => (

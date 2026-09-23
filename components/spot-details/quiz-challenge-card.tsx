@@ -13,7 +13,8 @@ import { COINS_PER_QUIZ, XP_PER_QUIZ } from "@/constants/gamification";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { useEffect, useRef } from "react";
+import { useTourGuide } from "@wrack/react-native-tour-guide";
+import { useEffect, useRef, type ComponentRef } from "react";
 import { Animated, Easing, Pressable, StyleSheet, View } from "react-native";
 
 interface QuizChallengeCardProps {
@@ -26,6 +27,13 @@ export const QuizChallengeCard = ({ quizId }: QuizChallengeCardProps) => {
   // Animaciones
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const targetRef = useRef<ComponentRef<typeof Pressable>>(null);
+  const { registerTarget, unregisterTarget } = useTourGuide();
+
+  useEffect(() => {
+    registerTarget("tutorial-quiz-card", targetRef, styles.pressable);
+    return () => unregisterTarget("tutorial-quiz-card", targetRef);
+  }, [registerTarget, unregisterTarget]);
 
   useEffect(() => {
     // Animación de pulso continuo
@@ -76,12 +84,11 @@ export const QuizChallengeCard = ({ quizId }: QuizChallengeCardProps) => {
     <Animated.View
       style={[
         styles.container,
-        {
-          transform: [{ scale: Animated.multiply(pulseAnim, scaleAnim) }],
-        },
+        { transform: [{ scale: Animated.multiply(pulseAnim, scaleAnim) }] },
       ]}
     >
       <Pressable
+        ref={targetRef}
         onPress={handlePress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
