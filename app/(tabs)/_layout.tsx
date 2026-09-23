@@ -26,7 +26,8 @@ export default function TabLayout() {
 
   const hideTabs =
     (pathname.startsWith("/tours/") && pathname !== "/tours") ||
-    (pathname.startsWith("/profile/") && pathname !== "/profile");
+    (pathname.startsWith("/profile/") && pathname !== "/profile") ||
+    pathname === "/scanner";
 
   return (
     <Tabs

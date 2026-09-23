@@ -97,6 +97,26 @@ export default function ScannerScreen() {
     permission?.granted,
   ]);
 
+  // Las pantallas de tabs permanecen montadas. Al volver a entrar, o al
+  // cambiar de modo, no reutilizamos resultados, previews ni estados de una
+  // sesión anterior de cámara.
+  useEffect(() => {
+    if (!isFocused) return;
+
+    setScanned(false);
+    setPhoto(null);
+    setIsTakingPhoto(false);
+    setIsLoading(false);
+    setFlashEnabled(false);
+    setPictureSize(undefined);
+  }, [
+    isFocused,
+    params.mode,
+    params.secret_id,
+    params.spot_id,
+    params.tour_id,
+  ]);
+
   const handleBack = () => {
     if (router.canGoBack()) {
       router.back();
