@@ -4,13 +4,14 @@ import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
 import { api } from "@/libs/api";
+import { trackProductEvent } from "@/libs/telemetry";
 import { IndividualSpotApiResponse } from "@/types";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetScrollView,
 } from "@gorhom/bottom-sheet";
 import { router, useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Share, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
@@ -38,6 +39,7 @@ const SpotDetails = () => {
     null,
   );
   const [loading, setLoading] = useState<boolean>(false);
+  const hasTrackedViewRef = useRef(false);
   const insets = useSafeAreaInsets();
 
   const snapPoints = useMemo(() => ["67%", "95%"], []);
@@ -48,10 +50,17 @@ const SpotDetails = () => {
       const response = await api.getSpot(user.access, parseInt(idStr));
       if (response) {
         setSpotInfo(response);
+        if (!hasTrackedViewRef.current) {
+          trackProductEvent("spot_viewed", {
+            spot_id: response.id,
+            tour_id: tourId ? Number(tourId) : undefined,
+          });
+          hasTrackedViewRef.current = true;
+        }
       }
     }
     setLoading(false);
-  }, [user, idStr]);
+  }, [user, idStr, tourId]);
 
   useEffect(() => {
     handleGetSpot();

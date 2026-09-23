@@ -23,7 +23,12 @@ import { translateUiText } from "@/i18n";
 import { useLanguage } from "@/hooks/use-language";
 import { useTranslation } from "react-i18next";
 import { PostHogErrorBoundary, PostHogProvider } from "posthog-react-native";
-import { posthog, syncSessionReplayConsent } from "@/libs/telemetry";
+import {
+  posthog,
+  setTelemetryLanguage,
+  syncSessionReplayConsent,
+  trackProductEvent,
+} from "@/libs/telemetry";
 import { useEffect } from "react";
 
 Observe.configure({
@@ -47,8 +52,14 @@ function AppContent() {
   const { t } = useTranslation();
 
   useEffect(() => {
+    setTelemetryLanguage(language);
+  }, [language]);
+
+  useEffect(() => {
     void syncSessionReplayConsent();
+    trackProductEvent("app_opened");
   }, []);
+
   const localizeToastText = (value?: string) =>
     value ? translateUiText(value) : value;
   const localizeErrorDetail = (value?: string) => {

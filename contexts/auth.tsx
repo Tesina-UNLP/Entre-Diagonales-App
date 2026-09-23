@@ -10,6 +10,7 @@ import {
   captureException,
   identifyTelemetryUser,
   resetTelemetryUser,
+  trackProductEvent,
 } from "@/libs/telemetry";
 
 const googleWebClientId = process.env.EXPO_PUBLIC_WEB_CLIENT_ID?.trim();
@@ -104,6 +105,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         },
         visibilityTime: 4000, // El toast se muestra por 4 segundos
       });
+      trackProductEvent("level_up", { level_id: newLevelId });
     }
 
     // Actualizamos la referencia del nivel anterior
@@ -188,7 +190,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       const userData = await api.register(email, password, confirmPassword);
 
-      initProfile(userData);
+      await initProfile(userData);
+      trackProductEvent("sign_up_completed");
     } catch (error) {
       throw error;
     } finally {
@@ -323,7 +326,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error("Onboarding completion failed");
       }
 
-      initProfile({ access: user.access, refresh: user.refresh });
+      await initProfile({ access: user.access, refresh: user.refresh });
+      trackProductEvent("onboarding_completed");
     }
   };
 

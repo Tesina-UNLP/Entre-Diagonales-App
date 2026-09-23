@@ -33,6 +33,14 @@ Configurá las variables públicas de `.env.example` mediante los entornos EAS. 
 
 Los builds EAS cargan source maps, dSYM y mappings Android mediante el plugin Expo. Las credenciales `POSTHOG_CLI_*` son secretos de build y nunca deben llevar el prefijo `EXPO_PUBLIC_`.
 
+### Plan de eventos de producto
+
+Las interacciones de Expo se emiten mediante `trackProductEvent` en `libs/telemetry.ts`: `app_opened`, `sign_up_completed`, `onboarding_completed`, `tour_viewed`, `tour_started`, `spot_viewed`, `camera_opened`, `recognition_succeeded`, `recognition_failed`, `quiz_started`, `quiz_answered`, `quiz_completed`, `secret_found`, `level_up` y `ranking_viewed`.
+
+Cada evento incorpora `environment`, `platform`, `app_version` e `language`; los eventos de recorrido/cámara agregan sólo IDs internos de tour, spot, quiz o secreto. Las fotos, coordenadas, direcciones, respuestas y mensajes de error no se capturan. `tour_completed`, `spot_verified` y `achievement_unlocked` son hechos confirmados y los emite únicamente la API de Django mediante su outbox.
+
+`tour_abandoned` y `spot_reached` no se emiten todavía: la UX no define un abandono explícito ni dispone de una regla de llegada validada antes de la confirmación server-side. Instrumentarlos ahora produciría métricas engañosas.
+
 Para una actualización OTA, usá el wrapper obligatorio y pasale los argumentos normales de `eas update`:
 
 ```bash

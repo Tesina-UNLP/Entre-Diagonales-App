@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Application from "expo-application";
 import PostHog, { type PostHogOptions } from "posthog-react-native";
+import { Platform } from "react-native";
 
 const POSTHOG_HOST =
   process.env.EXPO_PUBLIC_POSTHOG_HOST?.trim() || "https://us.i.posthog.com";
@@ -13,6 +14,7 @@ const REPLAY_FEATURE_ENABLED =
   process.env.EXPO_PUBLIC_POSTHOG_SESSION_REPLAY_ENABLED === "true";
 const REPLAY_CONSENT_KEY = "posthog.session-replay-consent.v1";
 const REDACTED = "[REDACTED]";
+let telemetryLanguage: string | undefined;
 
 const sensitiveKey =
   /(^|[_.$-])(authorization|cookie|password|passwd|secret|access[_-]?token|refresh[_-]?token|id[_-]?token|jwt|email|full[_-]?name|first[_-]?name|last[_-]?name|location|latitude|longitude|address|phone)([_.$-]|$)/i;
@@ -118,8 +120,58 @@ export const posthog = new PostHog(POSTHOG_API_KEY || "ph_disabled", {
 
 posthog.register({
   environment: APP_ENVIRONMENT,
+  platform: Platform.OS,
   service: "expo-mobile",
 });
+
+export type ProductEventName =
+  | "app_opened"
+  | "sign_up_completed"
+  | "onboarding_completed"
+  | "tour_viewed"
+  | "tour_started"
+  | "spot_viewed"
+  | "camera_opened"
+  | "recognition_succeeded"
+  | "recognition_failed"
+  | "quiz_started"
+  | "quiz_answered"
+  | "quiz_completed"
+  | "secret_found"
+  | "level_up"
+  | "ranking_viewed";
+
+type ProductEventProperties = Record<
+  string,
+  string | number | boolean | null | undefined
+>;
+
+/** Capture an interaction without putting it on the UI's critical path. */
+export function trackProductEvent(
+  eventName: ProductEventName,
+  properties: ProductEventProperties = {},
+): void {
+  if (!POSTHOG_ENABLED) return;
+
+  const definedProperties = Object.fromEntries(
+    Object.entries(properties).filter(([, value]) => value !== undefined),
+  );
+  posthog.capture(
+    eventName,
+    sanitizeRecord({
+      environment: APP_ENVIRONMENT,
+      platform: Platform.OS,
+      app_version: Application.nativeApplicationVersion,
+      ...(telemetryLanguage ? { language: telemetryLanguage } : {}),
+      ...definedProperties,
+    }) as Parameters<typeof posthog.capture>[1],
+  );
+}
+
+export function setTelemetryLanguage(language: string): void {
+  telemetryLanguage = language;
+  posthog.register({ language });
+}
 
 export function identifyTelemetryUser(userId: AppUserId): void {
   if (POSTHOG_ENABLED) {

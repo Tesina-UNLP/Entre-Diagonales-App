@@ -8,7 +8,7 @@ import { ThemedText } from "@/components/themed-text";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "@/hooks/use-location";
 import { api } from "@/libs/api";
-import { captureException } from "@/libs/telemetry";
+import { captureException, trackProductEvent } from "@/libs/telemetry";
 import {
   BarcodeScanningResult,
   CameraView,
@@ -16,7 +16,7 @@ import {
 } from "expo-camera";
 import { File } from "expo-file-system";
 import { useIsFocused, useLocalSearchParams, useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Toast from "react-native-toast-message";
@@ -80,6 +80,22 @@ export default function ScannerScreen() {
   const params = parsed.success
     ? parsed.data
     : { mode: "qr", from: "/(tabs)", secret_id: "", spot_id: "", tour_id: "" };
+
+  useEffect(() => {
+    if (isFocused && permission?.granted) {
+      trackProductEvent("camera_opened", {
+        camera_mode: params.mode,
+        tour_id: params.tour_id ? Number(params.tour_id) : undefined,
+        spot_id: params.spot_id ? Number(params.spot_id) : undefined,
+      });
+    }
+  }, [
+    isFocused,
+    params.mode,
+    params.spot_id,
+    params.tour_id,
+    permission?.granted,
+  ]);
 
   const handleBack = () => {
     if (router.canGoBack()) {
@@ -155,6 +171,10 @@ export default function ScannerScreen() {
           parseInt(params.spot_id),
           formData,
         );
+        trackProductEvent("recognition_succeeded", {
+          tour_id: Number(params.tour_id),
+          spot_id: Number(params.spot_id),
+        });
 
         if (response.tour_completed) {
           urlToRedirect = `/(tabs)/tours/${params.tour_id}/complete?tour_id=${params.tour_id}&xp=${response.rewards.experience}&coins=${response.rewards.coins}&secrets=${response.total_secret_items}&trivias=${response.total_quizzes}&secrets_completed=${response.secret_items_completed}&trivias_completed=${response.quizzes_completed}&tour_name=${response.tour_name}`;
@@ -171,6 +191,11 @@ export default function ScannerScreen() {
         );
 
         if (response.success) {
+          trackProductEvent("secret_found", {
+            secret_id: Number(params.secret_id),
+            spot_id: Number(params.spot_id),
+            tour_id: params.tour_id ? Number(params.tour_id) : undefined,
+          });
           urlToRedirect = `/(tabs)/profile/secrets/${params.secret_id}/complete?secret_id=${params.secret_id}&coins=${response.coins}&xp=${response.xp}&name=${response.name}&description=${response.description}&image_url=${response.image}`;
         }
       }
@@ -181,6 +206,13 @@ export default function ScannerScreen() {
       setPhoto(null);
       router.navigate(urlToRedirect as any);
     } catch (error) {
+      if (params.mode === "spot") {
+        trackProductEvent("recognition_failed", {
+          tour_id: Number(params.tour_id),
+          spot_id: Number(params.spot_id),
+          failure_kind: "verification_request_failed",
+        });
+      }
       // Si hay un error en cualquiera de las dos requests
       captureException(error, { operation: "scanner.complete_challenge" });
 
