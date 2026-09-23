@@ -2,14 +2,14 @@ import React from "react";
 import { Dimensions, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
-import { TAB_BAR_BASE_HEIGHT } from "./tab-bar-metrics";
+import { TAB_BAR_BACKGROUND_BASE_HEIGHT } from "./tab-bar-metrics";
 
 const { width } = Dimensions.get("window");
 
 export function CustomTabBar() {
   const insets = useSafeAreaInsets();
 
-  const HEIGHT = TAB_BAR_BASE_HEIGHT + insets.bottom;
+  const HEIGHT = TAB_BAR_BACKGROUND_BASE_HEIGHT + insets.bottom;
 
   return (
     <View

@@ -7,6 +7,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Link, router } from "expo-router";
 import React, { cloneElement } from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { ThemedButton } from "./themed-button";
 import { ThemedText } from "./themed-text";
 
@@ -29,6 +30,8 @@ const TourCard = ({
   progress?: string;
   started?: string;
 }) => {
+  const { t } = useTranslation();
+
   //progress es el número de spots completados
   const progressNumber = ((Number(progress) / (spotsCount || 0)) * 100).toFixed(
     0,
@@ -76,7 +79,7 @@ const TourCard = ({
                   style={{ transform: [{ rotate: "90deg" }] }}
                 />
                 <ThemedText type="muted" style={styles.stopsChipText}>
-                  {`${spotsCount || 0} paradas`}
+                  {t("tours.stopCount", { count: spotsCount || 0 })}
                 </ThemedText>
               </View>
             </View>

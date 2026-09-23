@@ -8,8 +8,11 @@ import { useFontScale } from "@/hooks/use-font-scale";
 import { router } from "expo-router";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { translateUiText } from "@/i18n";
+import { useTranslation } from "react-i18next";
 
 const Appearance = () => {
+  useTranslation();
   const { userFontScale, setUserFontScale } = useFontScale();
 
   return (
@@ -48,7 +51,7 @@ const Appearance = () => {
                       active && styles.optionLabelActive,
                     ]}
                   >
-                    {level.label}
+                    {translateUiText(level.label)}
                   </Text>
                   <Text
                     style={[

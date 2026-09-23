@@ -6,6 +6,8 @@ import { Link, router } from "expo-router";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "../themed-text";
+import { useLanguage } from "@/hooks/use-language";
+import { useTranslation } from "react-i18next";
 
 // Ahora este componente recibe los datos por props desde el componente padre
 // Esto evita hacer llamadas API redundantes y mejora el rendimiento
@@ -46,8 +48,8 @@ const ToursProfile = ({ data, loading }: ToursProfileProps) => {
   );
 };
 
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString("es-ES", {
+const formatDate = (date: string, locale: string) => {
+  return new Date(date).toLocaleDateString(locale, {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -55,6 +57,8 @@ const formatDate = (date: string) => {
 };
 
 const TourItem = ({ tour }: { tour: TourApiResponse }) => {
+  const { locale } = useLanguage();
+  const { t } = useTranslation();
   const progressNumber = (
     (Number(tour.progress) / (tour.spots.length || 0)) *
     100
@@ -70,8 +74,8 @@ const TourItem = ({ tour }: { tour: TourApiResponse }) => {
         </ThemedText>
         <ThemedText type="default" style={styles.tourItemCompleted}>
           {tour.completed_at
-            ? "Completado · " + formatDate(tour.completed_at)
-            : "En progreso"}
+            ? `${t("common.completed")} · ${formatDate(tour.completed_at, locale)}`
+            : t("common.inProgress")}
         </ThemedText>
         <View style={styles.tourItemStopsContainer}>
           <Ionicons name="footsteps" size={14} color={TOKENS.badgeActive} />

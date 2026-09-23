@@ -2,6 +2,7 @@ import { TOKENS } from "@/constants/colors";
 import React from "react";
 import { StyleSheet, TextInput, View } from "react-native";
 import { SectionHeader } from "./section-header";
+import { useTranslation } from "react-i18next";
 
 /**
  * Props para el componente CommentSection
@@ -22,6 +23,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
   value,
   onChangeText,
 }) => {
+  const { t } = useTranslation();
   return (
     <View style={styles.container}>
       {/* Encabezado de la sección */}
@@ -32,7 +34,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
 
       {/* Campo de texto multilinea */}
       <TextInput
-        placeholder="Escribe aqui tu idea o sugerencia..."
+        placeholder={t("tours.commentPlaceholder")}
         placeholderTextColor={TOKENS.muted}
         style={styles.input}
         value={value}

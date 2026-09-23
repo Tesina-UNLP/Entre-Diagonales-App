@@ -1,11 +1,14 @@
 import { TOKENS } from "@/constants/colors";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import { Image, StyleSheet, View } from "react-native";
+import { Image, Pressable, StyleSheet, View } from "react-native";
 import { ThemedText } from "./themed-text";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/hooks/use-language";
 
 interface Props {
   user: any;
   position: 1 | 2 | 3;
+  onPress?: () => void;
 }
 
 const podiumConfig = {
@@ -78,11 +81,23 @@ const podiumConfig = {
   },
 };
 
-const PodiumItem = ({ user, position }: Props) => {
+const PodiumItem = ({ user, position, onPress }: Props) => {
+  const { t } = useTranslation();
+  const { locale } = useLanguage();
   const config = podiumConfig[position];
 
   return (
-    <View style={[styles.container, { marginTop: config.offset }]}>
+    <Pressable
+      accessibilityRole={onPress ? "button" : undefined}
+      accessibilityLabel={
+        onPress
+          ? `${t("ranking.userOptions")}: ${user.display_name || user.username}`
+          : undefined
+      }
+      disabled={!onPress}
+      onPress={onPress}
+      style={[styles.container, { marginTop: config.offset }]}
+    >
       {/* Avatar */}
       <View
         style={[
@@ -114,7 +129,7 @@ const PodiumItem = ({ user, position }: Props) => {
               color: config.textColor,
             }}
           >
-            {Number(user?.experience ?? 0).toLocaleString()} pts
+            {Number(user?.experience ?? 0).toLocaleString(locale)} pts
           </ThemedText>
         </View>
 
@@ -147,7 +162,7 @@ const PodiumItem = ({ user, position }: Props) => {
           </ThemedText>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 };
 

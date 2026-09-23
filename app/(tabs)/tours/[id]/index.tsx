@@ -31,8 +31,10 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 
 const RouteDetails = () => {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const idStr = useMemo(() => (Array.isArray(id) ? id?.[0] : id), [id]);
   const { user } = useAuth();
@@ -157,7 +159,7 @@ const RouteDetails = () => {
         <>
           <Header
             title={routeInfo?.name || ""}
-            description={`${routeInfo?.spots.length} Puntos  • ${stopsDistanceInfo ? stopsDistanceInfo.slice(completedSpots.length).reduce((acc, info) => acc + (info.durationFromPrevious || 0), 0) + " min aprox" : "Calculando..."}`}
+            description={`${t("tours.stopCount", { count: routeInfo?.spots.length ?? 0 })}  • ${stopsDistanceInfo ? `${stopsDistanceInfo.slice(completedSpots.length).reduce((acc, info) => acc + (info.durationFromPrevious || 0), 0)} ${t("tours.approximateMinutes")}` : t("common.calculating")}`}
             onBack={() => router.navigate("/(tabs)/tours")}
           />
           <ScrollView

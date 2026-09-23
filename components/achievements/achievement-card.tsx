@@ -12,9 +12,10 @@ import Toast from "react-native-toast-message";
 import GemIcon from "../icons/gem";
 import { ThemedText } from "../themed-text";
 import { Ionicons } from "@expo/vector-icons";
+import { useLanguage } from "@/hooks/use-language";
 
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString("es-ES", {
+const formatDate = (date: string, locale: string) => {
+  return new Date(date).toLocaleDateString(locale, {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -31,6 +32,7 @@ const AchievementCard = ({
   const [isClaiming, setIsClaiming] = useState<string | null>(null);
 
   const { playSound } = useHaptics();
+  const { locale } = useLanguage();
   const { checkAuthState } = useAuth();
 
   const progressNumber = (
@@ -124,7 +126,7 @@ const AchievementCard = ({
               color={TOKENS.badgeActive}
             />
             <ThemedText type="muted">
-              Canjeado el {formatDate(isClaiming || "")}
+              Canjeado el {formatDate(isClaiming || "", locale)}
             </ThemedText>
           </View>
         ) : (
@@ -153,7 +155,7 @@ const AchievementCard = ({
                 ? "Puedes canjear este logro!"
                 : achievement.achievement.expired_at
                   ? "Termina el " +
-                    formatDate(achievement.achievement.expired_at || "")
+                    formatDate(achievement.achievement.expired_at || "", locale)
                   : getMessage()}
             </ThemedText>
 

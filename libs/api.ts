@@ -1,14 +1,20 @@
 import {
+  AccountDeletionPayload,
+  AccountDeletionResponse,
+  BlockedRankingUserApiResponse,
   CharacterApiResponse,
   FeedbackApiData,
   IndividualSpotApiResponse,
   LevelApiResponse,
   PowerUp5050ApiResponse,
+  PaginatedRankingResponse,
+  PaginatedResponse,
   QuizApiResponse,
-  RankingApiResponse,
+  QRCodeRedemptionApiResponse,
   SecretItemApiResponse,
   TourApiResponse,
   TourInfoApiResponse,
+  TourListFilters,
   UserAchievementApiResponse,
 } from "@/types";
 
@@ -60,6 +66,31 @@ export const api = {
     return data;
   },
 
+  loginWithApple: async (
+    idToken: string,
+    appleUser: string,
+    fullName?: string | null,
+  ) => {
+    const response = await fetch(`${apiBaseUrl}/auth/apple/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ idToken, appleUser, fullName }),
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Apple login failed";
+      throw new Error(message);
+    }
+    return data;
+  },
+
   // register
   register: async (
     email: string,
@@ -85,6 +116,30 @@ export const api = {
         data?.detail ||
         response.statusText ||
         "Registration failed";
+      throw new Error(message);
+    }
+    return data;
+  },
+
+  requestAccountDeletion: async (
+    token: string,
+    payload: AccountDeletionPayload,
+  ): Promise<AccountDeletionResponse> => {
+    const response = await fetch(`${apiBaseUrl}/profile/account-deletion/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        data?.detail ||
+        data?.error ||
+        data?.message ||
+        "No pudimos solicitar la eliminación de la cuenta.";
       throw new Error(message);
     }
     return data;
@@ -202,8 +257,19 @@ export const api = {
     return data as LevelApiResponse[];
   },
 
-  getRoutes: async (token: string): Promise<TourApiResponse[]> => {
-    const response = await fetch(`${apiBaseUrl}/tours/`, {
+  getRoutesPage: async (
+    token: string,
+    filters: TourListFilters = {},
+  ): Promise<PaginatedResponse<TourApiResponse>> => {
+    const url = new URL(`${apiBaseUrl}/tours/`);
+    url.searchParams.set("page", String(filters.page ?? 1));
+    if (filters.tag) url.searchParams.set("tag", filters.tag);
+    if (filters.completion) url.searchParams.set("completion", filters.completion);
+    if (filters.maxSpots != null) {
+      url.searchParams.set("max_spots", String(filters.maxSpots));
+    }
+
+    const response = await fetch(url.toString(), {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -219,7 +285,22 @@ export const api = {
         "Fetching routes failed";
       throw new Error(message);
     }
-    return data as TourApiResponse[];
+    return data as PaginatedResponse<TourApiResponse>;
+  },
+
+  getRoutes: async (token: string): Promise<TourApiResponse[]> => {
+    const routes: TourApiResponse[] = [];
+    let page = 1;
+    let next: string | null = "initial";
+
+    while (next) {
+      const response = await api.getRoutesPage(token, { page });
+      routes.push(...response.results);
+      next = response.next;
+      page += 1;
+    }
+
+    return routes;
   },
 
   getRoute: async (token: string, id: number): Promise<TourInfoApiResponse> => {
@@ -455,6 +536,48 @@ export const api = {
     return data;
   },
 
+  updateNotificationToken: async (token: string, expoToken: string) => {
+    const response = await fetch(`${apiBaseUrl}/profile/notifications/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ notification_token: expoToken }),
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        data?.error ||
+        data?.message ||
+        data?.detail ||
+        response.statusText ||
+        "Updating notification token failed";
+      throw new Error(message);
+    }
+    return data;
+  },
+
+  updateActivity: async (token: string, notificationToken?: string) => {
+    const response = await fetch(`${apiBaseUrl}/profile/activity/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(
+        notificationToken ? { notification_token: notificationToken } : {},
+      ),
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message =
+        data?.detail || response.statusText || "Updating activity failed";
+      throw new Error(message);
+    }
+    return data;
+  },
+
   getAchievements: async (
     token: string,
   ): Promise<UserAchievementApiResponse[]> => {
@@ -561,13 +684,15 @@ export const api = {
   getRanking: async (
     token: string,
     level?: string,
-  ): Promise<RankingApiResponse[]> => {
+    page = 1,
+  ): Promise<PaginatedRankingResponse> => {
     const url = new URL(`${apiBaseUrl}/ranking/`);
 
     // Solo agrego level si está definido
     if (level != null) {
       url.searchParams.append("level", String(level));
     }
+    url.searchParams.set("page", String(page));
 
     const response = await fetch(url.toString(), {
       method: "GET",
@@ -588,7 +713,98 @@ export const api = {
       throw new Error(message);
     }
 
-    return data as RankingApiResponse[];
+    return data as PaginatedRankingResponse;
+  },
+
+  reportRankingName: async (
+    token: string,
+    userId: number,
+    reason: "offensive" | "impersonation" | "other",
+  ): Promise<{ message: string }> => {
+    const response = await fetch(
+      `${apiBaseUrl}/ranking/${userId}/report-name/`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ reason }),
+      },
+    );
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(
+        data?.detail ||
+          data?.error ||
+          data?.message ||
+          "No pudimos enviar el reporte.",
+      );
+    }
+    return data as { message: string };
+  },
+
+  blockRankingUser: async (token: string, userId: number) => {
+    const response = await fetch(`${apiBaseUrl}/ranking/${userId}/block/`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(data?.detail || "No pudimos bloquear al usuario.");
+    }
+    return data as { message: string; is_blocked: true };
+  },
+
+  unblockRankingUser: async (token: string, userId: number) => {
+    const response = await fetch(`${apiBaseUrl}/ranking/${userId}/block/`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => null);
+      throw new Error(data?.detail || "No pudimos desbloquear al usuario.");
+    }
+  },
+
+  getBlockedRankingUsers: async (
+    token: string,
+  ): Promise<BlockedRankingUserApiResponse[]> => {
+    const response = await fetch(`${apiBaseUrl}/ranking/blocked/`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(
+        data?.detail || "No pudimos cargar los usuarios bloqueados.",
+      );
+    }
+    return data as BlockedRankingUserApiResponse[];
+  },
+
+  redeemQRCode: async (
+    token: string,
+    guid: string,
+  ): Promise<QRCodeRedemptionApiResponse> => {
+    const response = await fetch(`${apiBaseUrl}/qr/redeem/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ guid }),
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const error = new Error(
+        data?.detail || "No pudimos canjear el código.",
+      ) as Error & {
+        code?: string;
+      };
+      error.code = data?.code;
+      throw error;
+    }
+    return data as QRCodeRedemptionApiResponse;
   },
 
   usePowerUp5050: async (

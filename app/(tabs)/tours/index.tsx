@@ -1,7 +1,5 @@
 import { FadeInView } from "@/components/animations/fade-in-view";
 import { TourCardSkeleton } from "@/components/skeletons/tour-card-skeleton";
-import { ToursFiltersSkeleton } from "@/components/skeletons/tours-filters-skeleton";
-import { ToursHeaderSkeleton } from "@/components/skeletons/tours-header-skeleton";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedText } from "@/components/themed-text";
 import TourCard from "@/components/tour-card";
@@ -10,8 +8,9 @@ import { LEVELS, TAGS } from "@/constants/lists";
 import { useAuth } from "@/hooks/use-auth";
 import { api } from "@/libs/api";
 import { TourApiResponse } from "@/types";
-import { cloneElement, useCallback, useEffect, useState } from "react";
+import { cloneElement, useCallback, useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
   Image,
   Pressable,
@@ -25,231 +24,264 @@ import Toast from "react-native-toast-message";
 
 const emptyImage = require("@/assets/images/empty.png");
 
+type CompletionFilter = "incomplete" | "completed";
+
+interface ToursHeaderProps {
+  selectedTag: string | null;
+  selectedLevel: string | null;
+  completionFilter: CompletionFilter;
+  onSelectTag: (tag: string) => void;
+  onSelectLevel: (level: string) => void;
+  onSelectCompletion: (filter: CompletionFilter) => void;
+}
+
+// Está definido fuera de la pantalla para que FlatList no lo desmonte al filtrar.
+const ToursHeader = ({
+  selectedTag,
+  selectedLevel,
+  completionFilter,
+  onSelectTag,
+  onSelectLevel,
+  onSelectCompletion,
+}: ToursHeaderProps) => (
+  <>
+    <FadeInView delay={100}>
+      <View style={styles.header}>
+        <ThemedText type="title">Explora todos los tours</ThemedText>
+        <ThemedText type="muted">Elige la ruta que deseas comenzar</ThemedText>
+      </View>
+    </FadeInView>
+
+    <FadeInView delay={200}>
+      <View style={styles.filterSection}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.badgeContainer}
+        >
+          {TAGS.map((tag) => (
+            <TouchableOpacity
+              key={tag.id}
+              style={[
+                styles.badge,
+                selectedTag === tag.id && styles.badgeActive,
+              ]}
+              onPress={() => onSelectTag(tag.id)}
+            >
+              {cloneElement(tag.icon, {
+                color: selectedTag === tag.id ? TOKENS.background : TOKENS.text,
+              })}
+
+              <ThemedText
+                type="defaultSemiBold"
+                style={[
+                  styles.badgeText,
+                  selectedTag === tag.id && styles.badgeTextActive,
+                ]}
+              >
+                {tag.label}
+              </ThemedText>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+    </FadeInView>
+
+    <FadeInView delay={300}>
+      <View style={[styles.filterSection, { marginBottom: 20 }]}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.badgeContainer}
+        >
+          {LEVELS.map((level) => (
+            <TouchableOpacity
+              key={level.id}
+              style={[
+                styles.badge,
+                selectedLevel === level.id && styles.badgeActive,
+              ]}
+              onPress={() => onSelectLevel(level.id)}
+            >
+              <ThemedText
+                type="defaultSemiBold"
+                style={[
+                  styles.badgeText,
+                  selectedLevel === level.id && styles.badgeTextActive,
+                ]}
+              >
+                {level.label}
+              </ThemedText>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+    </FadeInView>
+
+    <FadeInView delay={150}>
+      <View style={styles.tabContainer}>
+        <Pressable
+          style={[
+            styles.tab,
+            completionFilter === "incomplete" && styles.tabActive,
+          ]}
+          onPress={() => onSelectCompletion("incomplete")}
+        >
+          <ThemedText
+            type={
+              completionFilter === "incomplete" ? "defaultSemiBold" : "muted"
+            }
+            style={[completionFilter === "incomplete" && styles.tabTextActive]}
+          >
+            No completados
+          </ThemedText>
+        </Pressable>
+
+        <Pressable
+          style={[
+            styles.tab,
+            completionFilter === "completed" && styles.tabActive,
+          ]}
+          onPress={() => onSelectCompletion("completed")}
+        >
+          <ThemedText
+            type={
+              completionFilter === "completed" ? "defaultSemiBold" : "muted"
+            }
+            style={[completionFilter === "completed" && styles.tabTextActive]}
+          >
+            Completados
+          </ThemedText>
+        </Pressable>
+      </View>
+    </FadeInView>
+  </>
+);
+
 export default function TabTwoScreen() {
   const [routes, setRoutes] = useState<TourApiResponse[]>([]);
-  const [allRoutes, setAllRoutes] = useState<TourApiResponse[]>([]);
   const [selectedTag, setSelectedTag] = useState<string | null>("todos");
   const [selectedLevel, setSelectedLevel] = useState<string | null>("1");
-  const [completionFilter, setCompletionFilter] = useState<
-    "incomplete" | "completed"
-  >("incomplete");
-  const [refreshing] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // Estado de carga
+  const [completionFilter, setCompletionFilter] =
+    useState<CompletionFilter>("incomplete");
+  const [refreshing, setRefreshing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const nextPageRef = useRef(2);
   const { user } = useAuth();
+  const currentAccessRef = useRef<string | undefined>(user?.access);
+  const requestIdRef = useRef(0);
+  const loadingMoreRef = useRef(false);
+  const hasNextPageRef = useRef(false);
 
-  const handleGetRoutes = useCallback(async () => {
-    try {
-      // Activar el estado de carga al inicio
-      setIsLoading(true);
-      const response = await api.getRoutes(user?.access || "");
-      setAllRoutes(response);
-      setRoutes(response);
-    } catch {
-      Toast.show({
-        type: "error",
-        text1: "Error al obtener las rutas",
-        text2: "Por favor, intente nuevamente más tarde.",
-      });
-    } finally {
-      // Desactivar el estado de carga al finalizar (exitoso o con error)
-      setIsLoading(false);
-    }
-  }, [user?.access]);
+  currentAccessRef.current = user?.access;
 
-  useEffect(() => {
-    handleGetRoutes();
-  }, [handleGetRoutes]);
+  const selectedMaxSpots = LEVELS.find(
+    (level) => level.id === selectedLevel,
+  )?.maxSpots;
 
-  const applyFilters = useCallback(() => {
-    let result = allRoutes;
+  const loadRoutes = useCallback(
+    async (page: number, replace: boolean, isRefresh = false) => {
+      const accessToken = user?.access;
 
-    // Completion filter
-    if (completionFilter === "completed") {
-      result = result.filter((route) => route.completed_at !== null);
-    } else {
-      result = result.filter((route) => route.completed_at === null);
-    }
-
-    if (selectedTag && selectedTag !== "todos") {
-      result = result.filter((route) => route.tag === selectedTag);
-    }
-
-    if (selectedLevel && selectedLevel !== "1") {
-      const maxSpots = LEVELS.find((l) => l.id === selectedLevel)?.maxSpots;
-      if (typeof maxSpots === "number") {
-        result = result.filter(
-          (route) => (route.spots.length || 0) <= maxSpots,
-        );
+      if (!accessToken) {
+        setRoutes([]);
+        setHasNextPage(false);
+        hasNextPageRef.current = false;
+        nextPageRef.current = 2;
+        setIsLoading(false);
+        return;
       }
-    }
 
-    setRoutes(result);
-  }, [allRoutes, selectedTag, selectedLevel, completionFilter]);
+      if (!replace && (!hasNextPageRef.current || loadingMoreRef.current)) {
+        return;
+      }
+
+      const requestId = ++requestIdRef.current;
+      if (isRefresh) {
+        setRefreshing(true);
+      } else if (replace) {
+        setIsLoading(true);
+      } else {
+        loadingMoreRef.current = true;
+        setLoadingMore(true);
+      }
+
+      try {
+        const response = await api.getRoutesPage(accessToken, {
+          page,
+          tag: selectedTag === "todos" ? undefined : (selectedTag ?? undefined),
+          completion: completionFilter,
+          maxSpots: selectedMaxSpots,
+        });
+        if (
+          currentAccessRef.current !== accessToken ||
+          requestId !== requestIdRef.current
+        ) {
+          return;
+        }
+
+        setRoutes((current) => {
+          const merged = replace
+            ? response.results
+            : [...current, ...response.results];
+          return Array.from(
+            new Map(merged.map((route) => [route.id, route])).values(),
+          );
+        });
+        setHasNextPage(response.next !== null);
+        hasNextPageRef.current = response.next !== null;
+        nextPageRef.current = page + 1;
+      } catch {
+        if (
+          currentAccessRef.current !== accessToken ||
+          requestId !== requestIdRef.current
+        ) {
+          return;
+        }
+
+        Toast.show({
+          type: "error",
+          text1: "Error al obtener las rutas",
+          text2: "Por favor, intente nuevamente más tarde.",
+        });
+      } finally {
+        if (
+          currentAccessRef.current === accessToken &&
+          requestId === requestIdRef.current
+        ) {
+          setIsLoading(false);
+          setRefreshing(false);
+          setLoadingMore(false);
+          loadingMoreRef.current = false;
+        }
+      }
+    },
+    [completionFilter, selectedMaxSpots, selectedTag, user?.access],
+  );
 
   useEffect(() => {
-    applyFilters();
-  }, [applyFilters]);
+    setRoutes([]);
+    setHasNextPage(false);
+    hasNextPageRef.current = false;
+    nextPageRef.current = 2;
+    void loadRoutes(1, true);
 
-  const handleFilterByTag = (tag: string) => {
-    setSelectedTag(tag);
-  };
+    return () => {
+      requestIdRef.current += 1;
+    };
+  }, [loadRoutes]);
 
-  const handleFilterByLevel = (level: string) => {
-    setSelectedLevel(level);
-  };
+  const loadMore = useCallback(() => {
+    if (!isLoading && hasNextPage) {
+      void loadRoutes(nextPageRef.current, false);
+    }
+  }, [hasNextPage, isLoading, loadRoutes]);
 
-  const renderHeader = () => (
-    <>
-      {/* Header con animación fade-in */}
-      <FadeInView delay={100}>
-        <View style={styles.header}>
-          <ThemedText type="title">Explora todos los tours</ThemedText>
-          <ThemedText type="muted">
-            Elige la ruta que deseas comenzar
-          </ThemedText>
-        </View>
-      </FadeInView>
-
-      {/* Scrolleable horizontal badge selector category con fade-in */}
-      <FadeInView delay={200}>
-        <View style={styles.filterSection}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.badgeContainer}
-          >
-            {TAGS.map((tag) => (
-              <TouchableOpacity
-                key={tag.id}
-                style={[
-                  styles.badge,
-                  selectedTag === tag.id && styles.badgeActive,
-                ]}
-                onPress={() => handleFilterByTag(tag.id)}
-              >
-                {cloneElement(tag.icon, {
-                  color:
-                    selectedTag === tag.id ? TOKENS.background : TOKENS.text,
-                })}
-
-                <ThemedText
-                  type="defaultSemiBold"
-                  style={[
-                    styles.badgeText,
-                    selectedTag === tag.id && styles.badgeTextActive,
-                  ]}
-                >
-                  {tag.label}
-                </ThemedText>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      </FadeInView>
-
-      {/* Scrolleable horizontal badge selector level con fade-in */}
-      <FadeInView delay={300}>
-        <View style={[styles.filterSection, { marginBottom: 20 }]}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.badgeContainer}
-          >
-            {LEVELS.map((level) => (
-              <TouchableOpacity
-                key={level.id}
-                style={[
-                  styles.badge,
-                  selectedLevel === level.id && styles.badgeActive,
-                ]}
-                onPress={() => handleFilterByLevel(level.id)}
-              >
-                <ThemedText
-                  type="defaultSemiBold"
-                  style={[
-                    styles.badgeText,
-                    selectedLevel === level.id && styles.badgeTextActive,
-                  ]}
-                >
-                  {level.label}
-                </ThemedText>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      </FadeInView>
-
-      {/* Tab Switcher - Selector de completados/no completados */}
-      <FadeInView delay={150}>
-        <View style={styles.tabContainer}>
-          {/* Tab: No completados */}
-          <Pressable
-            style={[
-              styles.tab,
-              completionFilter === "incomplete" && styles.tabActive,
-            ]}
-            onPress={() => setCompletionFilter("incomplete")}
-          >
-            <ThemedText
-              type={
-                completionFilter === "incomplete" ? "defaultSemiBold" : "muted"
-              }
-              style={[
-                completionFilter === "incomplete" && styles.tabTextActive,
-              ]}
-            >
-              No completados
-            </ThemedText>
-          </Pressable>
-
-          {/* Tab: Completados */}
-          <Pressable
-            style={[
-              styles.tab,
-              completionFilter === "completed" && styles.tabActive,
-            ]}
-            onPress={() => setCompletionFilter("completed")}
-          >
-            <ThemedText
-              type={
-                completionFilter === "completed" ? "defaultSemiBold" : "muted"
-              }
-              style={[completionFilter === "completed" && styles.tabTextActive]}
-            >
-              Completados
-            </ThemedText>
-          </Pressable>
-        </View>
-      </FadeInView>
-    </>
-  );
-
-  // Función para renderizar el header con skeletons cuando está cargando
-  const renderSkeletonHeader = () => (
-    <>
-      <ToursHeaderSkeleton />
-      <ToursFiltersSkeleton />
-    </>
-  );
-
-  // Si está cargando, mostrar los skeletons
-  if (isLoading) {
-    return (
-      <ThemedBackground style={styles.container}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.listContent}
-        >
-          {renderSkeletonHeader()}
-          {/* Mostrar varios TourCard skeletons */}
-          {[1, 2, 3].map((item) => (
-            <TourCardSkeleton key={item} />
-          ))}
-          <View style={styles.bottomSpacer}></View>
-        </ScrollView>
-      </ThemedBackground>
-    );
-  }
+  const refreshRoutes = useCallback(() => {
+    void loadRoutes(1, true, true);
+  }, [loadRoutes]);
 
   return (
     <ThemedBackground style={styles.container}>
@@ -258,15 +290,31 @@ export default function TabTwoScreen() {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={() => handleGetRoutes()}
+            onRefresh={refreshRoutes}
             tintColor={TOKENS.primary}
             progressBackgroundColor={TOKENS.primary}
             colors={[TOKENS.navActive]}
           />
         }
-        ListHeaderComponent={renderHeader}
-        ListFooterComponent={() => <View style={styles.bottomSpacer}></View>}
-        ListEmptyComponent={<EmptyComponent />}
+        ListHeaderComponent={
+          <ToursHeader
+            selectedTag={selectedTag}
+            selectedLevel={selectedLevel}
+            completionFilter={completionFilter}
+            onSelectTag={setSelectedTag}
+            onSelectLevel={setSelectedLevel}
+            onSelectCompletion={setCompletionFilter}
+          />
+        }
+        ListFooterComponent={() => (
+          <>
+            {loadingMore && <ActivityIndicator color={TOKENS.primary} />}
+            <View style={styles.bottomSpacer} />
+          </>
+        )}
+        ListEmptyComponent={
+          isLoading ? <ToursListSkeleton /> : <EmptyComponent />
+        }
         renderItem={({ item, index }) => (
           // Cada card aparece con un delay incremental
           // Los primeros 3 cards tienen delays más notables, luego se estabiliza
@@ -275,7 +323,7 @@ export default function TabTwoScreen() {
               title={item.name}
               description={item.description || ""}
               image={
-                item.spots[0].spot.image_urls[0] ||
+                item.spots[0]?.spot.image_urls[0] ||
                 "https://images.unsplash.com/photo-1600591832245-9a9f49ec6f5a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bGElMjBwbGF0YXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=400"
               }
               id={item.id.toString()}
@@ -287,6 +335,8 @@ export default function TabTwoScreen() {
           </FadeInView>
         )}
         showsVerticalScrollIndicator={false}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.4}
         contentContainerStyle={styles.listContent}
       />
     </ThemedBackground>
@@ -301,6 +351,15 @@ const EmptyComponent = () => (
       <ThemedText type="defaultSemiBold">No hay rutas disponibles</ThemedText>
     </View>
   </FadeInView>
+);
+
+// Skeleton exclusivo del contenido que cambia con los filtros.
+const ToursListSkeleton = () => (
+  <>
+    {[1, 2, 3].map((item) => (
+      <TourCardSkeleton key={item} />
+    ))}
+  </>
 );
 
 const styles = StyleSheet.create({

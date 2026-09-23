@@ -5,6 +5,7 @@ import { TourApiResponse } from "@/types";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Link } from "expo-router";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   FlatList,
   Image,
@@ -14,6 +15,8 @@ import {
 } from "react-native";
 
 const HorizontalTourList = ({ routes }: { routes: Array<TourApiResponse> }) => {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.recommendedContainer}>
       <View style={styles.recommendedHeaderRow}>
@@ -70,7 +73,7 @@ const HorizontalTourList = ({ routes }: { routes: Array<TourApiResponse> }) => {
                         color={TOKENS.text}
                       />
                       <ThemedText type="muted" style={styles.routeCardText}>
-                        {item.spots.length} Puntos
+                        {t("tours.stopCount", { count: item.spots.length })}
                       </ThemedText>
                     </View>
                   </View>

@@ -4,13 +4,18 @@ import { ThemedBackground } from "@/components/themed-background";
 import { ThemedButton } from "@/components/themed-button";
 import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
+import { useMarkInteractive } from "@/hooks/use-mark-interactive";
 import { router } from "expo-router";
 import React from "react";
 import { Platform, StyleSheet, View } from "react-native";
+import { LanguageSelector } from "@/components/language-selector";
 
 const Welcome = () => {
+  useMarkInteractive();
+
   return (
     <ThemedBackground style={styles.container}>
+      <LanguageSelector style={styles.languageSelector} />
       <View style={styles.logoContainer}>
         <FadeInView delay={100}>
           <Logo />
@@ -54,6 +59,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     gap: 24,
+  },
+  languageSelector: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    zIndex: 1,
   },
   logoContainer: {
     justifyContent: "center",

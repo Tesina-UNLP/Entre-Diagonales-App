@@ -3,6 +3,7 @@ import { isTokenExpired } from "@/libs/jwt";
 import { getSession, removeSession, storeSession } from "@/libs/store-session";
 import { AppUser } from "@/types";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import * as AppleAuthentication from "expo-apple-authentication";
 import React, { createContext, useEffect, useState } from "react";
 import Toast from "react-native-toast-message";
 
@@ -18,9 +19,11 @@ interface AuthContextType {
     password: string,
     confirmPassword: string,
   ) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
+  clearDeletedAccountSession: () => Promise<void>;
   checkAuthState?: () => Promise<void>;
   loginWithGoogle: () => Promise<AppUser | null>;
+  loginWithApple: () => Promise<AppUser | null>;
   completeOnboarding: (args: {
     characterId: number;
     notificationToken?: string;
@@ -35,7 +38,11 @@ export const AuthContext = createContext<AuthContextType>({
   },
   register: async () => {},
   logout: async () => {},
+  clearDeletedAccountSession: async () => {},
   loginWithGoogle: async () => {
+    return null;
+  },
+  loginWithApple: async () => {
     return null;
   },
   checkAuthState: async () => {},
@@ -128,9 +135,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     GoogleSignin.configure({
       ...(googleWebClientId ? { webClientId: googleWebClientId } : {}),
       ...(googleIosClientId ? { iosClientId: googleIosClientId } : {}),
-      offlineAccess: Boolean(googleWebClientId),
-      hostedDomain: "",
-      forceCodeForRefreshToken: Boolean(googleWebClientId),
+      // El backend consume solamente el idToken; no solicitamos serverAuthCode
+      // ni refresh token, que requieren un flujo OAuth offline adicional.
+      offlineAccess: false,
+      forceCodeForRefreshToken: false,
       profileImageSize: 150,
     });
     checkAuthState();
@@ -194,6 +202,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const clearDeletedAccountSession = async () => {
+    const shouldRevokeGoogle = user?.account_deletion_auth_method === "google";
+    setUser(null);
+    previousLevelIdRef.current = undefined;
+    await removeSession();
+
+    if (shouldRevokeGoogle) {
+      try {
+        await GoogleSignin.revokeAccess();
+      } catch (error) {
+        console.warn("Could not revoke local Google access", error);
+      }
+      try {
+        await GoogleSignin.signOut();
+      } catch (error) {
+        console.warn("Could not close the local Google session", error);
+      }
+    }
+  };
+
   const loginWithGoogle = async () => {
     try {
       setIsLoading(true);
@@ -230,6 +258,40 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const loginWithApple = async () => {
+    try {
+      setIsLoading(true);
+
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      if (!credential.identityToken) {
+        throw new Error("Apple no devolvió una credencial válida");
+      }
+
+      const fullName = [
+        credential.fullName?.givenName,
+        credential.fullName?.familyName,
+      ]
+        .filter(Boolean)
+        .join(" ");
+
+      const session = await api.loginWithApple(
+        credential.identityToken,
+        credential.user,
+        fullName || null,
+      );
+
+      return await initProfile(session);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const completeOnboarding = async ({
     characterId,
     notificationToken,
@@ -258,7 +320,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     register,
     logout,
+    clearDeletedAccountSession,
     loginWithGoogle,
+    loginWithApple,
     checkAuthState,
     completeOnboarding,
   };

@@ -1,4 +1,5 @@
 import { Share } from "react-native";
+import { useTranslation } from "react-i18next";
 
 /**
  * Parámetros necesarios para compartir el logro de completar un tour
@@ -20,6 +21,7 @@ interface ShareAchievementParams {
  * @returns Objeto con la función shareAchievement
  */
 export const useTourCompletion = () => {
+  const { t } = useTranslation();
   /**
    * Función que abre el diálogo nativo de compartir con información del tour
    *
@@ -28,13 +30,15 @@ export const useTourCompletion = () => {
   const shareAchievement = async (params: ShareAchievementParams) => {
     try {
       // Preparamos el mensaje a compartir con toda la información del tour
-      const message =
-        `🎉 ¡Completé la ruta "${params.tourName}" en Entre Diagonales!\n\n` +
-        `🌟 XP ganada: +${params.xp}\n` +
-        `💰 Monedas obtenidas: ${params.coins}\n` +
-        `💎 Secretos descubiertos: ${params.secretsCompleted}/${params.secretsTotal}\n` +
-        `❓ Trivias respondidas: ${params.triviasCompleted}/${params.triviasTotal}\n\n` +
-        `¡Únete a mí en esta aventura de exploración!`;
+      const message = t("achievements.shareTourDetails", {
+        tour: params.tourName,
+        xp: params.xp,
+        coins: params.coins,
+        secretsCompleted: params.secretsCompleted,
+        secretsTotal: params.secretsTotal,
+        triviasCompleted: params.triviasCompleted,
+        triviasTotal: params.triviasTotal,
+      });
 
       // Llamamos a la API nativa de compartir
       const result = await Share.share({

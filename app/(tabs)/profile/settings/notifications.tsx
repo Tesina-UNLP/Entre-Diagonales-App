@@ -4,6 +4,7 @@ import { ThemedBackground } from "@/components/themed-background";
 import { ThemedText } from "@/components/themed-text";
 import { useAuth } from "@/hooks/use-auth";
 import { api } from "@/libs/api";
+import { useLocalizedAlert } from "@/hooks/use-localized-alert";
 import {
   getExpoPushToken,
   hasNotificationPermissions,
@@ -11,16 +12,11 @@ import {
 } from "@/libs/notifications";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  StyleSheet,
-  Switch,
-  View,
-} from "react-native";
+import { ActivityIndicator, StyleSheet, Switch, View } from "react-native";
 import Toast from "react-native-toast-message";
 
 const Notifications = () => {
+  const showAlert = useLocalizedAlert();
   // Estado local del switch (mientras se actualiza en el servidor)
   const [isEnabled, setIsEnabled] = useState(false);
   // Estado para mostrar un indicador de carga mientras se procesa
@@ -71,7 +67,7 @@ const Notifications = () => {
 
           if (!granted) {
             // Si el usuario rechazó los permisos, mostramos una alerta
-            Alert.alert(
+            showAlert(
               "Permisos requeridos",
               "Necesitas activar los permisos de notificaciones en la configuración de tu dispositivo para recibir notificaciones.",
               [{ text: "OK" }],
@@ -145,7 +141,8 @@ const Notifications = () => {
                 Notificaciones Push
               </ThemedText>
               <ThemedText type="muted">
-                Recibe notificaciones sobre nuevos recorridos y actualizaciones
+                Recibe avisos de nuevos recorridos y recordatorios para
+                continuar
               </ThemedText>
             </View>
             {/* Si está cargando, mostramos un spinner, sino el switch */}

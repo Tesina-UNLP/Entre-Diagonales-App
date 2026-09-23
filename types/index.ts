@@ -26,6 +26,20 @@ export type TourApiResponse = {
   readonly number_of_people_completed: number;
 };
 
+export type PaginatedResponse<T> = {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+};
+
+export type TourListFilters = {
+  page?: number;
+  tag?: string;
+  completion?: "completed" | "incomplete";
+  maxSpots?: number;
+};
+
 export type TourInfoApiResponse = {
   id: number;
   name: string; // minLength: 1, maxLength: 100
@@ -118,6 +132,7 @@ export type AppUser = {
   coins: number;
   notifications?: boolean; // Estado de las notificaciones push
   provider?: string;
+  account_deletion_auth_method: AccountDeletionAuthMethod;
   character?: {
     id: number;
     name: string;
@@ -143,6 +158,26 @@ export type AppUser = {
   total_tours_completed: number;
   total_secret_items_completed: number;
   total_quizzes_completed: number;
+};
+
+export type AccountDeletionAuthMethod = "password" | "google" | "apple";
+
+export type AccountDeletionPayload =
+  | { method: "password"; password: string }
+  | { method: "google"; id_token: string }
+  | {
+      method: "apple";
+      identity_token: string;
+      authorization_code: string;
+      apple_user: string;
+    };
+
+export type AccountDeletionResponse = {
+  request_id: string;
+  status: "pending";
+  deletion_scheduled_for: string;
+  deadline_at: string;
+  apple_revocation_status: "not_applicable" | "revoked" | "manual_required";
 };
 
 export type FeedbackApiData = {
@@ -184,8 +219,31 @@ export type RankingApiResponse = {
   username: string;
   experience: number;
   character: string;
-  position?: number | null;
+  position: number;
   display_name: string;
+  is_blocked: boolean;
+  name_hidden: boolean;
+};
+
+export type PaginatedRankingResponse = PaginatedResponse<RankingApiResponse> & {
+  current_user: RankingApiResponse | null;
+};
+
+export type BlockedRankingUserApiResponse = {
+  id: number;
+  username: string;
+  display_name: string | null;
+  character: string | null;
+  blocked_at: string;
+};
+
+export type QRCodeRedemptionApiResponse = {
+  guid: string;
+  reward_type: "coins" | "gems";
+  reward_amount: number;
+  redeemed_at: string;
+  coins: number;
+  gems: number;
 };
 
 export type RemainingAnswersApiResponse = {

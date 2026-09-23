@@ -1,4 +1,5 @@
 import { FadeInView } from "@/components/animations/fade-in-view";
+import { AppleSignInButton } from "@/components/apple-sign-in-button";
 import { ExternalLink } from "@/components/external-link";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedButton } from "@/components/themed-button";
@@ -10,8 +11,9 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { statusCodes } from "@react-native-google-signin/google-signin";
+import * as AppleAuthentication from "expo-apple-authentication";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
@@ -23,6 +25,7 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 
 const registerSchema = z
   .object({
@@ -44,9 +47,19 @@ const registerSchema = z
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 const SignUp = () => {
-  const { register, loginWithGoogle } = useAuth();
+  const { t } = useTranslation();
+  const { register, loginWithApple, loginWithGoogle } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [appleAvailable, setAppleAvailable] = useState(false);
+
+  useEffect(() => {
+    if (Platform.OS === "ios") {
+      AppleAuthentication.isAvailableAsync()
+        .then(setAppleAvailable)
+        .catch(() => setAppleAvailable(false));
+    }
+  }, []);
 
   const handleSignUp = async (data: RegisterFormData) => {
     try {
@@ -96,6 +109,25 @@ const SignUp = () => {
         text1: "Error al iniciar sesión con Google",
         text2: errorMessage,
       });
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    try {
+      const profileUser = await loginWithApple();
+      if (profileUser?.on_boarding_completed_at) {
+        router.replace("/(tabs)");
+      } else {
+        router.replace("/(onboarding)/presentation");
+      }
+    } catch (error: any) {
+      if (error?.code !== "ERR_REQUEST_CANCELED") {
+        Toast.show({
+          type: "error",
+          text1: "Error al continuar con Apple",
+          text2: error?.message || "Intentá nuevamente más tarde",
+        });
+      }
     }
   };
 
@@ -164,7 +196,7 @@ const SignUp = () => {
             render={({ field: { onChange, onBlur, value } }) => (
               <View style={styles.passwordContainer}>
                 <TextInput
-                  placeholder="Contraseña"
+                  placeholder={t("auth.password")}
                   style={[
                     styles.passwordInput,
                     errors.password && styles.inputError,
@@ -199,7 +231,7 @@ const SignUp = () => {
             render={({ field: { onChange, onBlur, value } }) => (
               <View style={styles.passwordContainer}>
                 <TextInput
-                  placeholder="Contraseña"
+                  placeholder={t("auth.confirmPassword")}
                   style={[
                     styles.passwordInput,
                     errors.password && styles.inputError,
@@ -260,21 +292,31 @@ const SignUp = () => {
           <View style={styles.divider} />
         </FadeInView>
 
-        <FadeInView delay={600} style={styles.googleButtonContainer}>
-          <ThemedButton variant="secondary" onPress={handleGoogleSignIn}>
-            <View style={styles.googleButtonContent}>
-              <FontAwesome name="google" size={24} color={TOKENS.primary} />
-              <ThemedText
-                type="defaultSemiBold"
-                style={[styles.googleButtonText, { flexShrink: 1 }]}
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                Continuar con Google
-              </ThemedText>
-            </View>
-          </ThemedButton>
-        </FadeInView>
+        <View style={styles.buttonsContainer}>
+          <FadeInView delay={600} style={styles.googleButtonContainer}>
+            <ThemedButton variant="secondary" onPress={handleGoogleSignIn}>
+              <View style={styles.googleButtonContent}>
+                <FontAwesome name="google" size={24} color={TOKENS.primary} />
+                <ThemedText
+                  type="defaultSemiBold"
+                  style={[styles.googleButtonText, { flexShrink: 1 }]}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  Continuar con Google
+                </ThemedText>
+              </View>
+            </ThemedButton>
+          </FadeInView>
+          {Platform.OS === "ios" && appleAvailable && (
+            <FadeInView delay={650} style={styles.appleButtonContainer}>
+              <AppleSignInButton
+                label={t("auth.continueApple")}
+                onPress={handleAppleSignIn}
+              />
+            </FadeInView>
+          )}
+        </View>
         <FadeInView delay={700}>
           <ThemedText type="muted">
             Ya tienes una cuenta?{" "}
@@ -372,10 +414,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     width: "100%",
   },
+  buttonsContainer: {
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 15,
+    width: "100%",
+  },
   googleButtonContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingBottom: 20,
   },
   googleButtonContent: {
     flexDirection: "row",
@@ -385,6 +432,10 @@ const styles = StyleSheet.create({
   googleButtonText: {
     color: TOKENS.primary,
     fontSize: 16,
+  },
+  appleButtonContainer: {
+    width: "100%",
+    paddingBottom: 20,
   },
   errorText: {
     color: TOKENS.error,

@@ -1,21 +1,36 @@
 // app/(tabs)/ranking.tsx
 import { FadeInView } from "@/components/animations/fade-in-view";
 import PodiumItem from "@/components/podium-item";
-import { RankingScreenSkeleton } from "@/components/skeletons/ranking-skeleton";
+import { RankingContentSkeleton } from "@/components/skeletons/ranking-skeleton";
 import { ThemedBackground } from "@/components/themed-background";
 import { ThemedText } from "@/components/themed-text";
 import { UserRankingCard } from "@/components/user-ranking-card";
 import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
-import { useRanking } from "@/hooks/use-ranking";
+import { RankingItem, useRanking } from "@/hooks/use-ranking";
+import { api } from "@/libs/api";
 import { Octicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { FlatList, Image, Pressable, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  Pressable,
+  RefreshControl,
+  StyleSheet,
+  View,
+} from "react-native";
+import { useTranslation } from "react-i18next";
+import { useLocalizedAlert } from "@/hooks/use-localized-alert";
+import { useLanguage } from "@/hooks/use-language";
 
 // Tipo para los tabs disponibles
 type RankingTab = "global" | "level";
 
 export default function RankingScreen() {
+  const { t } = useTranslation();
+  const showAlert = useLocalizedAlert();
+  const { locale } = useLanguage();
   const { user } = useAuth();
   const token = user?.access || "";
   const level = user?.level || null;
@@ -28,162 +43,317 @@ export default function RankingScreen() {
   // Si es "level", pasamos el nivel del usuario
   const levelFilter = activeTab === "level" ? String(level?.id) : undefined;
 
-  const { top3, rest, userPosition, loading } = useRanking(
-    token,
-    user?.username,
-    levelFilter,
-  );
+  const {
+    top3,
+    rest,
+    userPosition,
+    loading,
+    refreshing,
+    loadingMore,
+    hasNextPage,
+    loadMore,
+    refresh,
+  } = useRanking(token, levelFilter);
+
+  const reportName = (userId: number, name: string) => {
+    showAlert("Reportar nombre", `¿Por qué querés reportar a ${name}?`, [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Ofensivo",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await api.reportRankingName(token, userId, "offensive");
+            showAlert("Reporte enviado", "Gracias. Revisaremos este nombre.");
+          } catch (error) {
+            showAlert(
+              "No pudimos enviar el reporte",
+              error instanceof Error ? error.message : "Intentá nuevamente.",
+            );
+          }
+        },
+      },
+      {
+        text: "Suplantación u otro",
+        onPress: async () => {
+          try {
+            await api.reportRankingName(token, userId, "impersonation");
+            showAlert("Reporte enviado", "Gracias. Revisaremos este nombre.");
+          } catch (error) {
+            showAlert(
+              "No pudimos enviar el reporte",
+              error instanceof Error ? error.message : "Intentá nuevamente.",
+            );
+          }
+        },
+      },
+    ]);
+  };
+
+  const blockUser = (item: RankingItem) => {
+    showAlert(
+      "Bloquear usuario",
+      "Su nombre se mostrará como *** para vos. Su posición, personaje y puntos seguirán visibles.",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Bloquear",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await api.blockRankingUser(token, item.id);
+              refresh();
+            } catch (error) {
+              showAlert(
+                "No pudimos bloquear al usuario",
+                error instanceof Error ? error.message : "Intentá nuevamente.",
+              );
+            }
+          },
+        },
+      ],
+    );
+  };
+
+  const unblockUser = async (item: RankingItem) => {
+    try {
+      await api.unblockRankingUser(token, item.id);
+      refresh();
+    } catch (error) {
+      showAlert(
+        "No pudimos desbloquear al usuario",
+        error instanceof Error ? error.message : "Intentá nuevamente.",
+      );
+    }
+  };
+
+  const openUserActions = (item: RankingItem) => {
+    if (item.is_blocked) {
+      showAlert("Usuario bloqueado", "Su nombre está oculto para vos.", [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Desbloquear", onPress: () => void unblockUser(item) },
+      ]);
+      return;
+    }
+
+    const name = item.display_name || item.username;
+    showAlert("Opciones del usuario", name, [
+      { text: "Cancelar", style: "cancel" },
+      { text: "Reportar nombre", onPress: () => reportName(item.id, name) },
+      {
+        text: "Bloquear usuario",
+        style: "destructive",
+        onPress: () => blockUser(item),
+      },
+    ]);
+  };
 
   return (
     <ThemedBackground style={styles.container}>
-      {loading ? (
-        <RankingScreenSkeleton />
-      ) : (
-        <FlatList
-          ListFooterComponent={<View style={styles.bottomSpacer}></View>}
-          ListHeaderComponent={
-            <>
-              {/* Título y descripción con animación */}
-              <FadeInView delay={100}>
-                <ThemedText type="title" style={styles.title}>
-                  Exploradores top
-                </ThemedText>
-                <ThemedText type="muted" style={styles.description}>
-                  Mira como es la clasificación de tu ciudad
-                </ThemedText>
-              </FadeInView>
+      <FlatList
+        ListFooterComponent={
+          <>
+            {loadingMore && <ActivityIndicator color={TOKENS.primary} />}
+            {!hasNextPage && rest.length > 0 && (
+              <View style={styles.endSpacer} />
+            )}
+            <View style={styles.bottomSpacer} />
+          </>
+        }
+        ListHeaderComponent={
+          <>
+            {/* El header y el selector permanecen montados al cambiar de ranking. */}
+            <FadeInView delay={100}>
+              <ThemedText type="title" style={styles.title}>
+                Exploradores top
+              </ThemedText>
+              <ThemedText type="muted" style={styles.description}>
+                Mira como es la clasificación de tu ciudad
+              </ThemedText>
+            </FadeInView>
 
-              {/* Tab Switcher - Selector de tipo de ranking */}
-              <FadeInView delay={150}>
-                <View style={styles.tabContainer}>
-                  {/* Tab: Puntaje Global */}
-                  <Pressable
+            {/* Tab Switcher - Selector de tipo de ranking */}
+            <FadeInView delay={150}>
+              <View style={styles.tabContainer}>
+                {/* Tab: Puntaje Global */}
+                <Pressable
+                  style={[
+                    styles.tab,
+                    activeTab === "global" && styles.tabActive,
+                  ]}
+                  onPress={() => setActiveTab("global")}
+                >
+                  <ThemedText
+                    type={activeTab === "global" ? "defaultSemiBold" : "muted"}
                     style={[
-                      styles.tab,
-                      activeTab === "global" && styles.tabActive,
+                      styles.tabText,
+                      activeTab === "global" && styles.tabTextActive,
                     ]}
-                    onPress={() => setActiveTab("global")}
                   >
-                    <ThemedText
-                      type={
-                        activeTab === "global" ? "defaultSemiBold" : "muted"
-                      }
-                      style={[
-                        styles.tabText,
-                        activeTab === "global" && styles.tabTextActive,
-                      ]}
-                    >
-                      Global
-                    </ThemedText>
-                  </Pressable>
-
-                  {/* Tab: Puntaje de Rango */}
-                  <Pressable
-                    style={[
-                      styles.tab,
-                      activeTab === "level" && styles.tabActive,
-                    ]}
-                    onPress={() => setActiveTab("level")}
-                  >
-                    <ThemedText
-                      type={activeTab === "level" ? "defaultSemiBold" : "muted"}
-                      style={[
-                        styles.tabText,
-                        activeTab === "level" && styles.tabTextActive,
-                      ]}
-                    >
-                      Nivel actual
-                    </ThemedText>
-                  </Pressable>
-                </View>
-              </FadeInView>
-
-              {/* Tarjeta del usuario actual con animación */}
-              {userPosition && (
-                <FadeInView key={`user-${activeTab}`} delay={200}>
-                  <UserRankingCard
-                    user={userPosition}
-                    userLevel={level?.name}
-                  />
-                </FadeInView>
-              )}
-
-              {/* PODIO con animaciones escalonadas - el ganador aparece primero */}
-              <View style={styles.podiumContainer}>
-                {/* Segundo lugar (izquierda) aparece tercero */}
-                {top3[1] && (
-                  <FadeInView key={`podium-2-${activeTab}`} delay={400}>
-                    <PodiumItem user={top3[1]} position={2} />
-                  </FadeInView>
-                )}
-
-                {/* Primer lugar (centro) aparece primero */}
-                {top3[0] && (
-                  <FadeInView key={`podium-1-${activeTab}`} delay={300}>
-                    <PodiumItem user={top3[0]} position={1} />
-                  </FadeInView>
-                )}
-
-                {/* Tercer lugar (derecha) aparece último */}
-                {top3[2] && (
-                  <FadeInView key={`podium-3-${activeTab}`} delay={500}>
-                    <PodiumItem user={top3[2]} position={3} />
-                  </FadeInView>
-                )}
-              </View>
-
-              <View style={{ height: 20 }} />
-            </>
-          }
-          data={rest}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item, index }) => (
-            // Cada usuario del ranking aparece con un delay incremental
-            // Comienza después del podio (600ms) y agrega 40ms por cada uno
-            <FadeInView
-              delay={600 + Math.min(index * 40, 200)}
-              key={`ranking-${activeTab}-${index}`}
-            >
-              <View style={styles.rowCard}>
-                <ThemedText type="subtitle" style={styles.position}>
-                  {item.position}
-                </ThemedText>
-
-                <Image
-                  source={{ uri: item.character }}
-                  style={styles.rowAvatar}
-                />
-
-                <View style={{ flex: 1, gap: 4 }}>
-                  <ThemedText type="subtitle">
-                    {item?.display_name?.slice(0, 40) ??
-                      item.username?.slice(0, 40)}
+                    Global
                   </ThemedText>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: 4,
-                    }}
-                  >
-                    <Octicons
-                      name="star-fill"
-                      size={15}
-                      color={TOKENS.accent}
-                    />
+                </Pressable>
 
-                    <ThemedText type="muted" style={styles.rowPts}>
-                      {item.experience.toLocaleString()} puntos
-                    </ThemedText>
-                  </View>
-                </View>
+                {/* Tab: Puntaje de Rango */}
+                <Pressable
+                  style={[
+                    styles.tab,
+                    activeTab === "level" && styles.tabActive,
+                  ]}
+                  onPress={() => setActiveTab("level")}
+                >
+                  <ThemedText
+                    type={activeTab === "level" ? "defaultSemiBold" : "muted"}
+                    style={[
+                      styles.tabText,
+                      activeTab === "level" && styles.tabTextActive,
+                    ]}
+                  >
+                    Nivel actual
+                  </ThemedText>
+                </Pressable>
               </View>
             </FadeInView>
-          )}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 50 }}
-        />
-      )}
+
+            {loading ? (
+              <RankingContentSkeleton />
+            ) : (
+              <>
+                {/* Tarjeta del usuario actual con animación */}
+                {userPosition && (
+                  <FadeInView key={`user-${activeTab}`} delay={200}>
+                    <UserRankingCard
+                      user={userPosition}
+                      userLevel={level?.name}
+                    />
+                  </FadeInView>
+                )}
+
+                {/* PODIO con animaciones escalonadas - el ganador aparece primero */}
+                <View style={styles.podiumContainer}>
+                  {/* Segundo lugar (izquierda) aparece tercero */}
+                  {top3[1] && (
+                    <FadeInView key={`podium-2-${activeTab}`} delay={400}>
+                      <PodiumItem
+                        user={top3[1]}
+                        position={2}
+                        onPress={
+                          String(top3[1].id) === user?.id
+                            ? undefined
+                            : () => openUserActions(top3[1])
+                        }
+                      />
+                    </FadeInView>
+                  )}
+
+                  {/* Primer lugar (centro) aparece primero */}
+                  {top3[0] && (
+                    <FadeInView key={`podium-1-${activeTab}`} delay={300}>
+                      <PodiumItem
+                        user={top3[0]}
+                        position={1}
+                        onPress={
+                          String(top3[0].id) === user?.id
+                            ? undefined
+                            : () => openUserActions(top3[0])
+                        }
+                      />
+                    </FadeInView>
+                  )}
+
+                  {/* Tercer lugar (derecha) aparece último */}
+                  {top3[2] && (
+                    <FadeInView key={`podium-3-${activeTab}`} delay={500}>
+                      <PodiumItem
+                        user={top3[2]}
+                        position={3}
+                        onPress={
+                          String(top3[2].id) === user?.id
+                            ? undefined
+                            : () => openUserActions(top3[2])
+                        }
+                      />
+                    </FadeInView>
+                  )}
+                </View>
+
+                <View style={{ height: 20 }} />
+              </>
+            )}
+          </>
+        }
+        data={loading ? [] : rest}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item, index }) => (
+          // Cada usuario del ranking aparece con un delay incremental
+          // Comienza después del podio (600ms) y agrega 40ms por cada uno
+          <FadeInView
+            delay={600 + Math.min(index * 40, 200)}
+            key={`ranking-${activeTab}-${index}`}
+          >
+            <View style={styles.rowCard}>
+              <ThemedText type="subtitle" style={styles.position}>
+                {item.position}
+              </ThemedText>
+
+              <Image
+                source={{ uri: item.character }}
+                style={styles.rowAvatar}
+              />
+
+              <View style={{ flex: 1, gap: 4 }}>
+                <ThemedText type="subtitle">
+                  {item?.display_name?.slice(0, 40) ??
+                    item.username?.slice(0, 40)}
+                </ThemedText>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 4,
+                  }}
+                >
+                  <Octicons name="star-fill" size={15} color={TOKENS.accent} />
+
+                  <ThemedText type="muted" style={styles.rowPts}>
+                    {t("common.pointsCount", {
+                      count: item.experience,
+                      value: item.experience.toLocaleString(locale),
+                    })}
+                  </ThemedText>
+                </View>
+              </View>
+              {String(item.id) !== user?.id && (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`${t("ranking.userOptions")}: ${item.display_name || item.username}`}
+                  hitSlop={8}
+                  onPress={() => openUserActions(item)}
+                  style={styles.reportButton}
+                >
+                  <Octicons
+                    name="kebab-horizontal"
+                    size={18}
+                    color={TOKENS.muted}
+                  />
+                </Pressable>
+              )}
+            </View>
+          </FadeInView>
+        )}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refresh}
+            tintColor={TOKENS.primary}
+            colors={[TOKENS.navActive]}
+          />
+        }
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.4}
+        contentContainerStyle={{ paddingBottom: 50 }}
+      />
     </ThemedBackground>
   );
 }
@@ -272,5 +442,10 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontSize: 13,
   },
+  reportButton: {
+    padding: 8,
+    marginLeft: 8,
+  },
   bottomSpacer: { height: 60 },
+  endSpacer: { height: 8 },
 });

@@ -5,7 +5,7 @@ import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { Href, router } from "expo-router";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 
@@ -31,6 +31,11 @@ const sections = [
     onPress: () => router.navigate("/(tabs)/profile/settings/appearance"),
   },
   {
+    title: "Idioma",
+    icon: "language",
+    onPress: () => router.navigate("/(tabs)/profile/settings/language" as Href),
+  },
+  {
     title: "Centro de ayuda",
     icon: "help-circle",
     onPress: () => router.navigate("/(tabs)/profile/settings/help"),
@@ -39,6 +44,12 @@ const sections = [
     title: "Sobre nosotros",
     icon: "information-circle",
     onPress: () => router.navigate("/(tabs)/profile/settings/about"),
+  },
+  {
+    title: "Usuarios bloqueados",
+    icon: "eye-off-outline",
+    onPress: () =>
+      router.navigate("/(tabs)/profile/settings/blocked-users" as Href),
   },
 ];
 
@@ -83,7 +94,31 @@ const Settings = () => {
           </FadeInView>
         ))}
 
-        <FadeInView delay={600}>
+        <FadeInView delay={800}>
+          <TouchableOpacity
+            accessibilityRole="button"
+            onPress={() =>
+              router.navigate("/(tabs)/profile/settings/delete-account" as Href)
+            }
+            style={styles.sectionContainer}
+          >
+            <View style={styles.sectionLeft}>
+              <Ionicons name="trash-outline" size={24} color={TOKENS.error} />
+              <ThemedText type="defaultSemiBold" style={styles.logoutText}>
+                Eliminar cuenta
+              </ThemedText>
+            </View>
+            <View style={styles.sectionRight}>
+              <Ionicons
+                name="chevron-forward-outline"
+                size={20}
+                color={TOKENS.error}
+              />
+            </View>
+          </TouchableOpacity>
+        </FadeInView>
+
+        <FadeInView delay={900}>
           <TouchableOpacity
             onPress={handleSignOut}
             style={styles.sectionContainer}

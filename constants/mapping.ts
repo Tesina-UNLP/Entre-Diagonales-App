@@ -9,3 +9,7 @@ export const ORS_PROFILE = "foot-walking";
 // Si querés usar auto: const ORS_PROFILE = "driving-car";
 
 export const MIN_LOCATION_CHANGE_METERS = 100; // o lo que te cierre más
+
+// Un recorrido turístico a pie es local. Por encima de esta distancia evitamos
+// pedir una ruta a ORS, que puede rechazar trayectos muy largos.
+export const MAX_ORS_WALKING_ROUTE_DISTANCE_METERS = 25_000;

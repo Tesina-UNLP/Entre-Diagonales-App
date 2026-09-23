@@ -13,6 +13,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Share, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 // Importamos todos los componentes modulares que creamos
 import {
   ActionButtons,
@@ -26,6 +27,7 @@ import {
 } from "@/components/spot-details";
 
 const SpotDetails = () => {
+  const { t } = useTranslation();
   const { id, tourId } = useLocalSearchParams<{
     id?: string;
     tourId?: string;
@@ -75,7 +77,11 @@ const SpotDetails = () => {
   const handleShare = async () => {
     try {
       // Creamos el mensaje que se va a compartir
-      const message = `¡Mira este lugar interesante!\n\n${spotInfo?.name}\n${spotInfo?.address}\n\n${spotInfo?.description || "Un lugar increíble para visitar."}`;
+      const message = t("spots.shareMessage", {
+        name: spotInfo?.name,
+        address: spotInfo?.address,
+        description: spotInfo?.description || t("spots.shareFallback"),
+      });
 
       // Llamamos a la API de Share con el contenido
       await Share.share({

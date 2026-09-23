@@ -11,6 +11,36 @@ type ExpoConfigWithNativeFlags = ExpoConfig & {
 };
 
 const googleServicesFile = "./google-services.json";
+const motionUsageDescription =
+  "Entre Diagonales usa los datos de movimiento para mejorar la precisión de la ubicación y verificar tu progreso durante los recorridos.";
+
+const requireGoogleClientId = (name: string): string => {
+  const clientId = process.env[name]?.trim();
+
+  if (!clientId?.endsWith(".apps.googleusercontent.com")) {
+    throw new Error(
+      `${name} debe contener un Client ID OAuth válido de Google.`,
+    );
+  }
+
+  return clientId;
+};
+
+const googleWebClientId = requireGoogleClientId("EXPO_PUBLIC_WEB_CLIENT_ID");
+const googleIosClientId = requireGoogleClientId("EXPO_PUBLIC_IOS_CLIENT_ID");
+const googleWebProjectNumber = googleWebClientId.split("-", 1)[0];
+const googleIosProjectNumber = googleIosClientId.split("-", 1)[0];
+
+if (googleWebProjectNumber !== googleIosProjectNumber) {
+  throw new Error(
+    "EXPO_PUBLIC_WEB_CLIENT_ID y EXPO_PUBLIC_IOS_CLIENT_ID deben pertenecer al mismo proyecto de Google Cloud.",
+  );
+}
+
+const googleIosUrlScheme = `com.googleusercontent.apps.${googleIosClientId.replace(
+  ".apps.googleusercontent.com",
+  "",
+)}`;
 
 export default ({ config }: ConfigContext): ExpoConfig =>
   ({
@@ -24,8 +54,32 @@ export default ({ config }: ConfigContext): ExpoConfig =>
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     ios: {
-      supportsTablet: true,
+      // El lanzamiento 1.0 está validado únicamente para iPhone.
+      // Evita distribuir una interfaz de teléfono sin QA ni capturas de iPad.
+      supportsTablet: false,
       bundleIdentifier: "com.entrediagonales.app",
+      usesAppleSignIn: true,
+      infoPlist: {
+        ITSAppUsesNonExemptEncryption: false,
+        NSMotionUsageDescription: motionUsageDescription,
+      },
+      privacyManifests: {
+        NSPrivacyTracking: false,
+        NSPrivacyTrackingDomains: [],
+        NSPrivacyCollectedDataTypes: [],
+        NSPrivacyAccessedAPITypes: [
+          {
+            NSPrivacyAccessedAPIType:
+              "NSPrivacyAccessedAPICategoryUserDefaults",
+            NSPrivacyAccessedAPITypeReasons: ["CA92.1"],
+          },
+          {
+            NSPrivacyAccessedAPIType:
+              "NSPrivacyAccessedAPICategoryFileTimestamp",
+            NSPrivacyAccessedAPITypeReasons: ["C617.1"],
+          },
+        ],
+      },
     },
     android: {
       adaptiveIcon: {
@@ -48,6 +102,8 @@ export default ({ config }: ConfigContext): ExpoConfig =>
     },
     plugins: [
       "expo-router",
+      "expo-localization",
+      "expo-apple-authentication",
       "expo-asset",
       [
         "expo-splash-screen",
@@ -57,33 +113,45 @@ export default ({ config }: ConfigContext): ExpoConfig =>
           imageWidth: 200,
         },
       ],
-      "expo-secure-store",
+      [
+        "expo-secure-store",
+        {
+          // No usamos autenticación biométrica para leer credenciales.
+          faceIDPermission: false,
+        },
+      ],
       "expo-font",
       "expo-web-browser",
       [
         "@react-native-google-signin/google-signin",
         {
-          iosUrlScheme:
-            "com.googleusercontent.apps.769784730737-7rokmmf9brdn9ade99u9eeum191pmbvj",
+          iosUrlScheme: googleIosUrlScheme,
         },
       ],
       "./plugins/with-google-signin-modular-headers",
       [
         "expo-camera",
         {
-          cameraPermission: "Permiso para usar la cámara de Entre Diagonales",
-          microphonePermission:
-            "Permiso para usar el micrófono de Entre Diagonales",
-          recordAudioAndroid: true,
+          cameraPermission:
+            "Entre Diagonales usa la cámara para escanear códigos y fotografiar monumentos u objetos, con el fin de validar desafíos del recorrido.",
+          microphonePermission: false,
+          recordAudioAndroid: false,
         },
       ],
-      "expo-location",
       [
-        "expo-maps",
+        "expo-location",
         {
-          requestLocationPermission: true,
-          locationPermission:
-            "Permiso para usar la ubicación de Entre Diagonales",
+          locationWhenInUsePermission:
+            "Tu ubicación se usa mientras utilizás la app para mostrarte en el mapa, calcular rutas y verificar que estés cerca de una parada.",
+          locationAlwaysAndWhenInUsePermission: false,
+          locationAlwaysPermission: false,
+          motionUsagePermission: motionUsageDescription,
+        },
+      ],
+      [
+        "react-native-maps",
+        {
+          androidGoogleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS,
         },
       ],
       [
@@ -93,7 +161,15 @@ export default ({ config }: ConfigContext): ExpoConfig =>
           sounds: ["./assets/sfx/notifications.wav"],
         },
       ],
-      "expo-audio",
+      [
+        "expo-audio",
+        {
+          microphonePermission: false,
+          recordAudioAndroid: false,
+          enableBackgroundPlayback: false,
+          enableBackgroundRecording: false,
+        },
+      ],
     ],
     updates: {
       url: "https://u.expo.dev/d8afb0e4-db66-480e-800f-b4d06f1368aa",
@@ -111,4 +187,4 @@ export default ({ config }: ConfigContext): ExpoConfig =>
         projectId: "d8afb0e4-db66-480e-800f-b4d06f1368aa",
       },
     },
-  } as ExpoConfigWithNativeFlags);
+  }) as ExpoConfigWithNativeFlags;
