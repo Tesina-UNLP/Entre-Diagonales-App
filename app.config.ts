@@ -47,7 +47,7 @@ export default ({ config }: ConfigContext): ExpoConfig =>
     ...config,
     name: "Entre Diagonales",
     slug: "entre-diagonales",
-    version: "1.0.0",
+    version: "1.0.1",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
     scheme: "entrediagonales",
@@ -168,14 +168,6 @@ export default ({ config }: ConfigContext): ExpoConfig =>
           recordAudioAndroid: false,
           enableBackgroundPlayback: false,
           enableBackgroundRecording: false,
-        },
-      ],
-      [
-        "posthog-react-native/expo",
-        {
-          uploadNativeSymbols: true,
-          skipOnConflict: true,
-          dotenvFile: ".env.posthog-cli.local",
         },
       ],
     ],

@@ -1,3 +1,3 @@
-const { getPostHogExpoConfig } = require("posthog-react-native/metro");
+const { getDefaultConfig } = require("expo/metro-config");
 
-module.exports = getPostHogExpoConfig(__dirname);
+module.exports = getDefaultConfig(__dirname);

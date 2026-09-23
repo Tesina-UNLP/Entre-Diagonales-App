@@ -31,7 +31,7 @@ PostHog captura excepciones JavaScript, rechazos no manejados, errores de render
 
 Configurá las variables públicas de `.env.example` mediante los entornos EAS. Session Replay está apagado por defecto y sólo puede iniciar si `EXPO_PUBLIC_POSTHOG_SESSION_REPLAY_ENABLED=true` y existe consentimiento persistido; texto e imágenes se enmascaran y no se capturan logs, red ni toques.
 
-Los builds EAS cargan source maps, dSYM y mappings Android mediante el plugin Expo. Las credenciales `POSTHOG_CLI_*` son secretos de build y nunca deben llevar el prefijo `EXPO_PUBLIC_`.
+Los builds EAS no suben source maps ni símbolos nativos a PostHog. Los eventos y errores siguen enviándose desde la app; las trazas de producción pueden mostrar nombres ofuscados.
 
 ### Plan de eventos de producto
 
@@ -41,13 +41,12 @@ Cada evento incorpora `environment`, `platform`, `app_version` e `language`; los
 
 `tour_abandoned` y `spot_reached` no se emiten todavía: la UX no define un abandono explícito ni dispone de una regla de llegada validada antes de la confirmación server-side. Instrumentarlos ahora produciría métricas engañosas.
 
-Para una actualización OTA, usá el wrapper obligatorio y pasale los argumentos normales de `eas update`:
+Para una actualización OTA, usá `eas update`:
 
 ```bash
-pnpm update:posthog -- --channel production --message "Descripción"
+eas update --channel production --message "Descripción"
 ```
 
-El comando publica en `dist` y sólo si finaliza correctamente ejecuta `posthog-cli hermes upload`.
 
 ## Aprende más
 
