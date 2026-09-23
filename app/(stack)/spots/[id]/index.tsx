@@ -10,7 +10,7 @@ import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetScrollView,
 } from "@gorhom/bottom-sheet";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useIsFocused, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Share, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -26,6 +26,7 @@ import {
   SpotHeader,
   VisitInfoSection,
 } from "@/components/spot-details";
+import { useTutorial } from "@/contexts/tutorial";
 
 const SpotDetails = () => {
   const { t } = useTranslation();
@@ -35,6 +36,8 @@ const SpotDetails = () => {
   }>();
   const idStr = useMemo(() => (Array.isArray(id) ? id?.[0] : id), [id]);
   const { user } = useAuth();
+  const isFocused = useIsFocused();
+  const { triggerTutorial, ready: tutorialReady } = useTutorial();
   const [spotInfo, setSpotInfo] = useState<IndividualSpotApiResponse | null>(
     null,
   );
@@ -65,6 +68,18 @@ const SpotDetails = () => {
   useEffect(() => {
     handleGetSpot();
   }, [handleGetSpot]);
+
+  useEffect(() => {
+    if (isFocused && tutorialReady && spotInfo?.quiz && !spotInfo.quiz_solved) {
+      void triggerTutorial("quiz");
+    }
+  }, [
+    isFocused,
+    spotInfo?.quiz,
+    spotInfo?.quiz_solved,
+    triggerTutorial,
+    tutorialReady,
+  ]);
 
   const renderBackdrop = useCallback(
     (props: any) => (

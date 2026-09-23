@@ -8,6 +8,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { router } from "expo-router";
 import React from "react";
 import { Image, StyleSheet, View } from "react-native";
+import { TourTarget } from "@wrack/react-native-tour-guide";
 
 const happyImage = require("@/assets/images/happy.png");
 
@@ -82,55 +83,59 @@ const NextStop = ({
       {routeInfo?.started && !isTourCompleted ? (
         // Mostrar botones normales cuando el tour no está completado
         <View style={styles.nextStopActions}>
-          <ThemedButton
-            variant="primary"
-            size="small"
-            style={styles.actionButton}
-            onPress={() =>
-              router.navigate(
-                `/(tabs)/scanner?mode=spot&from=/(tabs)/tours/${routeInfo?.id}&spot_id=${currentSpot?.spot.id}&tour_id=${routeInfo?.id}`,
-              )
-            }
-          >
-            <MaterialCommunityIcons
-              name="line-scan"
-              size={20}
-              color={TOKENS.text}
-            />
-            <ThemedText
-              type="defaultSemiBold"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              style={{ flexShrink: 1 }}
+          <TourTarget id="tutorial-tour-complete" style={styles.actionButton}>
+            <ThemedButton
+              variant="primary"
+              size="small"
+              style={styles.actionButton}
+              onPress={() =>
+                router.navigate(
+                  `/(tabs)/scanner?mode=spot&from=/(tabs)/tours/${routeInfo?.id}&spot_id=${currentSpot?.spot.id}&tour_id=${routeInfo?.id}`,
+                )
+              }
             >
-              Completar
-            </ThemedText>
-          </ThemedButton>
-          <ThemedButton
-            variant="secondary"
-            size="small"
-            style={styles.actionButton}
-            onPress={() =>
-              router.navigate({
-                pathname: "/(tabs)/tours/[id]/map",
-                params: { id: routeInfo?.id.toString() },
-              })
-            }
-          >
-            <MaterialCommunityIcons
-              name="map-marker-radius"
-              size={20}
-              color={TOKENS.primary}
-            />
-            <ThemedText
-              type="defaultSemiBold"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              style={[styles.actionButtonText, { flexShrink: 1 }]}
+              <MaterialCommunityIcons
+                name="line-scan"
+                size={20}
+                color={TOKENS.text}
+              />
+              <ThemedText
+                type="defaultSemiBold"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={{ flexShrink: 1 }}
+              >
+                Completar
+              </ThemedText>
+            </ThemedButton>
+          </TourTarget>
+          <TourTarget id="tutorial-tour-map" style={styles.actionButton}>
+            <ThemedButton
+              variant="secondary"
+              size="small"
+              style={styles.actionButton}
+              onPress={() =>
+                router.navigate({
+                  pathname: "/(tabs)/tours/[id]/map",
+                  params: { id: routeInfo?.id.toString() },
+                })
+              }
             >
-              Ver mapa
-            </ThemedText>
-          </ThemedButton>
+              <MaterialCommunityIcons
+                name="map-marker-radius"
+                size={20}
+                color={TOKENS.primary}
+              />
+              <ThemedText
+                type="defaultSemiBold"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={[styles.actionButtonText, { flexShrink: 1 }]}
+              >
+                Ver mapa
+              </ThemedText>
+            </ThemedButton>
+          </TourTarget>
         </View>
       ) : routeInfo?.started && isTourCompleted ? (
         // Mostrar solo botón de ver mapa cuando el tour está completado
@@ -160,21 +165,23 @@ const NextStop = ({
           </ThemedText>
         </ThemedButton>
       ) : (
-        <ThemedButton
-          variant="gold"
-          size="small"
-          style={styles.actionButton}
-          onPress={handleStartTour}
-        >
-          <ThemedText
-            type="defaultSemiBold"
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            style={{ flexShrink: 1 }}
+        <TourTarget id="tutorial-tour-start">
+          <ThemedButton
+            variant="gold"
+            size="small"
+            style={styles.actionButton}
+            onPress={handleStartTour}
           >
-            Comenzar aventura
-          </ThemedText>
-        </ThemedButton>
+            <ThemedText
+              type="defaultSemiBold"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              style={{ flexShrink: 1 }}
+            >
+              Comenzar aventura
+            </ThemedText>
+          </ThemedButton>
+        </TourTarget>
       )}
     </View>
   );

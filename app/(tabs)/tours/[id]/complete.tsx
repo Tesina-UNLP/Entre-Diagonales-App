@@ -18,11 +18,13 @@ import { useLocalSearchParams } from "expo-router";
 import React, { useEffect } from "react";
 import { Image, StyleSheet, View } from "react-native";
 import { useConfetti } from "@/components/confetti";
+import { useTutorial } from "@/contexts/tutorial";
 import * as z from "zod";
 
 const CompleteTour = () => {
   const { checkAuthState } = useAuth();
   const confettiRef = useConfetti();
+  const { triggerTutorial, ready: tutorialReady } = useTutorial();
 
   const ParamsSchema = z.object({
     tour_id: z.string().optional().default(""),
@@ -86,6 +88,10 @@ const CompleteTour = () => {
     checkAuth();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Array vacío = solo se ejecuta una vez al montar
+
+  useEffect(() => {
+    if (tutorialReady) void triggerTutorial("rewards");
+  }, [triggerTutorial, tutorialReady]);
 
   return (
     <ThemedBackground style={styles.container}>

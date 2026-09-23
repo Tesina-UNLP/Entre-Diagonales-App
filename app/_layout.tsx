@@ -15,6 +15,7 @@ import { FontScaleProvider } from "@/contexts/font-scale";
 import { HapticsProvider } from "@/contexts/haptics";
 import { LanguageProvider } from "@/contexts/language";
 import { StartupProvider } from "@/contexts/startup";
+import { TutorialProvider } from "@/contexts/tutorial";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Observe, ObserveRoot } from "expo-observe";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -105,30 +106,32 @@ function AppContent() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <FontScaleProvider>
-        <HapticsProvider>
-          <PostHogProvider
-            client={posthog}
-            autocapture={{ captureScreens: false, captureTouches: false }}
-          >
-            <PostHogErrorBoundary fallback={ErrorRecoveryScreen}>
-              <AuthProvider>
-                <NotificationLifecycle />
-                <StartupProvider>
-                  <ConfettiProvider
-                    initParticleAmount={0}
-                    colorPalette={confettiPalette}
-                  >
-                    <Slot screenOptions={{ animation: "fade" }} />
-                  </ConfettiProvider>
-                </StartupProvider>
-              </AuthProvider>
-            </PostHogErrorBoundary>
-          </PostHogProvider>
-          <Toast config={toastConfig} />
-          <StatusBar style="light" />
-        </HapticsProvider>
-      </FontScaleProvider>
+      <TutorialProvider>
+        <FontScaleProvider>
+          <HapticsProvider>
+            <PostHogProvider
+              client={posthog}
+              autocapture={{ captureScreens: false, captureTouches: false }}
+            >
+              <PostHogErrorBoundary fallback={ErrorRecoveryScreen}>
+                <AuthProvider>
+                  <NotificationLifecycle />
+                  <StartupProvider>
+                    <ConfettiProvider
+                      initParticleAmount={0}
+                      colorPalette={confettiPalette}
+                    >
+                      <Slot screenOptions={{ animation: "fade" }} />
+                    </ConfettiProvider>
+                  </StartupProvider>
+                </AuthProvider>
+              </PostHogErrorBoundary>
+            </PostHogProvider>
+            <Toast config={toastConfig} />
+            <StatusBar style="light" />
+          </HapticsProvider>
+        </FontScaleProvider>
+      </TutorialProvider>
     </ThemeProvider>
   );
 }

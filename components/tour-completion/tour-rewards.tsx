@@ -4,6 +4,7 @@ import React from "react";
 import { StyleSheet, View } from "react-native";
 import CoinIcon from "../icons/coin";
 import { Ionicons } from "@expo/vector-icons";
+import { TourTarget } from "@wrack/react-native-tour-guide";
 
 /**
  * Props para el componente TourRewards
@@ -21,7 +22,7 @@ interface TourRewardsProps {
  */
 export const TourRewards = ({ xp, coins }: TourRewardsProps) => {
   return (
-    <View style={styles.rewardContainer}>
+    <TourTarget id="tutorial-rewards-summary" style={styles.rewardContainer}>
       {/* Sección de XP */}
       <View style={styles.rewardsItem}>
         <Ionicons name="star" size={20} color={TOKENS.warning} />
@@ -33,7 +34,7 @@ export const TourRewards = ({ xp, coins }: TourRewardsProps) => {
         <CoinIcon height={25} width={25} />
         <ThemedText type="default"> {coins}</ThemedText>
       </View>
-    </View>
+    </TourTarget>
   );
 };
 

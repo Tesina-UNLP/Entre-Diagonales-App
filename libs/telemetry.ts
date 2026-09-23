@@ -139,7 +139,12 @@ export type ProductEventName =
   | "quiz_completed"
   | "secret_found"
   | "level_up"
-  | "ranking_viewed";
+  | "ranking_viewed"
+  | "tutorial_started"
+  | "tutorial_step_viewed"
+  | "tutorial_completed"
+  | "tutorial_dismissed"
+  | "tutorial_restarted";
 
 type ProductEventProperties = Record<
   string,

@@ -1,4 +1,5 @@
 import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { TourTarget } from "@wrack/react-native-tour-guide";
 
 /**
  * CaptureButton - Botón circular para capturar fotos (estilo clásico de cámara)
@@ -10,26 +11,33 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 interface CaptureButtonProps {
   onPress: () => void;
   disabled?: boolean;
+  tutorialTargetId?: string;
 }
 
 export function CaptureButton({
   onPress,
   disabled = false,
+  tutorialTargetId,
 }: CaptureButtonProps) {
-  return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        style={[
-          styles.captureButton,
-          disabled && styles.captureButtonDisabled, // Reduce la opacidad cuando está deshabilitado
-        ]}
-        onPress={onPress}
-        disabled={disabled}
-      >
-        {/* Círculo interno blanco del botón */}
-        <View style={styles.captureButtonInner} />
-      </TouchableOpacity>
-    </View>
+  const button = (
+    <TouchableOpacity
+      style={[
+        styles.captureButton,
+        disabled && styles.captureButtonDisabled, // Reduce la opacidad cuando está deshabilitado
+      ]}
+      onPress={onPress}
+      disabled={disabled}
+    >
+      {/* Círculo interno blanco del botón */}
+      <View style={styles.captureButtonInner} />
+    </TouchableOpacity>
+  );
+  return tutorialTargetId ? (
+    <TourTarget id={tutorialTargetId} style={styles.container}>
+      {button}
+    </TourTarget>
+  ) : (
+    <View style={styles.container}>{button}</View>
   );
 }
 

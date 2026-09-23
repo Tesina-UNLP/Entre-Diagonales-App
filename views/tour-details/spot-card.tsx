@@ -6,6 +6,7 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router } from "expo-router";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { TourTarget } from "@wrack/react-native-tour-guide";
 
 export const SpotCard = ({
   spot,
@@ -13,12 +14,14 @@ export const SpotCard = ({
   completed,
   currentSpot,
   tourId,
+  tutorialSecretTarget = false,
 }: {
   spot: StopApiResponse;
   actual: boolean;
   completed: boolean;
   currentSpot: StopApiResponse | null;
   tourId: number;
+  tutorialSecretTarget?: boolean;
 }) => {
   const urlToRedirect = {
     pathname: "/(stack)/spots/[id]" as const,
@@ -68,7 +71,7 @@ export const SpotCard = ({
           )}
         </View>
       </TouchableOpacity>
-      {spot.spot.secret_items.map((secret) => (
+      {spot.spot.secret_items.map((secret, index) => (
         <SecretItemCard
           key={secret.id}
           secret={secret}
@@ -76,6 +79,7 @@ export const SpotCard = ({
           spot={spot}
           tourId={tourId}
           completed={completed}
+          tutorialTarget={tutorialSecretTarget && index === 0}
         />
       ))}
     </>
@@ -88,19 +92,21 @@ export const SecretItemCard = ({
   spot,
   completed,
   tourId,
+  tutorialTarget = false,
 }: {
   secret: SecretItemApiResponse;
   actual: boolean;
   spot: StopApiResponse;
   tourId: number;
   completed: boolean;
+  tutorialTarget?: boolean;
 }) => {
   const urlToRedirect = secret.obtained
     ? `/(tabs)/profile/secrets/${secret.id}?id=${secret.id}&name=${secret.name}&description=${secret.description}&image_url=${secret.image_url}`
     : actual || completed
       ? `/(tabs)/scanner?mode=secret&from=/(tabs)/tours/${tourId}&secret_id=${secret.id}&spot_id=${spot.spot.id}&tour_id=${tourId}`
       : undefined;
-  return (
+  const content = (
     <TouchableOpacity
       onPress={() =>
         urlToRedirect ? router.navigate(urlToRedirect as any) : undefined
@@ -137,6 +143,11 @@ export const SecretItemCard = ({
         )}
       </View>
     </TouchableOpacity>
+  );
+  return tutorialTarget ? (
+    <TourTarget id="tutorial-tour-secret">{content}</TourTarget>
+  ) : (
+    content
   );
 };
 

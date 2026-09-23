@@ -10,6 +10,7 @@ import React, { useState } from "react";
 import { Linking, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { translateUiText } from "@/i18n";
 import { useTranslation } from "react-i18next";
+import { useTutorial } from "@/contexts/tutorial";
 
 const sections = [
   {
@@ -42,6 +43,7 @@ const sections = [
 
 const Help = () => {
   const { t } = useTranslation();
+  const { restartTutorials } = useTutorial();
   const [search, setSearch] = useState("");
   const localizedSections = sections.map((section) => ({
     question: translateUiText(section.question),
@@ -89,6 +91,32 @@ const Help = () => {
             </View>
           </FadeInView>
         )}
+
+        <FadeInView delay={700}>
+          <View style={styles.tutorialContainer}>
+            <Ionicons name="school" size={24} color={TOKENS.accent} />
+            <ThemedText type="subtitle">{t("tutorial.help.title")}</ThemedText>
+            <ThemedText type="muted" style={styles.contactDescription}>
+              {t("tutorial.help.description")}
+            </ThemedText>
+            <ThemedButton
+              variant="accent"
+              size="small"
+              onPress={() => void restartTutorials()}
+              accessibilityLabel={t("tutorial.actions.restart")}
+            >
+              <View style={styles.contactButtonContent}>
+                <Ionicons name="play" size={18} color={TOKENS.primaryHover} />
+                <ThemedText
+                  type="defaultSemiBold"
+                  style={styles.contactButtonText}
+                >
+                  {t("tutorial.actions.restart")}
+                </ThemedText>
+              </View>
+            </ThemedButton>
+          </View>
+        </FadeInView>
 
         <FadeInView delay={800}>
           <View style={styles.contactContainer}>
@@ -173,6 +201,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "column",
     justifyContent: "center",
+  },
+  tutorialContainer: {
+    gap: 10,
+    backgroundColor: TOKENS.cardBackground,
+    borderRadius: 18,
+    padding: 24,
+    marginBottom: 10,
+    alignItems: "center",
   },
   contactDescription: {
     textAlign: "center",
