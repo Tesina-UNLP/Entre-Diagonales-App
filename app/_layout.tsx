@@ -9,6 +9,7 @@ import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
 
 import { LevelUpToast } from "@/components/toasts/level-up-toast";
 import { NotificationLifecycle } from "@/components/notification-lifecycle";
+import { ErrorRecoveryScreen } from "@/components/error-recovery-screen";
 import { AuthProvider } from "@/contexts/auth";
 import { FontScaleProvider } from "@/contexts/font-scale";
 import { HapticsProvider } from "@/contexts/haptics";
@@ -21,6 +22,14 @@ import { ConfettiProvider } from "@/components/confetti";
 import { translateUiText } from "@/i18n";
 import { useLanguage } from "@/hooks/use-language";
 import { useTranslation } from "react-i18next";
+import { PostHogErrorBoundary, PostHogProvider } from "posthog-react-native";
+import {
+  posthog,
+  setTelemetryLanguage,
+  syncSessionReplayConsent,
+  trackProductEvent,
+} from "@/libs/telemetry";
+import { useEffect } from "react";
 
 Observe.configure({
   integrations: {
@@ -41,6 +50,16 @@ function AppContent() {
   const colorScheme = useColorScheme();
   const { language } = useLanguage();
   const { t } = useTranslation();
+
+  useEffect(() => {
+    setTelemetryLanguage(language);
+  }, [language]);
+
+  useEffect(() => {
+    void syncSessionReplayConsent();
+    trackProductEvent("app_opened");
+  }, []);
+
   const localizeToastText = (value?: string) =>
     value ? translateUiText(value) : value;
   const localizeErrorDetail = (value?: string) => {
@@ -88,17 +107,24 @@ function AppContent() {
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <FontScaleProvider>
         <HapticsProvider>
-          <AuthProvider>
-            <NotificationLifecycle />
-            <StartupProvider>
-              <ConfettiProvider
-                initParticleAmount={0}
-                colorPalette={confettiPalette}
-              >
-                <Slot screenOptions={{ animation: "fade" }} />
-              </ConfettiProvider>
-            </StartupProvider>
-          </AuthProvider>
+          <PostHogProvider
+            client={posthog}
+            autocapture={{ captureScreens: false, captureTouches: false }}
+          >
+            <PostHogErrorBoundary fallback={ErrorRecoveryScreen}>
+              <AuthProvider>
+                <NotificationLifecycle />
+                <StartupProvider>
+                  <ConfettiProvider
+                    initParticleAmount={0}
+                    colorPalette={confettiPalette}
+                  >
+                    <Slot screenOptions={{ animation: "fade" }} />
+                  </ConfettiProvider>
+                </StartupProvider>
+              </AuthProvider>
+            </PostHogErrorBoundary>
+          </PostHogProvider>
           <Toast config={toastConfig} />
           <StatusBar style="light" />
         </HapticsProvider>

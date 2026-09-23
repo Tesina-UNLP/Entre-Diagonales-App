@@ -170,6 +170,14 @@ export default ({ config }: ConfigContext): ExpoConfig =>
           enableBackgroundRecording: false,
         },
       ],
+      [
+        "posthog-react-native/expo",
+        {
+          uploadNativeSymbols: true,
+          skipOnConflict: true,
+          dotenvFile: ".env.posthog-cli.local",
+        },
+      ],
     ],
     updates: {
       url: "https://u.expo.dev/d8afb0e4-db66-480e-800f-b4d06f1368aa",

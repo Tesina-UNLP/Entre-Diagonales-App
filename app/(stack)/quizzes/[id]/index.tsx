@@ -11,10 +11,17 @@ import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
 import { useHaptics } from "@/hooks/use-haptics";
 import { api } from "@/libs/api";
+import { trackProductEvent } from "@/libs/telemetry";
 import { QuizApiResponse, RemainingAnswersApiResponse } from "@/types";
 import { FontAwesome } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 const QuizPage = () => {
@@ -28,6 +35,7 @@ const QuizPage = () => {
   const [remainingAnswers, setRemainingAnswers] = useState<
     RemainingAnswersApiResponse[] | null
   >(null);
+  const hasTrackedStartRef = useRef(false);
   const { playSound, haptic } = useHaptics();
 
   const handleGetQuiz = useCallback(async () => {
@@ -36,6 +44,10 @@ const QuizPage = () => {
       const response = await api.getQuiz(user.access, parseInt(idStr));
       if (response) {
         setQuiz(response);
+        if (!hasTrackedStartRef.current) {
+          trackProductEvent("quiz_started", { quiz_id: response.id });
+          hasTrackedStartRef.current = true;
+        }
       }
     }
     setLoading(false);
@@ -77,8 +89,14 @@ const QuizPage = () => {
       );
       if (response) {
         setCorrectAnswer(response.correct_answer_id);
+        const isCorrect = response.correct_answer_id === selectedAnswer;
+        trackProductEvent("quiz_answered", {
+          quiz_id: Number(idStr),
+          is_correct: isCorrect,
+        });
 
-        if (response.correct_answer_id === selectedAnswer) {
+        if (isCorrect) {
+          trackProductEvent("quiz_completed", { quiz_id: Number(idStr) });
           playSound("success");
           await checkAuthState?.();
         } else {

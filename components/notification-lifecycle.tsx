@@ -1,6 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { api } from "@/libs/api";
 import { getExpoPushToken } from "@/libs/notifications";
+import { captureException } from "@/libs/telemetry";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import * as Notifications from "expo-notifications";
@@ -112,12 +113,12 @@ export function NotificationLifecycle() {
 
   const syncOnAppEntry = useCallback(async () => {
     await Promise.all([
-      syncActivity().catch((error) =>
-        console.warn("Could not synchronize app activity", error),
-      ),
-      syncNotificationToken().catch((error) =>
-        console.warn("Could not synchronize notification token", error),
-      ),
+      syncActivity().catch((error) => {
+        captureException(error, { operation: "notifications.sync_activity" });
+      }),
+      syncNotificationToken().catch((error) => {
+        captureException(error, { operation: "notifications.sync_token" });
+      }),
     ]);
   }, [syncActivity, syncNotificationToken]);
 
@@ -138,9 +139,11 @@ export function NotificationLifecycle() {
         .then((response) => {
           if (response) handleResponse(response);
         })
-        .catch((error) =>
-          console.warn("Could not read the last notification response", error),
-        );
+        .catch((error) => {
+          captureException(error, {
+            operation: "notifications.read_last_response",
+          });
+        });
     }
 
     syncOnAppEntry();

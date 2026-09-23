@@ -6,6 +6,7 @@ import { MIN_LOCATION_CHANGE_METERS } from "@/constants/mapping";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "@/hooks/use-location";
 import { api } from "@/libs/api";
+import { trackProductEvent } from "@/libs/telemetry";
 import {
   getDistanceInMeters,
   getInformationBetweenStopsLocal,
@@ -49,6 +50,7 @@ const RouteDetails = () => {
   >([]);
   const [loading, setLoading] = useState<boolean>(false);
   const { location, isLoading } = useLocation();
+  const hasTrackedViewRef = useRef(false);
 
   // guardamos la última ubicación usada para calcular distancias
   const lastLocationForDistancesRef = useRef<{
@@ -61,8 +63,9 @@ const RouteDetails = () => {
   }, [routeInfo?.completed_at]);
 
   const handleStartTour = async () => {
-    if (user) {
-      await api.startTour(user.access, parseInt(idStr));
+    if (user && idStr) {
+      await api.startTour(user.access, parseInt(idStr, 10));
+      trackProductEvent("tour_started", { tour_id: Number(idStr) });
       await handleGetRoute();
     }
   };
@@ -74,6 +77,10 @@ const RouteDetails = () => {
 
       if (response) {
         setRouteInfo(response);
+        if (!hasTrackedViewRef.current) {
+          trackProductEvent("tour_viewed", { tour_id: response.id });
+          hasTrackedViewRef.current = true;
+        }
 
         const spotsQuantityCompleted = Number(response.progress);
         const completed = response.spots.slice(0, spotsQuantityCompleted);

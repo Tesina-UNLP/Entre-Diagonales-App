@@ -1,5 +1,6 @@
 import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
+import { captureException } from "@/libs/telemetry";
 
 /**
  * Configura cómo se mostrarán las notificaciones cuando la app está en primer plano
@@ -35,7 +36,9 @@ export async function requestNotificationPermissions(): Promise<boolean> {
     // Devolvemos true si el permiso fue concedido
     return finalStatus === "granted";
   } catch (error) {
-    console.error("Error requesting notification permissions:", error);
+    captureException(error, {
+      operation: "notifications.request_permissions",
+    });
     return false;
   }
 }
@@ -49,7 +52,9 @@ export async function hasNotificationPermissions(): Promise<boolean> {
     const { status } = await Notifications.getPermissionsAsync();
     return status === "granted";
   } catch (error) {
-    console.error("Error checking notification permissions:", error);
+    captureException(error, {
+      operation: "notifications.check_permissions",
+    });
     return false;
   }
 }
@@ -80,7 +85,7 @@ export async function getExpoPushToken(): Promise<string | null> {
 
     return tokenData.data;
   } catch (error) {
-    console.error("Error getting push token:", error);
+    captureException(error, { operation: "notifications.get_push_token" });
     return null;
   }
 }

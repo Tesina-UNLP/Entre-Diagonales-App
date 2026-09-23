@@ -25,6 +25,30 @@ En la salida, encontrarás opciones para abrir la app en:
 
 Puedes comenzar a desarrollar editando los archivos dentro del directorio **app**. Este proyecto utiliza [ruteo basado en archivos](https://docs.expo.dev/router/introduction).
 
+## Observabilidad con PostHog
+
+PostHog captura excepciones JavaScript, rechazos no manejados, errores de render y crashes nativos. La app identifica únicamente con el `AppUser.id` interno y agrega los encabezados `X-POSTHOG-DISTINCT-ID` y `X-POSTHOG-SESSION-ID` a las llamadas de la API. No se envían nombres, emails, tokens ni ubicación.
+
+Configurá las variables públicas de `.env.example` mediante los entornos EAS. Session Replay está apagado por defecto y sólo puede iniciar si `EXPO_PUBLIC_POSTHOG_SESSION_REPLAY_ENABLED=true` y existe consentimiento persistido; texto e imágenes se enmascaran y no se capturan logs, red ni toques.
+
+Los builds EAS cargan source maps, dSYM y mappings Android mediante el plugin Expo. Las credenciales `POSTHOG_CLI_*` son secretos de build y nunca deben llevar el prefijo `EXPO_PUBLIC_`.
+
+### Plan de eventos de producto
+
+Las interacciones de Expo se emiten mediante `trackProductEvent` en `libs/telemetry.ts`: `app_opened`, `sign_up_completed`, `onboarding_completed`, `tour_viewed`, `tour_started`, `spot_viewed`, `camera_opened`, `recognition_succeeded`, `recognition_failed`, `quiz_started`, `quiz_answered`, `quiz_completed`, `secret_found`, `level_up` y `ranking_viewed`.
+
+Cada evento incorpora `environment`, `platform`, `app_version` e `language`; los eventos de recorrido/cámara agregan sólo IDs internos de tour, spot, quiz o secreto. Las fotos, coordenadas, direcciones, respuestas y mensajes de error no se capturan. `tour_completed`, `spot_verified` y `achievement_unlocked` son hechos confirmados y los emite únicamente la API de Django mediante su outbox.
+
+`tour_abandoned` y `spot_reached` no se emiten todavía: la UX no define un abandono explícito ni dispone de una regla de llegada validada antes de la confirmación server-side. Instrumentarlos ahora produciría métricas engañosas.
+
+Para una actualización OTA, usá el wrapper obligatorio y pasale los argumentos normales de `eas update`:
+
+```bash
+pnpm update:posthog -- --channel production --message "Descripción"
+```
+
+El comando publica en `dist` y sólo si finaliza correctamente ejecuta `posthog-cli hermes upload`.
+
 ## Aprende más
 
 Para aprender más sobre el desarrollo de tu proyecto con Expo, revisa los siguientes recursos:

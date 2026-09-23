@@ -8,6 +8,7 @@ import { ThemedText } from "@/components/themed-text";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "@/hooks/use-location";
 import { api } from "@/libs/api";
+import { captureException, trackProductEvent } from "@/libs/telemetry";
 import {
   BarcodeScanningResult,
   CameraView,
@@ -79,6 +80,22 @@ export default function ScannerScreen() {
   const params = parsed.success
     ? parsed.data
     : { mode: "qr", from: "/(tabs)", secret_id: "", spot_id: "", tour_id: "" };
+
+  useEffect(() => {
+    if (isFocused && permission?.granted) {
+      trackProductEvent("camera_opened", {
+        camera_mode: params.mode,
+        tour_id: params.tour_id ? Number(params.tour_id) : undefined,
+        spot_id: params.spot_id ? Number(params.spot_id) : undefined,
+      });
+    }
+  }, [
+    isFocused,
+    params.mode,
+    params.spot_id,
+    params.tour_id,
+    permission?.granted,
+  ]);
 
   // Las pantallas de tabs permanecen montadas. Al volver a entrar, o al
   // cambiar de modo, no reutilizamos resultados, previews ni estados de una
@@ -174,6 +191,10 @@ export default function ScannerScreen() {
           parseInt(params.spot_id),
           formData,
         );
+        trackProductEvent("recognition_succeeded", {
+          tour_id: Number(params.tour_id),
+          spot_id: Number(params.spot_id),
+        });
 
         if (response.tour_completed) {
           urlToRedirect = `/(tabs)/tours/${params.tour_id}/complete?tour_id=${params.tour_id}&xp=${response.rewards.experience}&coins=${response.rewards.coins}&secrets=${response.total_secret_items}&trivias=${response.total_quizzes}&secrets_completed=${response.secret_items_completed}&trivias_completed=${response.quizzes_completed}&tour_name=${response.tour_name}`;
@@ -190,6 +211,11 @@ export default function ScannerScreen() {
         );
 
         if (response.success) {
+          trackProductEvent("secret_found", {
+            secret_id: Number(params.secret_id),
+            spot_id: Number(params.spot_id),
+            tour_id: params.tour_id ? Number(params.tour_id) : undefined,
+          });
           urlToRedirect = `/(tabs)/profile/secrets/${params.secret_id}/complete?secret_id=${params.secret_id}&coins=${response.coins}&xp=${response.xp}&name=${response.name}&description=${response.description}&image_url=${response.image}`;
         }
       }
@@ -200,8 +226,15 @@ export default function ScannerScreen() {
       setPhoto(null);
       router.navigate(urlToRedirect as any);
     } catch (error) {
+      if (params.mode === "spot") {
+        trackProductEvent("recognition_failed", {
+          tour_id: Number(params.tour_id),
+          spot_id: Number(params.spot_id),
+          failure_kind: "verification_request_failed",
+        });
+      }
       // Si hay un error en cualquiera de las dos requests
-      console.error("Error al completar:", error);
+      captureException(error, { operation: "scanner.complete_challenge" });
 
       // Un Alert queda por encima de la vista nativa de cámara y permite ver
       // el `detail` exacto que devuelve el backend para los errores 400.
@@ -254,9 +287,9 @@ export default function ScannerScreen() {
     try {
       setIsLoading(true);
       const redemption = await api.redeemQRCode(user.access, match[1]);
-      await checkAuthState?.().catch((error) =>
-        console.warn("No se pudieron actualizar los saldos del perfil", error),
-      );
+      await checkAuthState?.().catch((error) => {
+        captureException(error, { operation: "scanner.refresh_balance" });
+      });
       const unit = t(
         redemption.reward_type === "coins" ? "scanner.coins" : "scanner.gems",
       );
@@ -272,6 +305,7 @@ export default function ScannerScreen() {
         ],
       );
     } catch (error) {
+      captureException(error, { operation: "scanner.redeem_qr" });
       const message =
         error instanceof Error ? error.message : "Intentá nuevamente.";
       showAlert("No pudimos canjear el código", message, [
@@ -306,7 +340,7 @@ export default function ScannerScreen() {
         setPhoto(photo.uri);
       }
     } catch (error) {
-      console.error("Error al tomar la foto:", error);
+      captureException(error, { operation: "scanner.take_picture" });
       showAlert("Error", "No se pudo tomar la foto");
     } finally {
       setIsTakingPhoto(false);
@@ -337,7 +371,7 @@ export default function ScannerScreen() {
     } catch (error) {
       // La cámara conserva su tamaño predeterminado si el dispositivo no
       // expone los tamaños disponibles; la compresión JPEG sigue aplicando.
-      console.warn("No se pudo configurar la resolución de la foto:", error);
+      captureException(error, { operation: "scanner.configure_camera" });
     }
   };
 
