@@ -88,10 +88,5 @@
     "prettier": "^3.6.2",
     "typescript": "~6.0.3"
   },
-  "private": true,
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@posthog/cli"
-    ]
-  }
+  "private": true
 }
