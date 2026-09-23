@@ -6,6 +6,11 @@ import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import * as AppleAuthentication from "expo-apple-authentication";
 import React, { createContext, useEffect, useState } from "react";
 import Toast from "react-native-toast-message";
+import {
+  captureException,
+  identifyTelemetryUser,
+  resetTelemetryUser,
+} from "@/libs/telemetry";
 
 const googleWebClientId = process.env.EXPO_PUBLIC_WEB_CLIENT_ID?.trim();
 const googleIosClientId = process.env.EXPO_PUBLIC_IOS_CLIENT_ID?.trim();
@@ -106,6 +111,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     setUser(updatedUser);
     await storeSession(updatedUser);
+    identifyTelemetryUser(updatedUser.id);
 
     return updatedUser;
   };
@@ -119,8 +125,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else {
         await removeSession();
         setUser(null);
+        resetTelemetryUser();
       }
-    } catch {
+    } catch (error) {
+      captureException(error, { operation: "auth.restore_session" });
       Toast.show({
         type: "error",
         text1: "Error al verificar",
@@ -191,13 +199,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = async () => {
     try {
       setUser(null);
+      resetTelemetryUser();
       // Reseteamos la referencia del nivel anterior al cerrar sesión
       previousLevelIdRef.current = undefined;
       await removeSession();
     } catch (error) {
-      console.error("Error al cerrar sesión:", error);
+      captureException(error, { operation: "auth.logout" });
       // Incluso si hay error, limpiamos el estado local
       setUser(null);
+      resetTelemetryUser();
       previousLevelIdRef.current = undefined;
     }
   };
@@ -205,6 +215,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const clearDeletedAccountSession = async () => {
     const shouldRevokeGoogle = user?.account_deletion_auth_method === "google";
     setUser(null);
+    resetTelemetryUser();
     previousLevelIdRef.current = undefined;
     await removeSession();
 
@@ -212,11 +223,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         await GoogleSignin.revokeAccess();
       } catch (error) {
+        captureException(error, { operation: "auth.google_revoke" });
         console.warn("Could not revoke local Google access", error);
       }
       try {
         await GoogleSignin.signOut();
       } catch (error) {
+        captureException(error, { operation: "auth.google_signout" });
         console.warn("Could not close the local Google session", error);
       }
     }

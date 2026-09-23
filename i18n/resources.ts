@@ -1570,6 +1570,15 @@ export const UI_COPY = {
       "Há uma atualização pronta para instalar",
     ],
   },
+  telemetry: {
+    errorTitle: ["Algo salió mal", "Something went wrong", "Algo deu errado"],
+    errorMessage: [
+      "Ocurrió un error inesperado. Podés intentar nuevamente.",
+      "An unexpected error occurred. You can try again.",
+      "Ocorreu um erro inesperado. Você pode tentar novamente.",
+    ],
+    retry: ["Intentar nuevamente", "Try again", "Tentar novamente"],
+  },
   notFound: {
     title: [
       "Esta pantalla no existe.",

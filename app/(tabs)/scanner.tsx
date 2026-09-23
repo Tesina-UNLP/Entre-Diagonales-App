@@ -8,6 +8,7 @@ import { ThemedText } from "@/components/themed-text";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "@/hooks/use-location";
 import { api } from "@/libs/api";
+import { captureException } from "@/libs/telemetry";
 import {
   BarcodeScanningResult,
   CameraView,
@@ -181,7 +182,7 @@ export default function ScannerScreen() {
       router.navigate(urlToRedirect as any);
     } catch (error) {
       // Si hay un error en cualquiera de las dos requests
-      console.error("Error al completar:", error);
+      captureException(error, { operation: "scanner.complete_challenge" });
 
       // Un Alert queda por encima de la vista nativa de cámara y permite ver
       // el `detail` exacto que devuelve el backend para los errores 400.
@@ -234,9 +235,9 @@ export default function ScannerScreen() {
     try {
       setIsLoading(true);
       const redemption = await api.redeemQRCode(user.access, match[1]);
-      await checkAuthState?.().catch((error) =>
-        console.warn("No se pudieron actualizar los saldos del perfil", error),
-      );
+      await checkAuthState?.().catch((error) => {
+        captureException(error, { operation: "scanner.refresh_balance" });
+      });
       const unit = t(
         redemption.reward_type === "coins" ? "scanner.coins" : "scanner.gems",
       );
@@ -252,6 +253,7 @@ export default function ScannerScreen() {
         ],
       );
     } catch (error) {
+      captureException(error, { operation: "scanner.redeem_qr" });
       const message =
         error instanceof Error ? error.message : "Intentá nuevamente.";
       showAlert("No pudimos canjear el código", message, [
@@ -286,7 +288,7 @@ export default function ScannerScreen() {
         setPhoto(photo.uri);
       }
     } catch (error) {
-      console.error("Error al tomar la foto:", error);
+      captureException(error, { operation: "scanner.take_picture" });
       showAlert("Error", "No se pudo tomar la foto");
     } finally {
       setIsTakingPhoto(false);
@@ -317,7 +319,7 @@ export default function ScannerScreen() {
     } catch (error) {
       // La cámara conserva su tamaño predeterminado si el dispositivo no
       // expone los tamaños disponibles; la compresión JPEG sigue aplicando.
-      console.warn("No se pudo configurar la resolución de la foto:", error);
+      captureException(error, { operation: "scanner.configure_camera" });
     }
   };
 

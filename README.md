@@ -25,6 +25,22 @@ En la salida, encontrarás opciones para abrir la app en:
 
 Puedes comenzar a desarrollar editando los archivos dentro del directorio **app**. Este proyecto utiliza [ruteo basado en archivos](https://docs.expo.dev/router/introduction).
 
+## Observabilidad con PostHog
+
+PostHog captura excepciones JavaScript, rechazos no manejados, errores de render y crashes nativos. La app identifica únicamente con el `AppUser.id` interno y agrega los encabezados `X-POSTHOG-DISTINCT-ID` y `X-POSTHOG-SESSION-ID` a las llamadas de la API. No se envían nombres, emails, tokens ni ubicación.
+
+Configurá las variables públicas de `.env.example` mediante los entornos EAS. Session Replay está apagado por defecto y sólo puede iniciar si `EXPO_PUBLIC_POSTHOG_SESSION_REPLAY_ENABLED=true` y existe consentimiento persistido; texto e imágenes se enmascaran y no se capturan logs, red ni toques.
+
+Los builds EAS cargan source maps, dSYM y mappings Android mediante el plugin Expo. Las credenciales `POSTHOG_CLI_*` son secretos de build y nunca deben llevar el prefijo `EXPO_PUBLIC_`.
+
+Para una actualización OTA, usá el wrapper obligatorio y pasale los argumentos normales de `eas update`:
+
+```bash
+pnpm update:posthog -- --channel production --message "Descripción"
+```
+
+El comando publica en `dist` y sólo si finaliza correctamente ejecuta `posthog-cli hermes upload`.
+
 ## Aprende más
 
 Para aprender más sobre el desarrollo de tu proyecto con Expo, revisa los siguientes recursos:
