@@ -45,12 +45,9 @@ export default function ScannerScreen() {
 
   // Estado para indicar si está tomando la foto
   const [isTakingPhoto, setIsTakingPhoto] = useState(false);
-
-  // Limitar la resolución evita subir fotos tomadas a la resolución nativa
-  // completa (normalmente 12 MP o más). Dos megapíxeles mantienen suficiente
-  // detalle para la verificación visual y reducen de forma considerable el
-  // tiempo de subida y el consumo de datos.
-  const [pictureSize, setPictureSize] = useState<string | undefined>();
+  const [cameraVisible, setCameraVisible] = useState(false);
+  const [cameraReady, setCameraReady] = useState(false);
+  const [cameraError, setCameraError] = useState(false);
 
   // Estado para controlar el flash/linterna de la cámara
   const [flashEnabled, setFlashEnabled] = useState(false);
@@ -128,7 +125,7 @@ export default function ScannerScreen() {
     setIsTakingPhoto(false);
     setIsLoading(false);
     setFlashEnabled(false);
-    setPictureSize(undefined);
+    setCameraError(false);
   }, [
     isFocused,
     params.mode,
@@ -136,6 +133,17 @@ export default function ScannerScreen() {
     params.spot_id,
     params.tour_id,
   ]);
+
+  // iOS libera la sesión de captura de forma asíncrona. Al cambiar rápido de
+  // pantalla, esperar a que termine la transición antes de abrir otra sesión.
+  useEffect(() => {
+    setCameraVisible(false);
+    setCameraReady(false);
+    if (!isFocused || !permission?.granted) return;
+
+    const timer = setTimeout(() => setCameraVisible(true), 350);
+    return () => clearTimeout(timer);
+  }, [isFocused, permission?.granted, params.mode]);
 
   const handleBack = () => {
     if (router.canGoBack()) {
@@ -340,7 +348,7 @@ export default function ScannerScreen() {
   // Función para tomar una foto (para modos "spot" y "secret")
   const takePicture = async () => {
     // Verificamos que la cámara esté lista
-    if (!cameraRef.current) {
+    if (!cameraReady || !cameraRef.current) {
       showAlert("Error", "La cámara no está lista");
       return;
     }
@@ -364,34 +372,6 @@ export default function ScannerScreen() {
       showAlert("Error", "No se pudo tomar la foto");
     } finally {
       setIsTakingPhoto(false);
-    }
-  };
-
-  const configurePictureSize = async () => {
-    try {
-      const sizes = await cameraRef.current?.getAvailablePictureSizesAsync();
-      if (!sizes?.length) return;
-
-      const targetPixels = 2_200_000;
-      const candidates = sizes
-        .map((size) => {
-          const [width, height] = size.split("x").map(Number);
-          return { size, pixels: width * height };
-        })
-        .filter(({ pixels }) => Number.isFinite(pixels) && pixels > 0)
-        .sort((a, b) => b.pixels - a.pixels);
-
-      // Elegimos la mayor resolución que no supere el objetivo. Si el equipo
-      // no ofrece una menor, usamos la más pequeña disponible.
-      const selected =
-        candidates.find(({ pixels }) => pixels <= targetPixels) ??
-        candidates[candidates.length - 1];
-
-      setPictureSize(selected?.size);
-    } catch (error) {
-      // La cámara conserva su tamaño predeterminado si el dispositivo no
-      // expone los tamaños disponibles; la compresión JPEG sigue aplicando.
-      captureException(error, { operation: "scanner.configure_camera" });
     }
   };
 
@@ -425,6 +405,30 @@ export default function ScannerScreen() {
     return <View style={styles.container} />;
   }
 
+  if (cameraError || !cameraVisible) {
+    return (
+      <View style={styles.cameraStatus}>
+        <ThemedText style={styles.cameraStatusText}>
+          {cameraError ? "No se pudo iniciar la cámara." : "Abriendo cámara..."}
+        </ThemedText>
+        {cameraError && (
+          <TouchableOpacity
+            onPress={() => {
+              setCameraError(false);
+              setCameraReady(false);
+            }}
+            accessibilityRole="button"
+          >
+            <ThemedText style={styles.cameraStatusText}>Reintentar</ThemedText>
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity onPress={handleBack} accessibilityRole="button">
+          <ThemedText style={styles.cameraStatusText}>Volver</ThemedText>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   // MODO QR: canje de recompensas configuradas desde el backend.
   if (params.mode === "qr") {
     return (
@@ -432,7 +436,14 @@ export default function ScannerScreen() {
         <CameraView
           style={styles.camera}
           facing="back"
+          active={isFocused}
           enableTorch={flashEnabled}
+          onMountError={(error) => {
+            captureException(new Error(error.message), {
+              operation: "scanner.mount_camera",
+            });
+            setCameraError(true);
+          }}
           onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
           barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
         />
@@ -487,9 +498,15 @@ export default function ScannerScreen() {
             ref={cameraRef}
             style={styles.camera}
             facing="back"
+            active={isFocused}
             enableTorch={flashEnabled}
-            pictureSize={pictureSize}
-            onCameraReady={configurePictureSize}
+            onCameraReady={() => setCameraReady(true)}
+            onMountError={(error) => {
+              captureException(new Error(error.message), {
+                operation: "scanner.mount_camera",
+              });
+              setCameraError(true);
+            }}
           />
           <View
             collapsable={false}
@@ -527,7 +544,7 @@ export default function ScannerScreen() {
             <CaptureButton
               tutorialTargetId="tutorial-camera-capture"
               onPress={takePicture}
-              disabled={isTakingPhoto}
+              disabled={isTakingPhoto || !cameraReady}
             />
           </View>
         </>
@@ -543,6 +560,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "black",
+  },
+  cameraStatus: {
+    flex: 1,
+    backgroundColor: "black",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 24,
+  },
+  cameraStatusText: {
+    color: "white",
   },
   camera: {
     position: "absolute",
