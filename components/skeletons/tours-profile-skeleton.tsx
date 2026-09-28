@@ -9,7 +9,10 @@ export const ToursProfileSkeleton = () => {
     <View style={styles.container}>
       {/* Header skeleton */}
       <View style={styles.header}>
-        <Skeleton width={150} height={20} borderRadius={4} />
+        <View style={styles.headingGroup}>
+          <Skeleton width={70} height={20} borderRadius={4} />
+          <Skeleton width={140} height={14} borderRadius={4} />
+        </View>
         <Skeleton width={70} height={16} borderRadius={4} />
       </View>
 
@@ -17,6 +20,12 @@ export const ToursProfileSkeleton = () => {
       <View style={styles.tourList}>
         {[1, 2].map((item) => (
           <View key={item} style={styles.tourItem}>
+            <Skeleton
+              width={12}
+              height={12}
+              borderRadius={6}
+              style={styles.routeMarker}
+            />
             <View style={styles.tourItemContent}>
               {/* Título skeleton */}
               <Skeleton width={180} height={18} borderRadius={4} />
@@ -29,9 +38,7 @@ export const ToursProfileSkeleton = () => {
             {/* Progress skeleton */}
             <View style={styles.progressRow}>
               <Skeleton width={35} height={18} borderRadius={4} />
-              <View style={styles.progressTrack}>
-                <Skeleton width="60%" height={10} borderRadius={999} />
-              </View>
+              <Skeleton width={56} height={5} borderRadius={999} />
             </View>
           </View>
         ))}
@@ -42,8 +49,7 @@ export const ToursProfileSkeleton = () => {
 
 const styles = StyleSheet.create({
   container: {
-    gap: 10,
-    marginBottom: 20,
+    gap: 14,
   },
   header: {
     flexDirection: "row",
@@ -51,16 +57,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   tourList: {
-    gap: 10,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: TOKENS.tabBarInactive + "65",
   },
   tourItem: {
-    backgroundColor: TOKENS.cardBackground,
-    paddingHorizontal: 21,
-    paddingVertical: 17,
-    borderRadius: 16,
+    minHeight: 104,
+    paddingLeft: 24,
+    paddingRight: 2,
+    paddingVertical: 18,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: TOKENS.tabBarInactive + "65",
+    position: "relative",
   },
   tourItemContent: {
     flex: 1,
@@ -71,10 +81,10 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     gap: 2,
   },
-  progressTrack: {
-    width: 56,
-    height: 10,
-    borderRadius: 999,
-    overflow: "hidden",
+  routeMarker: {
+    position: "absolute",
+    left: 0,
+    top: 20,
   },
+  headingGroup: { gap: 4 },
 });

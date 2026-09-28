@@ -85,35 +85,20 @@ export default function ProfileScreen() {
 
   return (
     <ThemedBackground style={styles.container} scrollable>
-      {/* Cada sección del perfil aparece con un efecto fade-in escalonado */}
-      <FadeInView delay={100}>
+      <FadeInView duration={450} style={styles.content}>
         <HeaderProfile />
-      </FadeInView>
-
-      <FadeInView delay={200}>
         <StatsProfile />
-      </FadeInView>
-
-      {/* Pasamos los datos y el estado de loading a cada componente hijo */}
-      <FadeInView delay={300}>
         <SecretsProfile
           data={profileData.secrets}
           loading={profileData.loading}
         />
-      </FadeInView>
-
-      <FadeInView delay={400}>
         <ToursProfile data={profileData.tours} loading={profileData.loading} />
-      </FadeInView>
-
-      <FadeInView delay={500}>
         <AchievementsProfile
           data={profileData.achievements}
           loading={profileData.loading}
         />
+        <View style={styles.bottomSpacer} />
       </FadeInView>
-
-      <View style={styles.bottomSpacer}></View>
     </ThemedBackground>
   );
 }
@@ -121,7 +106,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    gap: 20,
   },
+  content: { gap: 34 },
   bottomSpacer: { height: 120 },
 });

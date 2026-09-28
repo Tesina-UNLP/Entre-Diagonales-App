@@ -24,16 +24,17 @@ const HeaderHome = () => {
           style={styles.avatar}
         />
         <View style={styles.headerLeftTextContainer}>
-          <ThemedText type="defaultSemiBold">
+          <ThemedText type="subtitle" style={styles.userName}>
             {user?.display_name || user?.username}
           </ThemedText>
-          <View style={styles.headerLocation}>
-            <View style={styles.headerIconContainer}>
-              <GemIcon height={30} width={30} />
+          <View style={styles.resources}>
+            <View style={styles.resourceItem}>
+              <GemIcon height={22} width={22} />
               <ThemedText type="default">{user?.gems}</ThemedText>
             </View>
-            <View style={styles.headerIconContainer}>
-              <CoinIcon />
+            <View style={styles.resourceDivider} />
+            <View style={styles.resourceItem}>
+              <CoinIcon height={22} width={22} />
               <ThemedText type="default">{user?.coins}</ThemedText>
             </View>
           </View>
@@ -43,6 +44,9 @@ const HeaderHome = () => {
       <View style={styles.headerRight}>
         <TouchableOpacity
           onPress={() => router.navigate("/(tabs)/profile/settings")}
+          style={styles.settingsButton}
+          accessibilityRole="button"
+          accessibilityLabel="Configuración"
         >
           <Ionicons
             name="settings-outline"
@@ -60,12 +64,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 20,
   },
-  headerLocation: {
+  resources: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 9,
+    gap: 10,
   },
   headerLeft: {
     flexDirection: "row",
@@ -73,32 +76,38 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   headerLeftTextContainer: {
-    gap: 4,
+    gap: 5,
     alignItems: "flex-start",
   },
   headerRight: {
     alignItems: "flex-end",
     gap: 4,
   },
-  headerIcon: {
-    width: 35,
-    height: 35,
+  userName: {
+    fontSize: 20,
   },
-  headerIconContainer: {
+  resourceItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 3,
-    backgroundColor: TOKENS.primary + "60",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 12,
+    gap: 4,
+  },
+  resourceDivider: {
+    width: 1,
+    height: 16,
+    backgroundColor: TOKENS.tabBarInactive + "70",
+  },
+  settingsButton: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
   },
   avatar: {
-    width: 64,
-    height: 64,
+    width: 62,
+    height: 62,
     borderRadius: 50,
-    borderWidth: 1,
-    borderColor: TOKENS.badgeActive,
+    borderWidth: 2,
+    borderColor: TOKENS.navActive,
   },
 });
 
