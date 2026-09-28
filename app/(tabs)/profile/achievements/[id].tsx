@@ -47,6 +47,7 @@ const SecretScreen = () => {
             name={params.name}
             description={params.description}
             imageUrl={params.image_url}
+            kind="achievement"
           />
 
           {/* Botón para compartir el logro */}

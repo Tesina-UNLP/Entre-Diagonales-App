@@ -1,6 +1,7 @@
+import { SecretParallaxObject } from "@/components/secret-parallax-object";
 import { ThemedText } from "@/components/themed-text";
 import React from "react";
-import { Image, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 /**
  * Componente que muestra la información del secreto
@@ -14,17 +15,18 @@ interface SecretInfoProps {
   name: string;
   description: string;
   imageUrl: string;
+  kind?: "secret" | "achievement";
 }
 
 export const SecretInfo = ({
   name,
   description,
   imageUrl,
+  kind = "secret",
 }: SecretInfoProps) => {
   return (
     <View style={styles.imageContainer}>
-      {/* Imagen del secreto */}
-      <Image source={{ uri: imageUrl }} style={styles.image} />
+      <SecretParallaxObject imageUrl={imageUrl} name={name} kind={kind} />
 
       {/* Título del secreto */}
       <ThemedText type="title" style={styles.centeredText}>
@@ -40,10 +42,6 @@ export const SecretInfo = ({
 };
 
 const styles = StyleSheet.create({
-  image: {
-    aspectRatio: 1, // Mantiene la imagen cuadrada
-    width: "80%",
-  },
   centeredText: {
     textAlign: "center", // Centra el texto dentro del componente
   },
@@ -51,6 +49,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "flex-start", // Comienza desde arriba, sin espacio extra
-    gap: 10,
+    gap: 12,
   },
 });

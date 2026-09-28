@@ -1566,6 +1566,16 @@ export const UI_COPY = {
     ],
   },
   achievements: {
+    interactiveObject: [
+      "Logro interactivo: {{name}}",
+      "Interactive achievement: {{name}}",
+      "Conquista interativa: {{name}}",
+    ],
+    interactionAccessibilityHint: [
+      "Arrastrá en cualquier dirección para inclinar el logro",
+      "Drag in any direction to tilt the achievement",
+      "Arraste em qualquer direção para inclinar a conquista",
+    ],
     levelUp: ["¡Subiste de Nivel!", "You leveled up!", "Você subiu de nível!"],
     levelUpHint: [
       "¡Sigue explorando para alcanzar el siguiente nivel!",
@@ -1603,6 +1613,16 @@ export const UI_COPY = {
     ],
   },
   secrets: {
+    interactiveObject: [
+      "Objeto secreto interactivo: {{name}}",
+      "Interactive secret item: {{name}}",
+      "Objeto secreto interativo: {{name}}",
+    ],
+    interactionAccessibilityHint: [
+      "Arrastrá en cualquier dirección para inclinar el objeto",
+      "Drag in any direction to tilt the object",
+      "Arraste em qualquer direção para inclinar o objeto",
+    ],
     discovered: [
       "Haz descubierto un nuevo objeto secreto!",
       "You discovered a new secret item!",

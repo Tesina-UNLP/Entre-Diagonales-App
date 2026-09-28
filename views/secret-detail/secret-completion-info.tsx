@@ -1,7 +1,8 @@
+import { SecretParallaxObject } from "@/components/secret-parallax-object";
 import { ThemedText } from "@/components/themed-text";
 import { TourRewards } from "@/components/tour-completion";
 import React from "react";
-import { Image, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 /**
  * Componente que muestra la información de celebración cuando se descubre un secreto
@@ -38,8 +39,7 @@ export const SecretCompletionInfo = ({
       {/* Recompensas obtenidas (XP y monedas) */}
       <TourRewards xp={xp} coins={coins} />
 
-      {/* Imagen del secreto descubierto */}
-      <Image source={{ uri: imageUrl }} style={styles.image} />
+      <SecretParallaxObject imageUrl={imageUrl} name={name} />
 
       {/* Nombre del secreto */}
       <ThemedText type="title" style={styles.centeredText}>
@@ -55,10 +55,6 @@ export const SecretCompletionInfo = ({
 };
 
 const styles = StyleSheet.create({
-  image: {
-    aspectRatio: 1, // Mantiene la imagen cuadrada
-    width: "80%",
-  },
   centeredText: {
     textAlign: "center", // Centra el texto dentro del componente
   },
@@ -66,6 +62,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "flex-start", // Comienza desde arriba, sin espacio extra
-    gap: 10,
+    gap: 12,
   },
 });
