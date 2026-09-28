@@ -6,6 +6,7 @@ import { MIN_LOCATION_CHANGE_METERS } from "@/constants/mapping";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "@/hooks/use-location";
 import { api } from "@/libs/api";
+import { trackProductEvent } from "@/libs/telemetry";
 import {
   getDistanceInMeters,
   getInformationBetweenStopsLocal,
@@ -16,7 +17,7 @@ import NextStop from "@/views/tour-details/next-stop";
 import Progression from "@/views/tour-details/progression";
 import RewardCard from "@/views/tour-details/reward-card";
 import SpotList from "@/views/tour-details/spot-list";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useIsFocused, useLocalSearchParams } from "expo-router";
 import React, {
   useCallback,
   useEffect,
@@ -32,12 +33,15 @@ import {
   View,
 } from "react-native";
 import { useTranslation } from "react-i18next";
+import { useTutorial } from "@/contexts/tutorial";
 
 const RouteDetails = () => {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const idStr = useMemo(() => (Array.isArray(id) ? id?.[0] : id), [id]);
   const { user } = useAuth();
+  const isFocused = useIsFocused();
+  const { triggerTutorial, ready: tutorialReady } = useTutorial();
   const [routeInfo, setRouteInfo] = useState<TourInfoApiResponse | null>(null);
   const [currentSpot, setCurrentSpot] = useState<StopApiResponse | null>(null);
   const [completedSpots, setCompletedSpots] = useState<StopApiResponse[]>([]);
@@ -48,7 +52,9 @@ const RouteDetails = () => {
     StopDistanceInfo[]
   >([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const scrollRef = useRef<ScrollView>(null);
   const { location, isLoading } = useLocation();
+  const hasTrackedViewRef = useRef(false);
 
   // guardamos la última ubicación usada para calcular distancias
   const lastLocationForDistancesRef = useRef<{
@@ -61,8 +67,9 @@ const RouteDetails = () => {
   }, [routeInfo?.completed_at]);
 
   const handleStartTour = async () => {
-    if (user) {
-      await api.startTour(user.access, parseInt(idStr));
+    if (user && idStr) {
+      await api.startTour(user.access, parseInt(idStr, 10));
+      trackProductEvent("tour_started", { tour_id: Number(idStr) });
       await handleGetRoute();
     }
   };
@@ -74,6 +81,10 @@ const RouteDetails = () => {
 
       if (response) {
         setRouteInfo(response);
+        if (!hasTrackedViewRef.current) {
+          trackProductEvent("tour_viewed", { tour_id: response.id });
+          hasTrackedViewRef.current = true;
+        }
 
         const spotsQuantityCompleted = Number(response.progress);
         const completed = response.spots.slice(0, spotsQuantityCompleted);
@@ -100,6 +111,12 @@ const RouteDetails = () => {
   useEffect(() => {
     handleGetRoute();
   }, [handleGetRoute]);
+
+  useEffect(() => {
+    if (!loading && isFocused && routeInfo?.started && tutorialReady) {
+      void triggerTutorial("tour", false, { scrollRef });
+    }
+  }, [isFocused, loading, routeInfo?.started, triggerTutorial, tutorialReady]);
 
   // Cálculo de distancias/tiempos con Haversine + velocidad caminando
   useEffect(() => {
@@ -163,6 +180,7 @@ const RouteDetails = () => {
             onBack={() => router.navigate("/(tabs)/tours")}
           />
           <ScrollView
+            ref={scrollRef}
             style={styles.container}
             refreshControl={
               <RefreshControl

@@ -7,10 +7,12 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
+      "environment": "development",
       "channel": "development"
     },
     "preview": {
       "distribution": "internal",
+      "environment": "preview",
       // apk for android preview builds
       "channel": "preview",
       "android": {
@@ -19,6 +21,7 @@
     },
     "production": {
       "autoIncrement": true,
+      "environment": "production",
       "channel": "production"
     }
   },

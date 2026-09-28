@@ -5,6 +5,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useRef } from "react";
 import { Animated, Image, StyleSheet, View } from "react-native";
+import { TourTarget } from "@wrack/react-native-tour-guide";
 
 const ProgressionLevel = () => {
   const { user } = useAuth();
@@ -30,7 +31,10 @@ const ProgressionLevel = () => {
   }, [percent, animatedWidth]);
 
   return (
-    <View style={styles.levelProgressionContainer}>
+    <TourTarget
+      id="tutorial-home-progress"
+      style={styles.levelProgressionContainer}
+    >
       <Image
         source={{ uri: user?.level?.image_url }}
         style={styles.levelImage}
@@ -93,7 +97,7 @@ const ProgressionLevel = () => {
           </ThemedText>
         </View>
       </View>
-    </View>
+    </TourTarget>
   );
 };
 

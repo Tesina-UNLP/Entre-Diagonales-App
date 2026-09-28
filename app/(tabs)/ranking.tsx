@@ -9,8 +9,9 @@ import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
 import { RankingItem, useRanking } from "@/hooks/use-ranking";
 import { api } from "@/libs/api";
+import { trackProductEvent } from "@/libs/telemetry";
 import { Octicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -37,6 +38,7 @@ export default function RankingScreen() {
 
   // Estado para controlar qué tab está activo
   const [activeTab, setActiveTab] = useState<RankingTab>("global");
+  const hasTrackedViewRef = useRef(false);
 
   // Determinar qué nivel pasar al hook basado en el tab activo
   // Si es "global", pasamos undefined para obtener el ranking global
@@ -54,6 +56,13 @@ export default function RankingScreen() {
     loadMore,
     refresh,
   } = useRanking(token, levelFilter);
+
+  useEffect(() => {
+    if (!loading && !hasTrackedViewRef.current) {
+      trackProductEvent("ranking_viewed", { ranking_scope: activeTab });
+      hasTrackedViewRef.current = true;
+    }
+  }, [activeTab, loading]);
 
   const reportName = (userId: number, name: string) => {
     showAlert("Reportar nombre", `¿Por qué querés reportar a ${name}?`, [

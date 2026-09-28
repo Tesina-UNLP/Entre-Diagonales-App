@@ -1,4 +1,157 @@
 export const UI_COPY = {
+  tutorial: {
+    actions: {
+      next: ["Siguiente", "Next", "Próximo"],
+      back: ["Atrás", "Back", "Voltar"],
+      skip: ["Omitir", "Skip", "Pular"],
+      done: ["Listo", "Done", "Concluído"],
+      restart: [
+        "Ver tutorial nuevamente",
+        "View tutorial again",
+        "Ver tutorial novamente",
+      ],
+    },
+    help: {
+      title: [
+        "¿Querés repasar cómo jugar?",
+        "Want to review how to play?",
+        "Quer revisar como jogar?",
+      ],
+      description: [
+        "Podés volver a ver el tutorial y las guías de cada función cuando quieras.",
+        "You can replay the tutorial and each feature guide whenever you want.",
+        "Você pode rever o tutorial e os guias de cada função quando quiser.",
+      ],
+    },
+    home: {
+      welcomeTitle: [
+        "Tu nivel de exploración",
+        "Your exploration level",
+        "Seu nível de exploração",
+      ],
+      welcomeDescription: [
+        "Acá podés seguir tus puntos de exploración y avanzar hacia el próximo nivel.",
+        "Here you can follow your exploration points and advance to the next level.",
+        "Aqui você acompanha seus pontos de exploração e avança para o próximo nível.",
+      ],
+      toursTitle: [
+        "Elegí un recorrido",
+        "Choose a tour",
+        "Escolha um percurso",
+      ],
+      toursDescription: [
+        "Tocá un recorrido para conocer sus paradas y comenzar la aventura.",
+        "Tap a tour to see its stops and start your adventure.",
+        "Toque em um percurso para conhecer as paradas e começar a aventura.",
+      ],
+      scannerTitle: [
+        "Escaneá y verificá",
+        "Scan and verify",
+        "Escaneie e verifique",
+      ],
+      scannerDescription: [
+        "Usá este acceso para escanear códigos o verificar una parada con la cámara.",
+        "Use this shortcut to scan codes or verify a stop with your camera.",
+        "Use este atalho para escanear códigos ou verificar uma parada com a câmera.",
+      ],
+    },
+    tour: {
+      completeTitle: [
+        "Completá esta parada",
+        "Complete this stop",
+        "Conclua esta parada",
+      ],
+      completeDescription: [
+        "Cuando estés cerca del lugar, usá este botón para abrir la cámara y verificarlo.",
+        "When you are near the place, use this button to open the camera and verify it.",
+        "Quando estiver perto do local, use este botão para abrir a câmera e verificá-lo.",
+      ],
+      startTitle: [
+        "Comenzá el recorrido",
+        "Start the tour",
+        "Comece o percurso",
+      ],
+      startDescription: [
+        "Cuando estés listo, iniciá la aventura para desbloquear la próxima parada.",
+        "When you are ready, start the adventure to unlock the next stop.",
+        "Quando estiver pronto, inicie a aventura para desbloquear a próxima parada.",
+      ],
+      mapTitle: [
+        "Orientate en el mapa",
+        "Find your way on the map",
+        "Oriente-se no mapa",
+      ],
+      mapDescription: [
+        "Consultá el mapa para ubicar las paradas y planificar tu camino.",
+        "Open the map to locate stops and plan your route.",
+        "Consulte o mapa para localizar as paradas e planejar seu caminho.",
+      ],
+      secretTitle: [
+        "Encontrá un objeto secreto",
+        "Find a secret item",
+        "Encontre um item secreto",
+      ],
+      secretDescription: [
+        "Cuando una parada tenga un objeto secreto disponible, tocá esta tarjeta para abrir la cámara y encontrarlo.",
+        "When a stop has a secret item available, tap this card to open the camera and find it.",
+        "Quando uma parada tiver um item secreto disponível, toque neste cartão para abrir a câmera e encontrá-lo.",
+      ],
+    },
+    camera: {
+      frameTitle: ["Encuadrá el lugar", "Frame the place", "Enquadre o local"],
+      frameDescription: [
+        "Mantené el monumento dentro de esta guía y apuntá de frente.",
+        "Keep the landmark inside this guide and point straight at it.",
+        "Mantenha o monumento dentro deste guia e aponte de frente.",
+      ],
+      captureTitle: ["Tomá la foto", "Take the photo", "Tire a foto"],
+      captureDescription: [
+        "Cuando esté bien encuadrado, tocá este botón para verificar la parada.",
+        "When it is well framed, tap here to verify the stop.",
+        "Quando estiver bem enquadrado, toque aqui para verificar a parada.",
+      ],
+    },
+    quiz: {
+      cardTitle: [
+        "Una trivia te espera",
+        "A trivia awaits",
+        "Uma curiosidade espera por você",
+      ],
+      cardDescription: [
+        "Respondé trivias para demostrar lo que aprendiste y obtener recompensas.",
+        "Answer trivia to show what you learned and earn rewards.",
+        "Responda às curiosidades para mostrar o que aprendeu e ganhar recompensas.",
+      ],
+      submitTitle: [
+        "Confirmá tu respuesta",
+        "Confirm your answer",
+        "Confirme sua resposta",
+      ],
+      submitDescription: [
+        "Elegí una opción y usá este botón para revisar tu respuesta.",
+        "Choose an option and use this button to check your answer.",
+        "Escolha uma opção e use este botão para conferir sua resposta.",
+      ],
+    },
+    rewards: {
+      summaryTitle: ["Tus recompensas", "Your rewards", "Suas recompensas"],
+      summaryDescription: [
+        "Al completar un recorrido ganás experiencia y monedas.",
+        "Completing a tour earns you experience and coins.",
+        "Ao concluir um percurso você ganha experiência e moedas.",
+      ],
+      actionsTitle: [
+        "Seguí explorando",
+        "Keep exploring",
+        "Continue explorando",
+      ],
+      actionsDescription: [
+        "Revisá tu progreso o compartí el logro antes de elegir tu próxima aventura.",
+        "Review your progress or share your achievement before choosing your next adventure.",
+        "Veja seu progresso ou compartilhe a conquista antes de escolher a próxima aventura.",
+      ],
+    },
+  },
   common: {
     back: ["Volver", "Back", "Retornar"],
     cancel: ["Cancelar", "Cancel", "Cancelar"],
@@ -426,6 +579,21 @@ export const UI_COPY = {
       "Selecciona el personaje que más te guste para acompañarte en tu viaje de aprendizaje.",
       "Choose the character you'd most like to join you on your learning journey.",
       "Selecione o personagem que você mais gosta para acompanhá-lo em sua jornada de aprendizado.",
+    ],
+    companionTitle: [
+      "¿Quién te acompaña?",
+      "Who will join you?",
+      "Quem vai acompanhar você?",
+    ],
+    companionDescription: [
+      "Deslizá y elegí tu personaje",
+      "Swipe and choose your character",
+      "Deslize e escolha seu personagem",
+    ],
+    characterLoadError: [
+      "No pudimos cargar los personajes.",
+      "We couldn't load the characters.",
+      "Não foi possível carregar os personagens.",
     ],
     start: ["Iniciar aventuras", "Start adventuring", "Comece aventuras"],
     notificationTitle: [
@@ -904,6 +1072,37 @@ export const UI_COPY = {
       "Trivias respondidas",
       "Trivia answered",
       "Curiosidades respondidas",
+    ],
+    progressLabel: ["Tu avance", "Your progress", "Seu progresso"],
+    routesSubtitle: [
+      "Tu recorrido por la ciudad",
+      "Your journey through the city",
+      "Seu percurso pela cidade",
+    ],
+    foundSecretsCount_one: [
+      "{{count}} encontrado",
+      "{{count}} found",
+      "{{count}} encontrado",
+    ],
+    foundSecretsCount_other: [
+      "{{count}} encontrados",
+      "{{count}} found",
+      "{{count}} encontrados",
+    ],
+    earnedAchievementsCount_one: [
+      "{{count}} obtenido",
+      "{{count}} earned",
+      "{{count}} conquistado",
+    ],
+    earnedAchievementsCount_other: [
+      "{{count}} obtenidos",
+      "{{count}} earned",
+      "{{count}} conquistados",
+    ],
+    noStartedTours: [
+      "Todavía no empezaste ninguna ruta",
+      "You haven't started a tour yet",
+      "Você ainda não começou nenhuma rota",
     ],
     maxLevel: ["Nivel máximo", "Maximum level", "Nível máximo"],
     undiscovered: ["Sin descubrir", "Undiscovered", "não descoberto"],
@@ -1398,6 +1597,16 @@ export const UI_COPY = {
     ],
   },
   achievements: {
+    interactiveObject: [
+      "Logro interactivo: {{name}}",
+      "Interactive achievement: {{name}}",
+      "Conquista interativa: {{name}}",
+    ],
+    interactionAccessibilityHint: [
+      "Arrastrá en cualquier dirección para inclinar el logro",
+      "Drag in any direction to tilt the achievement",
+      "Arraste em qualquer direção para inclinar a conquista",
+    ],
     levelUp: ["¡Subiste de Nivel!", "You leveled up!", "Você subiu de nível!"],
     levelUpHint: [
       "¡Sigue explorando para alcanzar el siguiente nivel!",
@@ -1435,6 +1644,16 @@ export const UI_COPY = {
     ],
   },
   secrets: {
+    interactiveObject: [
+      "Objeto secreto interactivo: {{name}}",
+      "Interactive secret item: {{name}}",
+      "Objeto secreto interativo: {{name}}",
+    ],
+    interactionAccessibilityHint: [
+      "Arrastrá en cualquier dirección para inclinar el objeto",
+      "Drag in any direction to tilt the object",
+      "Arraste em qualquer direção para inclinar o objeto",
+    ],
     discovered: [
       "Haz descubierto un nuevo objeto secreto!",
       "You discovered a new secret item!",
@@ -1569,6 +1788,15 @@ export const UI_COPY = {
       "An update is ready to install",
       "Há uma atualização pronta para instalar",
     ],
+  },
+  telemetry: {
+    errorTitle: ["Algo salió mal", "Something went wrong", "Algo deu errado"],
+    errorMessage: [
+      "Ocurrió un error inesperado. Podés intentar nuevamente.",
+      "An unexpected error occurred. You can try again.",
+      "Ocorreu um erro inesperado. Você pode tentar novamente.",
+    ],
+    retry: ["Intentar nuevamente", "Try again", "Tentar novamente"],
   },
   notFound: {
     title: [

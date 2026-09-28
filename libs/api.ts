@@ -17,15 +17,28 @@ import {
   TourListFilters,
   UserAchievementApiResponse,
 } from "@/types";
+import { getPostHogCorrelationHeaders } from "@/libs/telemetry";
 
 const apiBaseUrl =
   process.env.EXPO_PUBLIC_API_URL ||
   "https://started-circles-tim-optimization.trycloudflare.com/api";
 
+async function posthogFetch(
+  input: Parameters<typeof globalThis.fetch>[0],
+  init: RequestInit = {},
+) {
+  const headers = new Headers(init.headers);
+  Object.entries(getPostHogCorrelationHeaders()).forEach(([name, value]) => {
+    headers.set(name, value);
+  });
+
+  return globalThis.fetch(input, { ...init, headers });
+}
+
 export const api = {
   // login
   login: async (email: string, password: string) => {
-    const response = await fetch(`${apiBaseUrl}/auth/login/`, {
+    const response = await posthogFetch(`${apiBaseUrl}/auth/login/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -46,7 +59,7 @@ export const api = {
   },
 
   loginWithGoogle: async (token: string) => {
-    const response = await fetch(`${apiBaseUrl}/auth/google/`, {
+    const response = await posthogFetch(`${apiBaseUrl}/auth/google/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -71,7 +84,7 @@ export const api = {
     appleUser: string,
     fullName?: string | null,
   ) => {
-    const response = await fetch(`${apiBaseUrl}/auth/apple/`, {
+    const response = await posthogFetch(`${apiBaseUrl}/auth/apple/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -97,7 +110,7 @@ export const api = {
     password: string,
     confirmPassword: string,
   ) => {
-    const response = await fetch(`${apiBaseUrl}/auth/register/`, {
+    const response = await posthogFetch(`${apiBaseUrl}/auth/register/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -125,14 +138,17 @@ export const api = {
     token: string,
     payload: AccountDeletionPayload,
   ): Promise<AccountDeletionResponse> => {
-    const response = await fetch(`${apiBaseUrl}/profile/account-deletion/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+    const response = await posthogFetch(
+      `${apiBaseUrl}/profile/account-deletion/`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
       },
-      body: JSON.stringify(payload),
-    });
+    );
     const data = await response.json().catch(() => null);
     if (!response.ok) {
       const message =
@@ -151,7 +167,7 @@ export const api = {
     character_id: number,
     notificationToken: string,
   ) => {
-    const response = await fetch(`${apiBaseUrl}/onboarding/`, {
+    const response = await posthogFetch(`${apiBaseUrl}/onboarding/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -176,7 +192,7 @@ export const api = {
   },
 
   forgotPassword: async (email: string) => {
-    const response = await fetch(`${apiBaseUrl}/auth/password-reset/`, {
+    const response = await posthogFetch(`${apiBaseUrl}/auth/password-reset/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -197,7 +213,7 @@ export const api = {
   },
 
   getProfile: async (token: string) => {
-    const response = await fetch(`${apiBaseUrl}/profile/`, {
+    const response = await posthogFetch(`${apiBaseUrl}/profile/`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -218,7 +234,7 @@ export const api = {
 
   //  get characters
   getCharacters: async (token: string): Promise<CharacterApiResponse[]> => {
-    const response = await fetch(`${apiBaseUrl}/characters/`, {
+    const response = await posthogFetch(`${apiBaseUrl}/characters/`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -238,7 +254,7 @@ export const api = {
   },
 
   getLevels: async (token: string): Promise<LevelApiResponse[]> => {
-    const response = await fetch(`${apiBaseUrl}/levels/`, {
+    const response = await posthogFetch(`${apiBaseUrl}/levels/`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -264,12 +280,13 @@ export const api = {
     const url = new URL(`${apiBaseUrl}/tours/`);
     url.searchParams.set("page", String(filters.page ?? 1));
     if (filters.tag) url.searchParams.set("tag", filters.tag);
-    if (filters.completion) url.searchParams.set("completion", filters.completion);
+    if (filters.completion)
+      url.searchParams.set("completion", filters.completion);
     if (filters.maxSpots != null) {
       url.searchParams.set("max_spots", String(filters.maxSpots));
     }
 
-    const response = await fetch(url.toString(), {
+    const response = await posthogFetch(url.toString(), {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -304,7 +321,7 @@ export const api = {
   },
 
   getRoute: async (token: string, id: number): Promise<TourInfoApiResponse> => {
-    const response = await fetch(`${apiBaseUrl}/tours/${id}/`, {
+    const response = await posthogFetch(`${apiBaseUrl}/tours/${id}/`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -325,7 +342,7 @@ export const api = {
   },
 
   startTour: async (token: string, id: number) => {
-    const response = await fetch(`${apiBaseUrl}/tours/start/`, {
+    const response = await posthogFetch(`${apiBaseUrl}/tours/start/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -343,7 +360,7 @@ export const api = {
     item_id: number,
     photo: FormData,
   ) => {
-    const response = await fetch(
+    const response = await posthogFetch(
       `${apiBaseUrl}/tours/${tour_id}/spots/${item_id}/complete`,
       {
         method: "POST",
@@ -373,7 +390,7 @@ export const api = {
     spot_id: number,
     photo: FormData,
   ) => {
-    const response = await fetch(
+    const response = await posthogFetch(
       `${apiBaseUrl}/spots/${spot_id}/secret_items/${item_id}/`,
       {
         method: "POST",
@@ -401,7 +418,7 @@ export const api = {
     token: string,
     id: number,
   ): Promise<IndividualSpotApiResponse> => {
-    const response = await fetch(`${apiBaseUrl}/spots/${id}/`, {
+    const response = await posthogFetch(`${apiBaseUrl}/spots/${id}/`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -422,7 +439,7 @@ export const api = {
   },
 
   getQuiz: async (token: string, id: number): Promise<QuizApiResponse> => {
-    const response = await fetch(`${apiBaseUrl}/quizzes/${id}/`, {
+    const response = await posthogFetch(`${apiBaseUrl}/quizzes/${id}/`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -442,7 +459,7 @@ export const api = {
   },
 
   solveQuiz: async (token: string, id: number, answer_id: number) => {
-    const response = await fetch(
+    const response = await posthogFetch(
       `${apiBaseUrl}/quizzes/${id}/answer/${answer_id}/`,
       {
         method: "POST",
@@ -469,14 +486,17 @@ export const api = {
     formData: FeedbackApiData,
     tour_id: number,
   ) => {
-    const response = await fetch(`${apiBaseUrl}/tours/${tour_id}/feedback/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+    const response = await posthogFetch(
+      `${apiBaseUrl}/tours/${tour_id}/feedback/`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData),
       },
-      body: JSON.stringify(formData),
-    });
+    );
     const data = await response.json().catch(() => null);
     if (!response.ok) {
       const message =
@@ -491,7 +511,7 @@ export const api = {
   },
 
   getSecrets: async (token: string): Promise<SecretItemApiResponse[]> => {
-    const response = await fetch(`${apiBaseUrl}/secret_items/`, {
+    const response = await posthogFetch(`${apiBaseUrl}/secret_items/`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -515,14 +535,17 @@ export const api = {
     notifications: boolean,
     expoToken: string,
   ) => {
-    const response = await fetch(`${apiBaseUrl}/profile/notifications/`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+    const response = await posthogFetch(
+      `${apiBaseUrl}/profile/notifications/`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ notifications, notification_token: expoToken }),
       },
-      body: JSON.stringify({ notifications, notification_token: expoToken }),
-    });
+    );
     const data = await response.json().catch(() => null);
     if (!response.ok) {
       const message =
@@ -537,14 +560,17 @@ export const api = {
   },
 
   updateNotificationToken: async (token: string, expoToken: string) => {
-    const response = await fetch(`${apiBaseUrl}/profile/notifications/`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+    const response = await posthogFetch(
+      `${apiBaseUrl}/profile/notifications/`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ notification_token: expoToken }),
       },
-      body: JSON.stringify({ notification_token: expoToken }),
-    });
+    );
     const data = await response.json().catch(() => null);
     if (!response.ok) {
       const message =
@@ -559,7 +585,7 @@ export const api = {
   },
 
   updateActivity: async (token: string, notificationToken?: string) => {
-    const response = await fetch(`${apiBaseUrl}/profile/activity/`, {
+    const response = await posthogFetch(`${apiBaseUrl}/profile/activity/`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -581,7 +607,7 @@ export const api = {
   getAchievements: async (
     token: string,
   ): Promise<UserAchievementApiResponse[]> => {
-    const response = await fetch(`${apiBaseUrl}/achievements/`, {
+    const response = await posthogFetch(`${apiBaseUrl}/achievements/`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -601,12 +627,15 @@ export const api = {
   },
 
   claimAchievement: async (token: string, id: number) => {
-    const response = await fetch(`${apiBaseUrl}/achievements/redeem/${id}/`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
+    const response = await posthogFetch(
+      `${apiBaseUrl}/achievements/redeem/${id}/`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       },
-    });
+    );
     const data = await response.json().catch(() => null);
     if (!response.ok) {
       const message =
@@ -629,7 +658,7 @@ export const api = {
       character: number;
     },
   ) => {
-    const response = await fetch(`${apiBaseUrl}/profile/`, {
+    const response = await posthogFetch(`${apiBaseUrl}/profile/`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -656,7 +685,7 @@ export const api = {
     newPassword: string,
     confirmPassword: string,
   ) => {
-    const response = await fetch(`${apiBaseUrl}/auth/change-password/`, {
+    const response = await posthogFetch(`${apiBaseUrl}/auth/change-password/`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -694,7 +723,7 @@ export const api = {
     }
     url.searchParams.set("page", String(page));
 
-    const response = await fetch(url.toString(), {
+    const response = await posthogFetch(url.toString(), {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -721,7 +750,7 @@ export const api = {
     userId: number,
     reason: "offensive" | "impersonation" | "other",
   ): Promise<{ message: string }> => {
-    const response = await fetch(
+    const response = await posthogFetch(
       `${apiBaseUrl}/ranking/${userId}/report-name/`,
       {
         method: "POST",
@@ -745,10 +774,13 @@ export const api = {
   },
 
   blockRankingUser: async (token: string, userId: number) => {
-    const response = await fetch(`${apiBaseUrl}/ranking/${userId}/block/`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await posthogFetch(
+      `${apiBaseUrl}/ranking/${userId}/block/`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
     const data = await response.json().catch(() => null);
     if (!response.ok) {
       throw new Error(data?.detail || "No pudimos bloquear al usuario.");
@@ -757,10 +789,13 @@ export const api = {
   },
 
   unblockRankingUser: async (token: string, userId: number) => {
-    const response = await fetch(`${apiBaseUrl}/ranking/${userId}/block/`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await posthogFetch(
+      `${apiBaseUrl}/ranking/${userId}/block/`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
     if (!response.ok) {
       const data = await response.json().catch(() => null);
       throw new Error(data?.detail || "No pudimos desbloquear al usuario.");
@@ -770,7 +805,7 @@ export const api = {
   getBlockedRankingUsers: async (
     token: string,
   ): Promise<BlockedRankingUserApiResponse[]> => {
-    const response = await fetch(`${apiBaseUrl}/ranking/blocked/`, {
+    const response = await posthogFetch(`${apiBaseUrl}/ranking/blocked/`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await response.json().catch(() => null);
@@ -786,7 +821,7 @@ export const api = {
     token: string,
     guid: string,
   ): Promise<QRCodeRedemptionApiResponse> => {
-    const response = await fetch(`${apiBaseUrl}/qr/redeem/`, {
+    const response = await posthogFetch(`${apiBaseUrl}/qr/redeem/`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -811,12 +846,15 @@ export const api = {
     token: string,
     id: number,
   ): Promise<PowerUp5050ApiResponse> => {
-    const response = await fetch(`${apiBaseUrl}/quizzes/${id}/powerup/5050/`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
+    const response = await posthogFetch(
+      `${apiBaseUrl}/quizzes/${id}/powerup/5050/`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       },
-    });
+    );
     const data = await response.json().catch(() => null);
     if (!response.ok) {
       const message =

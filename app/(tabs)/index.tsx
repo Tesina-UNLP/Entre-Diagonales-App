@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useMarkInteractive } from "@/hooks/use-mark-interactive";
 import { useMessageOfTheDay } from "@/hooks/use-message-of-the-day";
 import { useWeather } from "@/hooks/use-weather";
+import { useTutorial } from "@/contexts/tutorial";
 import { api } from "@/libs/api";
 import { TourApiResponse } from "@/types";
 import ActiveTour from "@/views/home/active-tour";
@@ -25,6 +26,7 @@ export default function HomeScreen() {
   const { user, checkAuthState } = useAuth();
   const { fetchWeather, isLoading: isWeatherLoading } = useWeather();
   const { refreshMessage } = useMessageOfTheDay();
+  const { triggerTutorial, ready: tutorialReady } = useTutorial();
   const [routes, setRoutes] = useState<TourApiResponse[]>([]);
   const [currentRoute, setCurrentRoute] = useState<TourApiResponse | null>(
     null,
@@ -84,6 +86,12 @@ export default function HomeScreen() {
   useEffect(() => {
     handleGetRoutes();
   }, [handleGetRoutes]);
+
+  useEffect(() => {
+    if (!loading && !isWeatherLoading && tutorialReady) {
+      void triggerTutorial("home");
+    }
+  }, [isWeatherLoading, loading, triggerTutorial, tutorialReady]);
 
   return (
     <ThemedBackground

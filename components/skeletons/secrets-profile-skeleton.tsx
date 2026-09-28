@@ -1,6 +1,7 @@
 import { Skeleton } from "@/components/skeleton";
 import React from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
+import { TOKENS } from "@/constants/colors";
 
 // Skeleton para la sección de secretos del perfil
 export const SecretsProfileSkeleton = () => {
@@ -8,7 +9,10 @@ export const SecretsProfileSkeleton = () => {
     <View style={styles.container}>
       {/* Header skeleton */}
       <View style={styles.header}>
-        <Skeleton width={180} height={20} borderRadius={4} />
+        <View style={styles.headingGroup}>
+          <Skeleton width={90} height={20} borderRadius={4} />
+          <Skeleton width={70} height={14} borderRadius={4} />
+        </View>
         <Skeleton width={70} height={16} borderRadius={4} />
       </View>
 
@@ -20,7 +24,8 @@ export const SecretsProfileSkeleton = () => {
       >
         {[1, 2, 3, 4].map((item) => (
           <View key={item} style={styles.secretItem}>
-            <Skeleton width={90} height={90} borderRadius={8} />
+            <Skeleton width={86} height={86} borderRadius={8} />
+            <Skeleton width={72} height={12} borderRadius={4} />
           </View>
         ))}
       </ScrollView>
@@ -30,8 +35,7 @@ export const SecretsProfileSkeleton = () => {
 
 const styles = StyleSheet.create({
   container: {
-    gap: 10,
-    marginBottom: 20,
+    gap: 14,
   },
   header: {
     flexDirection: "row",
@@ -40,8 +44,14 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     gap: 10,
+    paddingBottom: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: TOKENS.tabBarInactive + "65",
   },
   secretItem: {
-    borderRadius: 8,
+    width: 96,
+    alignItems: "center",
+    gap: 4,
   },
+  headingGroup: { gap: 4 },
 });

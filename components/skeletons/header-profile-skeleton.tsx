@@ -8,21 +8,22 @@ export const HeaderProfileSkeleton = () => {
     <View style={styles.header}>
       <View style={styles.headerLeft}>
         {/* Avatar skeleton */}
-        <Skeleton width={64} height={64} borderRadius={32} />
+        <Skeleton width={62} height={62} borderRadius={31} />
         <View style={styles.headerLeftTextContainer}>
           {/* Nombre skeleton */}
-          <Skeleton width={120} height={18} borderRadius={4} />
+          <Skeleton width={132} height={20} borderRadius={4} />
           {/* Gems y coins skeleton */}
           <View style={styles.headerLocation}>
-            <Skeleton width={60} height={16} borderRadius={4} />
-            <Skeleton width={60} height={16} borderRadius={4} />
+            <Skeleton width={48} height={18} borderRadius={4} />
+            <View style={styles.resourceDivider} />
+            <Skeleton width={48} height={18} borderRadius={4} />
           </View>
         </View>
       </View>
 
       {/* Botón de configuración skeleton */}
       <View style={styles.headerRight}>
-        <Skeleton width={24} height={24} borderRadius={12} />
+        <Skeleton width={30} height={30} borderRadius={15} />
       </View>
     </View>
   );
@@ -33,7 +34,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 20,
   },
   headerLeft: {
     flexDirection: "row",
@@ -52,5 +52,10 @@ const styles = StyleSheet.create({
   headerRight: {
     alignItems: "flex-end",
     gap: 4,
+  },
+  resourceDivider: {
+    width: 1,
+    height: 16,
+    backgroundColor: "rgba(140, 188, 176, 0.35)",
   },
 });

@@ -5,6 +5,7 @@ import { FontAwesome } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
 import { StyleSheet, View } from "react-native";
+import { TourTarget } from "@wrack/react-native-tour-guide";
 
 /**
  * QuizActions Component
@@ -36,23 +37,25 @@ export const QuizActions: React.FC<QuizActionsProps> = ({
   return (
     <View style={styles.container}>
       {/* Botón para enviar la respuesta */}
-      <ThemedButton
-        variant="primary"
-        size="small"
-        onPress={onCheckAnswer}
-        style={styles.button}
-        disabled={isSubmitDisabled}
-      >
-        <FontAwesome name="send" size={16} color={TOKENS.text} />
-        <ThemedText
-          type="defaultSemiBold"
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          style={{ flexShrink: 1 }}
+      <TourTarget id="tutorial-quiz-submit" style={styles.button}>
+        <ThemedButton
+          variant="primary"
+          size="small"
+          onPress={onCheckAnswer}
+          style={styles.button}
+          disabled={isSubmitDisabled}
         >
-          Enviar mi respuesta
-        </ThemedText>
-      </ThemedButton>
+          <FontAwesome name="send" size={16} color={TOKENS.text} />
+          <ThemedText
+            type="defaultSemiBold"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={{ flexShrink: 1 }}
+          >
+            Enviar mi respuesta
+          </ThemedText>
+        </ThemedButton>
+      </TourTarget>
 
       {/* Botón para volver al inicio - solo visible después de responder */}
       <ThemedButton
