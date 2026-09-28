@@ -11,7 +11,7 @@ const StatsProfile = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
   // Creamos un valor animado que comenzará en 0
-  const animatedWidth = useRef(new Animated.Value(0)).current;
+  const animatedProgress = useRef(new Animated.Value(0)).current;
 
   // Calculamos el porcentaje de progreso (usando valores por defecto si user no existe)
   const xp = user?.experience || 0;
@@ -23,15 +23,18 @@ const StatsProfile = () => {
   useEffect(() => {
     // Solo animamos si hay un usuario (percent será 0 si no hay user)
     // Reiniciamos la animación a 0
-    animatedWidth.setValue(0);
+    animatedProgress.setValue(0);
 
     // Creamos la animación que va de 0 al porcentaje final
-    Animated.timing(animatedWidth, {
-      toValue: percent, // Valor final: el porcentaje calculado
-      duration: 1000, // Duración de la animación en milisegundos (1 segundo)
-      useNativeDriver: false, // No podemos usar native driver para width
-    }).start(); // Iniciamos la animación
-  }, [percent, animatedWidth]);
+    const animation = Animated.timing(animatedProgress, {
+      toValue: percent / 100,
+      duration: 450,
+      useNativeDriver: true,
+    });
+    animation.start();
+
+    return () => animation.stop();
+  }, [percent, animatedProgress]);
 
   // Ahora verificamos si hay usuario DESPUÉS de todos los hooks
   if (!user) {
@@ -56,15 +59,10 @@ const StatsProfile = () => {
       <View style={styles.levelProgressionContainer}>
         <View style={styles.levelProgressBarContainer}>
           <Animated.View
-            style={{
-              width: animatedWidth.interpolate({
-                inputRange: [0, 100],
-                outputRange: ["0%", "100%"],
-              }),
-              height: "100%",
-              backgroundColor: TOKENS.navActive,
-              borderRadius: 999,
-            }}
+            style={[
+              styles.levelProgressBar,
+              { transform: [{ scaleX: animatedProgress }] },
+            ]}
           />
         </View>
 
@@ -90,23 +88,32 @@ const StatsProfile = () => {
         <StatItem
           icon="map-outline"
           value={user?.total_tours_completed || 0}
-          label="Recorridos completados"
+          label={toTwoLineLabel(t("profile.completedTours"))}
         />
         <View style={styles.statDivider} />
         <StatItem
           icon="help-circle-outline"
           value={user?.total_quizzes_completed || 0}
-          label="Trivias respondidas"
+          label={toTwoLineLabel(t("profile.answeredTrivia"))}
         />
         <View style={styles.statDivider} />
         <StatItem
           icon="location-outline"
           value={user?.total_secret_items_completed || 0}
-          label="Secretos encontrados"
+          label={toTwoLineLabel(t("profile.discoveredSecrets"))}
         />
       </View>
     </View>
   );
+};
+
+const toTwoLineLabel = (label: string) => {
+  const words = label.trim().split(/\s+/);
+  const breakAt = Math.ceil(words.length / 2);
+  const firstLine = words.slice(0, breakAt).join(" ");
+  const secondLine = words.slice(breakAt).join(" ");
+
+  return `${firstLine}\n${secondLine || " "}`;
 };
 
 const StatItem = ({
@@ -125,7 +132,13 @@ const StatItem = ({
         {value}
       </ThemedText>
     </View>
-    <ThemedText type="muted" style={styles.statLabel}>
+    <ThemedText
+      type="muted"
+      style={styles.statLabel}
+      translateContent={false}
+      numberOfLines={2}
+      accessibilityLabel={label.replace("\n", " ").trim()}
+    >
       {label}
     </ThemedText>
   </View>
@@ -160,6 +173,13 @@ const styles = StyleSheet.create({
     position: "relative",
     backgroundColor: TOKENS.tabBarInactive + "55",
   },
+  levelProgressBar: {
+    width: "100%",
+    height: "100%",
+    backgroundColor: TOKENS.navActive,
+    borderRadius: 999,
+    transformOrigin: "left center",
+  },
   levelProgressionContainer: {
     flexDirection: "column",
     gap: 6,
@@ -184,12 +204,14 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
     paddingHorizontal: 8,
+    alignItems: "center",
     justifyContent: "center",
     gap: 3,
   },
   statValueRow: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     gap: 6,
   },
   statValue: {
@@ -198,7 +220,9 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 11,
     lineHeight: 14,
+    minHeight: 28,
     width: "100%",
+    textAlign: "center",
     flexShrink: 1,
   },
   statDivider: {

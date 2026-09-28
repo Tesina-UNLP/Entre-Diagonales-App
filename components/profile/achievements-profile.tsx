@@ -2,7 +2,7 @@ import { AchievementsProfileSkeleton } from "@/components/skeletons/achievements
 import { UserAchievementApiResponse } from "@/types";
 import { TOKENS } from "@/constants/colors";
 import { Link, router } from "expo-router";
-import React from "react";
+import React, { useMemo } from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
@@ -17,8 +17,9 @@ interface AchievementsProfileProps {
 
 const AchievementsProfile = ({ data, loading }: AchievementsProfileProps) => {
   const { t } = useTranslation();
-  const completedAchievements = data.filter(
-    (achievement) => achievement.is_completed,
+  const completedAchievements = useMemo(
+    () => data.filter((achievement) => achievement.is_completed),
+    [data],
   );
 
   // Si aún está cargando, mostramos el skeleton
@@ -46,7 +47,7 @@ const AchievementsProfile = ({ data, loading }: AchievementsProfileProps) => {
         <FlatList
           data={completedAchievements}
           horizontal
-          ItemSeparatorComponent={() => <View style={{ width: 10 }} />}
+          ItemSeparatorComponent={ListSeparator}
           contentContainerStyle={styles.collectionShelf}
           showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => (
@@ -89,6 +90,8 @@ const AchievementsProfile = ({ data, loading }: AchievementsProfileProps) => {
   );
 };
 
+const ListSeparator = () => <View style={styles.listSeparator} />;
+
 const styles = StyleSheet.create({
   container: {
     gap: 14,
@@ -115,6 +118,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 11,
   },
+  listSeparator: { width: 10 },
   emptyContainer: {
     minHeight: 72,
     justifyContent: "center",

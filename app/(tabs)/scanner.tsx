@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "@/hooks/use-location";
 import { api } from "@/libs/api";
 import { captureException, trackProductEvent } from "@/libs/telemetry";
+import { TOKENS } from "@/constants/colors";
 import {
   BarcodeScanningResult,
   CameraView,
@@ -18,7 +19,6 @@ import { File } from "expo-file-system";
 import { useIsFocused, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Toast from "react-native-toast-message";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
@@ -26,6 +26,24 @@ import { TourTarget } from "@wrack/react-native-tour-guide";
 import { useTutorial } from "@/contexts/tutorial";
 import { useLocalizedAlert } from "@/hooks/use-localized-alert";
 import { useLanguage } from "@/hooks/use-language";
+import {
+  AppState,
+  type AppStateStatus,
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
+
+const ParamsSchema = z.object({
+  mode: z.enum(["spot", "secret", "qr"]).optional().default("qr"),
+  from: z.string().optional().default("/(tabs)"),
+  secret_id: z.string().optional().default(""),
+  spot_id: z.string().optional().default(""),
+  tour_id: z.string().optional().default(""),
+});
+
+const QR_SCANNER_SETTINGS = { barcodeTypes: ["qr" as const] };
 
 export default function ScannerScreen() {
   const { t } = useTranslation();
@@ -34,6 +52,11 @@ export default function ScannerScreen() {
   const { user, checkAuthState } = useAuth();
   const { triggerTutorial, ready: tutorialReady } = useTutorial();
   const isFocused = useIsFocused();
+  const [appState, setAppState] = useState<AppStateStatus>(
+    AppState.currentState,
+  );
+  const [cameraSessionActive, setCameraSessionActive] = useState(false);
+  const [cameraMountError, setCameraMountError] = useState<string | null>(null);
   // Camera permissions hook - nos ayuda a manejar los permisos de la cámara
   const [permission, requestPermission] = useCameraPermissions();
 
@@ -61,28 +84,43 @@ export default function ScannerScreen() {
   // Referencia a la cámara para poder tomar fotos
   const cameraRef = useRef<CameraView>(null);
 
-  const {
-    location,
-    isLoading: isLocationLoading,
-    error: locationError,
-  } = useLocation();
-
   // Router para navegar después de escanear
   const router = useRouter();
-
-  const ParamsSchema = z.object({
-    mode: z.enum(["spot", "secret", "qr"]).optional().default("qr"),
-    from: z.string().optional().default("/(tabs)"),
-    secret_id: z.string().optional().default(""),
-    spot_id: z.string().optional().default(""),
-    tour_id: z.string().optional().default(""),
-  });
 
   // get query params
   const parsed = ParamsSchema.safeParse(useLocalSearchParams());
   const params = parsed.success
     ? parsed.data
     : { mode: "qr", from: "/(tabs)", secret_id: "", spot_id: "", tour_id: "" };
+
+  const {
+    location,
+    isLoading: isLocationLoading,
+    error: locationError,
+  } = useLocation({
+    enabled: isFocused && appState === "active" && params.mode === "spot",
+  });
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", setAppState);
+    return () => subscription.remove();
+  }, []);
+
+  // Esperar el final de la transición evita iniciar AVCaptureSession mientras
+  // la navegación todavía está componiendo la pantalla. En iOS conservamos la
+  // vista montada y pausamos la sesión con `active` al perder foco/foreground.
+  useEffect(() => {
+    if (!isFocused || appState !== "active" || !permission?.granted) {
+      setCameraSessionActive(false);
+      return;
+    }
+
+    const activationTimer = setTimeout(() => {
+      setCameraSessionActive(true);
+    }, 250);
+
+    return () => clearTimeout(activationTimer);
+  }, [appState, isFocused, permission?.granted]);
 
   useEffect(() => {
     if (isFocused && permission?.granted) {
@@ -129,6 +167,7 @@ export default function ScannerScreen() {
     setIsLoading(false);
     setFlashEnabled(false);
     setPictureSize(undefined);
+    setCameraMountError(null);
   }, [
     isFocused,
     params.mode,
@@ -144,6 +183,12 @@ export default function ScannerScreen() {
     }
 
     router.replace(params.from as any);
+  };
+
+  const handleCameraMountError = ({ message }: { message: string }) => {
+    const error = new Error(message || "La cámara no pudo iniciarse");
+    captureException(error, { operation: "scanner.mount_camera" });
+    setCameraMountError(error.message);
   };
 
   const handleComplete = async () => {
@@ -418,24 +463,47 @@ export default function ScannerScreen() {
     return <CameraPermissionView onRequestPermission={requestPermission} />;
   }
 
-  // Las pantallas de tabs permanecen montadas al navegar. Desmontar la vista
-  // nativa cuando pierde foco evita reutilizar una sesión de cámara inválida
-  // al entrar y salir varias veces, especialmente en iOS.
-  if (!isFocused) {
+  // Android no implementa `active`: allí sí desmontamos al perder foco. iOS
+  // conserva una sola vista nativa y pausa la sesión para evitar ciclos rápidos
+  // de mount/unmount que pueden dejar AVCaptureSession sin preview.
+  if (!isFocused && Platform.OS !== "ios") {
     return <View style={styles.container} />;
   }
+
+  if (cameraMountError && isFocused) {
+    return (
+      <View style={styles.cameraErrorContainer}>
+        <ThemedText type="subtitle" style={styles.cameraErrorTitle}>
+          No pudimos iniciar la cámara
+        </ThemedText>
+        <ThemedText style={styles.cameraErrorMessage}>
+          {cameraMountError}
+        </ThemedText>
+        <TouchableOpacity style={styles.cameraErrorButton} onPress={handleBack}>
+          <ThemedText type="defaultSemiBold">Volver</ThemedText>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  const shouldRenderCamera = Platform.OS === "ios" || cameraSessionActive;
 
   // MODO QR: canje de recompensas configuradas desde el backend.
   if (params.mode === "qr") {
     return (
       <View style={styles.container}>
-        <CameraView
-          style={styles.camera}
-          facing="back"
-          enableTorch={flashEnabled}
-          onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
-          barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
-        />
+        {shouldRenderCamera ? (
+          <CameraView
+            key="qr-camera"
+            style={styles.camera}
+            facing="back"
+            active={cameraSessionActive}
+            enableTorch={flashEnabled}
+            onMountError={handleCameraMountError}
+            onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
+            barcodeScannerSettings={QR_SCANNER_SETTINGS}
+          />
+        ) : null}
         <View
           collapsable={false}
           pointerEvents="box-none"
@@ -483,14 +551,19 @@ export default function ScannerScreen() {
       ) : (
         // Mostrar cámara para tomar fotos
         <>
-          <CameraView
-            ref={cameraRef}
-            style={styles.camera}
-            facing="back"
-            enableTorch={flashEnabled}
-            pictureSize={pictureSize}
-            onCameraReady={configurePictureSize}
-          />
+          {shouldRenderCamera ? (
+            <CameraView
+              key={`${params.mode}-camera`}
+              ref={cameraRef}
+              style={styles.camera}
+              facing="back"
+              active={cameraSessionActive}
+              enableTorch={flashEnabled}
+              pictureSize={pictureSize}
+              onCameraReady={configurePictureSize}
+              onMountError={handleCameraMountError}
+            />
+          ) : null}
           <View
             collapsable={false}
             pointerEvents="box-none"
@@ -632,5 +705,29 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  cameraErrorContainer: {
+    flex: 1,
+    backgroundColor: TOKENS.background,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 28,
+    gap: 16,
+  },
+  cameraErrorTitle: {
+    textAlign: "center",
+  },
+  cameraErrorMessage: {
+    color: TOKENS.muted,
+    textAlign: "center",
+  },
+  cameraErrorButton: {
+    minWidth: 140,
+    minHeight: 48,
+    borderRadius: 12,
+    backgroundColor: TOKENS.primary,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
   },
 });

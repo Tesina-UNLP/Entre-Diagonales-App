@@ -2,7 +2,7 @@ import { SecretsProfileSkeleton } from "@/components/skeletons/secrets-profile-s
 import { SecretItemApiResponse } from "@/types";
 import { TOKENS } from "@/constants/colors";
 import { Link, router } from "expo-router";
-import React from "react";
+import React, { useMemo } from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
@@ -17,7 +17,10 @@ interface SecretsProfileProps {
 
 const SecretsProfile = ({ data, loading }: SecretsProfileProps) => {
   const { t } = useTranslation();
-  const obtainedSecrets = data.filter((secret) => secret.obtained);
+  const obtainedSecrets = useMemo(
+    () => data.filter((secret) => secret.obtained),
+    [data],
+  );
 
   // Si aún está cargando, mostramos el skeleton
   if (loading) {
@@ -45,7 +48,7 @@ const SecretsProfile = ({ data, loading }: SecretsProfileProps) => {
           showsHorizontalScrollIndicator={false}
           data={obtainedSecrets}
           // gap between item
-          ItemSeparatorComponent={() => <View style={{ width: 10 }} />}
+          ItemSeparatorComponent={ListSeparator}
           contentContainerStyle={styles.collectionShelf}
           horizontal
           renderItem={({ item }) => (
@@ -84,6 +87,8 @@ const SecretsProfile = ({ data, loading }: SecretsProfileProps) => {
   );
 };
 
+const ListSeparator = () => <View style={styles.listSeparator} />;
+
 const styles = StyleSheet.create({
   container: {
     gap: 14,
@@ -110,6 +115,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 11,
   },
+  listSeparator: { width: 10 },
   emptyContainer: {
     minHeight: 72,
     justifyContent: "center",

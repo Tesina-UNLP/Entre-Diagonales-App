@@ -65,6 +65,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
+          tabBarAccessibilityLabel: t("navigation.home"),
           tabBarIcon: ({ color }) => <HomeIcon color={String(color)} />,
           tabBarLabel: ({ focused, color }) =>
             focused ? (
@@ -75,6 +76,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="tours"
         options={{
+          tabBarAccessibilityLabel: t("navigation.routes"),
           tabBarLabel: ({ focused, color }) =>
             focused ? (
               <Text style={{ color }}>{t("navigation.routes")}</Text>
@@ -85,6 +87,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="scanner"
         options={{
+          tabBarAccessibilityLabel: "Abrir escáner QR",
           tabBarLabel: () => null,
           tabBarIcon: () => null,
           tabBarButton: (props) => (
@@ -95,6 +98,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="ranking"
         options={{
+          tabBarAccessibilityLabel: t("navigation.ranking"),
           tabBarLabel: ({ focused, color }) =>
             focused ? (
               <Text style={{ color }}>{t("navigation.ranking")}</Text>
@@ -105,6 +109,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
+          tabBarAccessibilityLabel: t("navigation.profile"),
           tabBarLabel: ({ focused, color }) =>
             focused ? (
               <Text style={{ color }}>{t("navigation.profile")}</Text>

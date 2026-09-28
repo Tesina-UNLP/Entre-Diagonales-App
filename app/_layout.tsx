@@ -30,7 +30,7 @@ import {
   syncSessionReplayConsent,
   trackProductEvent,
 } from "@/libs/telemetry";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 Observe.configure({
   integrations: {
@@ -51,6 +51,17 @@ function AppContent() {
   const colorScheme = useColorScheme();
   const { language } = useLanguage();
   const { t } = useTranslation();
+  const navigationTheme = useMemo(() => {
+    const baseTheme = colorScheme === "dark" ? DarkTheme : DefaultTheme;
+    return {
+      ...baseTheme,
+      colors: {
+        ...baseTheme.colors,
+        background: TOKENS.background,
+        card: TOKENS.background,
+      },
+    };
+  }, [colorScheme]);
 
   useEffect(() => {
     setTelemetryLanguage(language);
@@ -105,7 +116,7 @@ function AppContent() {
   };
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={navigationTheme}>
       <TutorialProvider>
         <FontScaleProvider>
           <HapticsProvider>

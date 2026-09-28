@@ -14,7 +14,11 @@ type Props = {
   focused?: boolean;
 };
 
-export function CustomTabBarButton({ children }: Props) {
+export function CustomTabBarButton({
+  children,
+  accessibilityState,
+  accessibilityRole,
+}: Props) {
   const { theme } = useThemeColor();
   const router = useRouter();
 
@@ -38,6 +42,10 @@ export function CustomTabBarButton({ children }: Props) {
       style={styles.container}
       onPress={openQrScanner}
       activeOpacity={0.9}
+      accessibilityRole={accessibilityRole ?? "button"}
+      accessibilityState={accessibilityState}
+      accessibilityLabel="Abrir escáner QR"
+      testID="tab-scanner"
     >
       <View style={styles.button}>
         <ScannerIcon color={theme.text} />

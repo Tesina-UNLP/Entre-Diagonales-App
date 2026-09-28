@@ -3,7 +3,7 @@ import { TOKENS } from "@/constants/colors";
 import { TourApiResponse } from "@/types";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Link, router } from "expo-router";
-import React from "react";
+import React, { useMemo } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "../themed-text";
 import { useLanguage } from "@/hooks/use-language";
@@ -16,9 +16,14 @@ interface ToursProfileProps {
   loading: boolean;
 }
 
+const MAX_PROFILE_TOURS = 4;
+
 const ToursProfile = ({ data, loading }: ToursProfileProps) => {
   const { t } = useTranslation();
-  const startedTours = data.filter((tour) => tour.started);
+  const startedTours = useMemo(
+    () => data.filter((tour) => tour.started).slice(0, MAX_PROFILE_TOURS),
+    [data],
+  );
 
   // Si aún está cargando, mostramos el skeleton
   if (loading) {
@@ -77,10 +82,13 @@ const TourItem = ({
 }) => {
   const { locale } = useLanguage();
   const { t } = useTranslation();
-  const progressNumber = (
-    (Number(tour.progress) / (tour.spots.length || 0)) *
-    100
-  ).toFixed(0);
+  const totalSpots = tour.spots?.length ?? 0;
+  const completedSpots = Number(tour.progress);
+  const progress =
+    totalSpots > 0 && Number.isFinite(completedSpots)
+      ? Math.min(Math.max((completedSpots / totalSpots) * 100, 0), 100)
+      : 0;
+  const progressNumber = progress.toFixed(0);
   return (
     <TouchableOpacity
       style={styles.tourItem}
@@ -113,7 +121,7 @@ const TourItem = ({
         <View style={styles.tourItemStopsContainer}>
           <Ionicons name="footsteps" size={14} color={TOKENS.badgeActive} />
           <ThemedText type="defaultSemiBold" style={styles.tourItemStops}>
-            {tour.spots.length} paradas
+            {totalSpots} paradas
           </ThemedText>
         </View>
       </View>
@@ -148,8 +156,7 @@ const styles = StyleSheet.create({
   container: {
     gap: 14,
   },
-  tourList: {
-  },
+  tourList: {},
   header: {
     flexDirection: "row",
     justifyContent: "space-between",

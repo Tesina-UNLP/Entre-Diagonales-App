@@ -16,9 +16,27 @@ import {
   UserAchievementApiResponse,
 } from "@/types";
 
+const PROFILE_TOURS_LIMIT = 4;
+
+const getStartedToursPreview = async (accessToken: string) => {
+  const startedTours: TourApiResponse[] = [];
+  let page = 1;
+  let hasNextPage = true;
+
+  while (hasNextPage && startedTours.length < PROFILE_TOURS_LIMIT) {
+    const response = await api.getRoutesPage(accessToken, { page });
+    startedTours.push(...response.results.filter((tour) => tour.started));
+    hasNextPage = Boolean(response.next);
+    page += 1;
+  }
+
+  return startedTours.slice(0, PROFILE_TOURS_LIMIT);
+};
+
 export default function ProfileScreen() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const accessToken = user?.access;
 
   // Estado centralizado para todos los datos del perfil
   const [profileData, setProfileData] = useState<{
@@ -35,9 +53,11 @@ export default function ProfileScreen() {
 
   // Cargar todos los datos en paralelo cuando el componente se monta
   useEffect(() => {
+    let cancelled = false;
+
     const loadProfileData = async () => {
       // Si no hay usuario, no cargar nada
-      if (!user) {
+      if (!accessToken) {
         setProfileData((prev) => ({ ...prev, loading: false }));
         return;
       }
@@ -49,10 +69,12 @@ export default function ProfileScreen() {
         // Esto significa que las 3 peticiones se ejecutan al mismo tiempo
         // en lugar de esperar que cada una termine antes de iniciar la siguiente
         const [secretsData, toursData, achievementsData] = await Promise.all([
-          api.getSecrets(user.access),
-          api.getRoutes(user.access),
-          api.getAchievements(user.access),
+          api.getSecrets(accessToken),
+          getStartedToursPreview(accessToken),
+          api.getAchievements(accessToken),
         ]);
+
+        if (cancelled) return;
 
         // Una vez que todas las peticiones terminan, actualizamos el estado
         setProfileData({
@@ -62,6 +84,7 @@ export default function ProfileScreen() {
           loading: false,
         });
       } catch (error) {
+        if (cancelled) return;
         console.error("Error loading profile data:", error);
         // En caso de error, marcamos como no loading para mostrar estados vacíos
         setProfileData((prev) => ({ ...prev, loading: false }));
@@ -69,7 +92,10 @@ export default function ProfileScreen() {
     };
 
     loadProfileData();
-  }, [user]); // Solo se ejecuta cuando cambia el usuario
+    return () => {
+      cancelled = true;
+    };
+  }, [accessToken]);
 
   // Resetear el stack de navegación cuando el usuario vuelve a esta pantalla
   // Optimizado para solo ejecutarse cuando realmente venimos de una sub-pantalla
