@@ -4,10 +4,12 @@ import { useAuth } from "@/hooks/use-auth";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useRef } from "react";
 import { Animated, Image, StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { ThemedText } from "../themed-text";
 
 const StatsProfile = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   // Creamos un valor animado que comenzará en 0
   const animatedWidth = useRef(new Animated.Value(0)).current;
 
@@ -38,19 +40,19 @@ const StatsProfile = () => {
 
   return (
     <View style={styles.statsProfileContainer}>
-      {/* Level informacion */}
-      <View style={styles.statsProfileItem}>
+      <View style={styles.levelHeader}>
         <Image
           source={{ uri: user?.level?.image_url }}
-          style={{ width: 48, height: 48 }}
+          style={styles.levelImage}
         />
-        <View style={{ flex: 1, gap: 2 }}>
-          <ThemedText type="defaultSemiBold">{user?.experience} XP</ThemedText>
-          <ThemedText type="default">{user?.level?.name}</ThemedText>
+        <View style={styles.levelCopy}>
+          <ThemedText type="title" style={styles.experienceText}>
+            {user?.experience} XP
+          </ThemedText>
+          <ThemedText type="bigMuted">{user?.level?.name}</ThemedText>
         </View>
       </View>
 
-      {/* Progression level */}
       <View style={styles.levelProgressionContainer}>
         <View style={styles.levelProgressBarContainer}>
           <Animated.View
@@ -60,8 +62,8 @@ const StatsProfile = () => {
                 outputRange: ["0%", "100%"],
               }),
               height: "100%",
-              backgroundColor: TOKENS.text,
-              borderRadius: 4,
+              backgroundColor: TOKENS.navActive,
+              borderRadius: 999,
             }}
           />
         </View>
@@ -71,7 +73,7 @@ const StatsProfile = () => {
             type="defaultSemiBold"
             style={styles.levelProgressPlanText}
           >
-            {user?.experience} XP
+            {t("profile.progressLabel")}
           </ThemedText>
           <ThemedText
             type="defaultSemiBold"
@@ -79,87 +81,88 @@ const StatsProfile = () => {
           >
             {user?.next_level?.name
               ? `${user?.next_level?.name}`
-              : "Nivel máximo"}
+              : t("profile.maxLevel")}
           </ThemedText>
         </View>
       </View>
 
-      {/* Stats */}
-
       <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <View
-            style={[styles.iconCircle, { backgroundColor: TOKENS.badgeActive }]}
-          >
-            <Ionicons name="map" size={24} color={TOKENS.primary} />
-          </View>
-          <ThemedText type="subtitle">
-            {user?.total_tours_completed || 0}
-          </ThemedText>
-          <ThemedText type="muted" style={styles.statLabel}>
-            Rutas completadas
-          </ThemedText>
-        </View>
-
-        <View style={styles.statCard}>
-          <View
-            style={[styles.iconCircle, { backgroundColor: TOKENS.badgeActive }]}
-          >
-            <Ionicons name="help-circle" size={24} color={TOKENS.primary} />
-          </View>
-          <ThemedText type="subtitle">
-            {user?.total_quizzes_completed || 0}
-          </ThemedText>
-          <ThemedText type="muted" style={styles.statLabel}>
-            Trivias respondidas
-          </ThemedText>
-        </View>
-
-        <View style={styles.statCard}>
-          <View
-            style={[styles.iconCircle, { backgroundColor: TOKENS.badgeActive }]}
-          >
-            <Ionicons name="location" size={24} color={TOKENS.primary} />
-          </View>
-          <ThemedText type="subtitle">
-            {user?.total_secret_items_completed || 0}
-          </ThemedText>
-          <ThemedText type="muted" style={styles.statLabel}>
-            Secretos encontrados
-          </ThemedText>
-        </View>
+        <StatItem
+          icon="map-outline"
+          value={user?.total_tours_completed || 0}
+          label="Recorridos completados"
+        />
+        <View style={styles.statDivider} />
+        <StatItem
+          icon="help-circle-outline"
+          value={user?.total_quizzes_completed || 0}
+          label="Trivias respondidas"
+        />
+        <View style={styles.statDivider} />
+        <StatItem
+          icon="location-outline"
+          value={user?.total_secret_items_completed || 0}
+          label="Secretos encontrados"
+        />
       </View>
     </View>
   );
 };
 
+const StatItem = ({
+  icon,
+  value,
+  label,
+}: {
+  icon: React.ComponentProps<typeof Ionicons>["name"];
+  value: number;
+  label: string;
+}) => (
+  <View style={styles.statItem}>
+    <View style={styles.statValueRow}>
+      <Ionicons name={icon} size={17} color={TOKENS.badgeActive} />
+      <ThemedText type="subtitle" style={styles.statValue}>
+        {value}
+      </ThemedText>
+    </View>
+    <ThemedText type="muted" style={styles.statLabel}>
+      {label}
+    </ThemedText>
+  </View>
+);
+
 const styles = StyleSheet.create({
   statsProfileContainer: {
-    // Removido flex: 1 para permitir que el gap del padre funcione correctamente
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: TOKENS.cardBackground,
-    paddingHorizontal: 21,
-    paddingVertical: 17,
-    borderRadius: 16,
-    gap: 10,
-    marginBottom: 20,
+    gap: 18,
   },
-  statsProfileItem: {
+  levelHeader: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: 14,
+  },
+  levelImage: {
+    width: 64,
+    height: 64,
+  },
+  levelCopy: {
+    flex: 1,
+    gap: 1,
+  },
+  experienceText: {
+    color: TOKENS.text,
+    fontSize: 28,
   },
   levelProgressBarContainer: {
-    height: 10,
+    height: 6,
     width: "100%",
-    borderRadius: 4,
+    borderRadius: 999,
+    overflow: "hidden",
     position: "relative",
-    backgroundColor: TOKENS.tabBarInactive,
+    backgroundColor: TOKENS.tabBarInactive + "55",
   },
   levelProgressionContainer: {
     flexDirection: "column",
-    gap: 2,
+    gap: 6,
     width: "100%",
   },
   levelProgressPlan: {
@@ -167,38 +170,41 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     width: "100%",
   },
-  levelProgressPlanText: { marginTop: 4 },
+  levelProgressPlanText: { fontSize: 12 },
   statsContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "stretch",
-    width: "100%",
-    gap: 8,
-  },
-  statCard: {
-    flex: 1,
-    flexBasis: 0,
-    minWidth: 0,
-    backgroundColor: TOKENS.cardBackground,
-    borderRadius: 12,
-    padding: 12,
     alignItems: "center",
+    width: "100%",
+    paddingVertical: 16,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: TOKENS.tabBarInactive + "65",
+  },
+  statItem: {
+    flex: 1,
+    minWidth: 0,
+    paddingHorizontal: 8,
     justifyContent: "center",
+    gap: 3,
+  },
+  statValueRow: {
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
-  iconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: "center",
-    justifyContent: "center",
+  statValue: {
+    fontSize: 20,
   },
   statLabel: {
-    fontSize: 10,
-    textAlign: "center",
-    lineHeight: 12,
+    fontSize: 11,
+    lineHeight: 14,
     width: "100%",
     flexShrink: 1,
+  },
+  statDivider: {
+    width: StyleSheet.hairlineWidth,
+    height: 38,
+    backgroundColor: TOKENS.tabBarInactive + "65",
   },
 });
 export default StatsProfile;

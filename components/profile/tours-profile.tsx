@@ -17,6 +17,9 @@ interface ToursProfileProps {
 }
 
 const ToursProfile = ({ data, loading }: ToursProfileProps) => {
+  const { t } = useTranslation();
+  const startedTours = data.filter((tour) => tour.started);
+
   // Si aún está cargando, mostramos el skeleton
   if (loading) {
     return <ToursProfileSkeleton />;
@@ -25,23 +28,32 @@ const ToursProfile = ({ data, loading }: ToursProfileProps) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <ThemedText type="subtitle">Rutas realizados</ThemedText>
+        <View>
+          <ThemedText type="subtitle">Rutas</ThemedText>
+          <ThemedText type="muted" translateContent={false}>
+            {t("profile.routesSubtitle")}
+          </ThemedText>
+        </View>
         <Link asChild href={{ pathname: "/(tabs)/tours" }}>
           <ThemedText type="muted">Ver todos</ThemedText>
         </Link>
       </View>
       {/* Usamos 'data' en lugar de 'tours' ya que ahora lo recibimos por props */}
-      {data.filter((tour) => tour.started).length > 0 ? (
+      {startedTours.length > 0 ? (
         <View style={styles.tourList}>
-          {data
-            .filter((tour) => tour.started)
-            .map((tour) => (
-              <TourItem key={tour.id} tour={tour} />
-            ))}
+          {startedTours.map((tour, index) => (
+            <TourItem
+              key={tour.id}
+              tour={tour}
+              isLast={index === startedTours.length - 1}
+            />
+          ))}
         </View>
       ) : (
         <View style={styles.emptyContainer}>
-          <ThemedText type="muted">No tienes ninguna ruta realizada</ThemedText>
+          <ThemedText type="muted" translateContent={false}>
+            {t("profile.noStartedTours")}
+          </ThemedText>
         </View>
       )}
     </View>
@@ -56,7 +68,13 @@ const formatDate = (date: string, locale: string) => {
   });
 };
 
-const TourItem = ({ tour }: { tour: TourApiResponse }) => {
+const TourItem = ({
+  tour,
+  isLast,
+}: {
+  tour: TourApiResponse;
+  isLast: boolean;
+}) => {
   const { locale } = useLanguage();
   const { t } = useTranslation();
   const progressNumber = (
@@ -67,7 +85,22 @@ const TourItem = ({ tour }: { tour: TourApiResponse }) => {
     <TouchableOpacity
       style={styles.tourItem}
       onPress={() => router.navigate(`/(tabs)/tours/${tour.id}`)}
+      accessibilityRole="button"
     >
+      <View
+        style={[
+          styles.routeMarker,
+          progressNumber === "100" && styles.routeMarkerCompleted,
+        ]}
+      >
+        <View
+          style={[
+            styles.routeMarkerCore,
+            progressNumber === "100" && styles.routeMarkerCoreCompleted,
+          ]}
+        />
+      </View>
+      {!isLast && <View style={styles.routeStem} />}
       <View style={styles.tourItemContent}>
         <ThemedText type="defaultSemiBold" style={styles.tourItemTitle}>
           {tour.name}
@@ -113,12 +146,9 @@ const TourItem = ({ tour }: { tour: TourApiResponse }) => {
 
 const styles = StyleSheet.create({
   container: {
-    // Removido flex: 1 para permitir que el gap funcione correctamente
-    gap: 10,
-    marginBottom: 20,
+    gap: 14,
   },
   tourList: {
-    gap: 10,
   },
   header: {
     flexDirection: "row",
@@ -131,13 +161,16 @@ const styles = StyleSheet.create({
   },
   // tour item
   tourItem: {
-    backgroundColor: TOKENS.cardBackground,
-    paddingHorizontal: 21,
-    paddingVertical: 17,
-    borderRadius: 16,
+    minHeight: 104,
+    paddingLeft: 24,
+    paddingRight: 2,
+    paddingVertical: 18,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: TOKENS.tabBarInactive + "65",
+    position: "relative",
   },
   tourItemTitle: {
     fontSize: 16,
@@ -161,18 +194,19 @@ const styles = StyleSheet.create({
   progressRow: {
     flexDirection: "column",
     alignItems: "flex-end",
-    gap: 2,
+    gap: 5,
+    marginLeft: 12,
   },
   progressTrack: {
     width: 56,
-    height: 10,
-    backgroundColor: TOKENS.badgeActive,
+    height: 5,
+    backgroundColor: TOKENS.tabBarInactive + "55",
     borderRadius: 999,
     overflow: "hidden",
   },
   progressFill: {
-    height: 10,
-    backgroundColor: TOKENS.primary,
+    height: 5,
+    backgroundColor: TOKENS.badgeActive,
     borderRadius: 999,
   },
   progressFillCompleted: {
@@ -182,10 +216,43 @@ const styles = StyleSheet.create({
     color: TOKENS.navActive,
   },
   progressPercent: { color: TOKENS.badgeActive, fontSize: 18 },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
+  routeMarker: {
+    position: "absolute",
+    left: 0,
+    top: 24,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: TOKENS.navActive,
     alignItems: "center",
+    justifyContent: "center",
+  },
+  routeMarkerCompleted: {
+    borderColor: TOKENS.badgeActive,
+  },
+  routeMarkerCore: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: TOKENS.navActive,
+  },
+  routeMarkerCoreCompleted: {
+    backgroundColor: TOKENS.badgeActive,
+  },
+  routeStem: {
+    position: "absolute",
+    left: 5.5,
+    top: 32,
+    bottom: -20,
+    width: StyleSheet.hairlineWidth,
+  },
+  emptyContainer: {
+    minHeight: 88,
+    justifyContent: "center",
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: TOKENS.tabBarInactive + "65",
   },
 });
 

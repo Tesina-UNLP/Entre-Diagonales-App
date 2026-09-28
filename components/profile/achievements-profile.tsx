@@ -1,9 +1,11 @@
 import { AchievementsProfileSkeleton } from "@/components/skeletons/achievements-profile-skeleton";
 import { UserAchievementApiResponse } from "@/types";
+import { TOKENS } from "@/constants/colors";
 import { Link, router } from "expo-router";
 import React from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
+import { useTranslation } from "react-i18next";
 import { ThemedText } from "../themed-text";
 
 // Ahora este componente recibe los datos por props desde el componente padre
@@ -14,6 +16,11 @@ interface AchievementsProfileProps {
 }
 
 const AchievementsProfile = ({ data, loading }: AchievementsProfileProps) => {
+  const { t } = useTranslation();
+  const completedAchievements = data.filter(
+    (achievement) => achievement.is_completed,
+  );
+
   // Si aún está cargando, mostramos el skeleton
   if (loading) {
     return <AchievementsProfileSkeleton />;
@@ -22,21 +29,30 @@ const AchievementsProfile = ({ data, loading }: AchievementsProfileProps) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <ThemedText type="subtitle">Logros</ThemedText>
+        <View>
+          <ThemedText type="subtitle">Logros</ThemedText>
+          <ThemedText type="muted" translateContent={false}>
+            {t("profile.earnedAchievementsCount", {
+              count: completedAchievements.length,
+            })}
+          </ThemedText>
+        </View>
         <Link asChild href={{ pathname: "/(tabs)/profile/achievements" }}>
           <ThemedText type="muted">Ver todos</ThemedText>
         </Link>
       </View>
       {/* Usamos 'data' en lugar de 'achievements' ya que ahora lo recibimos por props */}
-      {data.filter((achievement) => achievement.is_completed).length > 0 ? (
+      {completedAchievements.length > 0 ? (
         <FlatList
-          data={data.filter((achievement) => achievement.is_completed)}
+          data={completedAchievements}
           horizontal
           ItemSeparatorComponent={() => <View style={{ width: 10 }} />}
+          contentContainerStyle={styles.collectionShelf}
           showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => (
             <TouchableOpacity
               key={item.id}
+              style={styles.achievementItem}
               onPress={() =>
                 router.navigate({
                   pathname: "/(tabs)/profile/achievements/[id]",
@@ -53,6 +69,13 @@ const AchievementsProfile = ({ data, loading }: AchievementsProfileProps) => {
                 source={{ uri: item.achievement.image_url || "" }}
                 style={styles.secretImage}
               />
+              <ThemedText
+                type="muted"
+                style={styles.itemLabel}
+                numberOfLines={1}
+              >
+                {item.achievement.name}
+              </ThemedText>
             </TouchableOpacity>
           )}
           keyExtractor={(item) => item.id.toString()}
@@ -68,9 +91,7 @@ const AchievementsProfile = ({ data, loading }: AchievementsProfileProps) => {
 
 const styles = StyleSheet.create({
   container: {
-    // Removido flex: 1 para permitir que el gap funcione correctamente
-    gap: 10,
-    marginBottom: 20,
+    gap: 14,
   },
   header: {
     flexDirection: "row",
@@ -78,13 +99,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   secretImage: {
-    width: 90,
-    height: 90,
+    width: 86,
+    height: 86,
+  },
+  collectionShelf: {
+    paddingBottom: 12,
+  },
+  achievementItem: {
+    width: 96,
+    alignItems: "center",
+    gap: 4,
+  },
+  itemLabel: {
+    width: "100%",
+    textAlign: "center",
+    fontSize: 11,
   },
   emptyContainer: {
-    flex: 1,
+    minHeight: 72,
     justifyContent: "center",
-    alignItems: "center",
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: TOKENS.tabBarInactive + "65",
   },
 });
 

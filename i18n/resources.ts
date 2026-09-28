@@ -1073,6 +1073,37 @@ export const UI_COPY = {
       "Trivia answered",
       "Curiosidades respondidas",
     ],
+    progressLabel: ["Tu avance", "Your progress", "Seu progresso"],
+    routesSubtitle: [
+      "Tu recorrido por la ciudad",
+      "Your journey through the city",
+      "Seu percurso pela cidade",
+    ],
+    foundSecretsCount_one: [
+      "{{count}} encontrado",
+      "{{count}} found",
+      "{{count}} encontrado",
+    ],
+    foundSecretsCount_other: [
+      "{{count}} encontrados",
+      "{{count}} found",
+      "{{count}} encontrados",
+    ],
+    earnedAchievementsCount_one: [
+      "{{count}} obtenido",
+      "{{count}} earned",
+      "{{count}} conquistado",
+    ],
+    earnedAchievementsCount_other: [
+      "{{count}} obtenidos",
+      "{{count}} earned",
+      "{{count}} conquistados",
+    ],
+    noStartedTours: [
+      "Todavía no empezaste ninguna ruta",
+      "You haven't started a tour yet",
+      "Você ainda não começou nenhuma rota",
+    ],
     maxLevel: ["Nivel máximo", "Maximum level", "Nível máximo"],
     undiscovered: ["Sin descubrir", "Undiscovered", "não descoberto"],
     achievementsLoadError: [
