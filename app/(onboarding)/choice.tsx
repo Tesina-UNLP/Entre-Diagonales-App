@@ -12,43 +12,94 @@ import {
 import { CharacterApiResponse } from "@/types";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Image,
   Modal,
-  Platform,
+  ScrollView,
   StyleSheet,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { runOnJS } from "react-native-reanimated";
 import Toast from "react-native-toast-message";
 
-const xThinkingImage = require("../../assets/images/onboarding/choice.png");
+const backgroundImage = require("../../assets/images/onboarding/background.png");
 
 const Choice = () => {
   const { completeOnboarding, user } = useAuth();
+  const { width } = useWindowDimensions();
   const [npcs, setNpcs] = useState<CharacterApiResponse[]>([]);
-  const [selectedNpc, setSelectedNpc] = useState<number | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasLoadError, setHasLoadError] = useState(false);
+  const [largeImageFailed, setLargeImageFailed] = useState(false);
   const [showNotificationsPrompt, setShowNotificationsPrompt] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
-  // Efecto para cargar los personajes disponibles
-  useEffect(() => {
-    const fetchNpcs = async () => {
-      const token = user?.access;
-      if (!token) return;
+
+  const fetchNpcs = useCallback(async () => {
+    const token = user?.access;
+    if (!token) return;
+
+    setIsLoading(true);
+    setHasLoadError(false);
+
+    try {
       const data = await api.getCharacters(token);
       setNpcs(data);
-    };
+      setSelectedIndex(0);
+      setHasLoadError(data.length === 0);
+    } catch {
+      setNpcs([]);
+      setHasLoadError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user?.access]);
 
-    fetchNpcs();
-  }, [user]);
+  useEffect(() => {
+    void fetchNpcs();
+  }, [fetchNpcs]);
+
+  useEffect(() => {
+    setLargeImageFailed(false);
+  }, [selectedIndex]);
+
+  const selectedNpc = npcs[selectedIndex];
+  const stageHeight = Math.max(500, Math.min(570, width * 1.38));
+
+  const selectRelativeCharacter = useCallback(
+    (offset: number) => {
+      if (npcs.length < 2) return;
+      setSelectedIndex(
+        (current) => (current + offset + npcs.length) % npcs.length,
+      );
+    },
+    [npcs.length],
+  );
+
+  const swipeGesture = Gesture.Pan()
+    .enabled(npcs.length > 1)
+    .activeOffsetX([-20, 20])
+    .failOffsetY([-20, 20])
+    .onEnd((event) => {
+      if (event.translationX < -50) {
+        runOnJS(selectRelativeCharacter)(1);
+      } else if (event.translationX > 50) {
+        runOnJS(selectRelativeCharacter)(-1);
+      }
+    });
 
   const finishOnboarding = async (notificationToken = "") => {
+    if (!selectedNpc) return;
+
     try {
-      if (!selectedNpc) return;
       setIsCompleting(true);
       await completeOnboarding({
-        characterId: selectedNpc,
+        characterId: selectedNpc.id,
         notificationToken,
       });
       router.replace("/(tabs)");
@@ -73,7 +124,6 @@ const Choice = () => {
         notificationToken = (await getExpoPushToken()) ?? "";
       }
     } catch (error) {
-      // Un error al registrar notificaciones no debe impedir usar la app.
       console.error("Error al configurar notificaciones:", error);
     }
 
@@ -81,88 +131,182 @@ const Choice = () => {
     await finishOnboarding(notificationToken);
   };
 
-  const back = () => {
-    router.replace("/(onboarding)/presentation");
-  };
+  const characterImageUrl =
+    !largeImageFailed && selectedNpc?.large_image_url
+      ? selectedNpc.large_image_url
+      : selectedNpc?.image_url;
 
   return (
     <ThemedBackground style={styles.container}>
       <FadeInView delay={100} style={styles.header}>
         <View style={styles.actionBack}>
-          <TouchableOpacity onPress={() => back()}>
-            <MaterialIcons name="arrow-back" size={24} color={TOKENS.muted} />
+          <TouchableOpacity
+            accessibilityLabel="Volver"
+            hitSlop={12}
+            onPress={() => router.replace("/(onboarding)/presentation")}
+          >
+            <MaterialIcons name="arrow-back" size={30} color={TOKENS.muted} />
           </TouchableOpacity>
         </View>
 
         <View style={styles.progressBarContainer}>
-          <View style={[styles.progressBar]} />
+          <View style={styles.progressBar} />
         </View>
 
         <View style={styles.actionNext} />
       </FadeInView>
-      <FadeInView delay={300} style={styles.content}>
-        <ThemedText type="title">Elige tu personaje</ThemedText>
-        <ThemedText type="bigMuted" style={styles.description}>
-          Selecciona el personaje que más te guste para acompañarte en tu viaje
-          de aprendizaje.
-        </ThemedText>
 
-        <View style={styles.grid}>
-          {npcs?.map(({ id, name, image_url }: any) => (
-            <TouchableOpacity
-              key={id}
-              onPress={() => setSelectedNpc(Number(id))}
-              style={styles.personButton}
-            >
-              <View
-                style={{
-                  borderRadius: 100,
-                  borderWidth: 3,
-                  borderColor:
-                    selectedNpc === Number(id) ? "#8CBCB0" : "transparent",
-                }}
-              >
-                <Image
-                  source={{ uri: image_url }}
-                  style={styles.personImage}
-                  resizeMode="contain"
-                />
-              </View>
-              <ThemedText type="muted" style={styles.personName}>
-                {name}
-              </ThemedText>
-            </TouchableOpacity>
-          ))}
-        </View>
-        <Image
-          source={xThinkingImage}
-          style={styles.xImage}
-          resizeMode="contain"
-        />
-      </FadeInView>
-      {selectedNpc && (
-        <FadeInView delay={400} style={styles.navigationContainer}>
-          <ThemedButton
-            variant="primary"
-            onPress={() => setShowNotificationsPrompt(true)}
-            loading={isCompleting}
-          >
-            Iniciar aventuras
-          </ThemedButton>
+      <ScrollView
+        bounces={false}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        style={styles.scroll}
+      >
+        <FadeInView delay={200} style={styles.heading}>
+          <ThemedText type="title" style={styles.title}>
+            ¿Quién te acompaña?
+          </ThemedText>
+          <ThemedText type="bigMuted" style={styles.subtitle}>
+            Deslizá y elegí tu personaje
+          </ThemedText>
         </FadeInView>
-      )}
+
+        <GestureDetector gesture={swipeGesture}>
+          <View style={[styles.stage, { height: stageHeight }]}>
+            <Image
+              resizeMode="contain"
+              source={backgroundImage}
+              style={[
+                styles.backgroundImage,
+                { height: width * (1176 / 780), width },
+              ]}
+            />
+
+            {isLoading ? (
+              <View style={styles.stateContainer}>
+                <ActivityIndicator color={TOKENS.muted} size="large" />
+                <ThemedText type="muted">Cargando...</ThemedText>
+              </View>
+            ) : hasLoadError || !selectedNpc ? (
+              <View style={styles.stateContainer}>
+                <ThemedText type="bigMuted" style={styles.stateText}>
+                  No pudimos cargar los personajes.
+                </ThemedText>
+                <ThemedButton
+                  onPress={() => void fetchNpcs()}
+                  size="small"
+                  style={styles.retryButton}
+                  variant="outline"
+                >
+                  Intentar nuevamente
+                </ThemedButton>
+              </View>
+            ) : (
+              <>
+                {characterImageUrl ? (
+                  <FadeInView
+                    key={`character-image-${selectedNpc.id}`}
+                    duration={250}
+                    style={styles.characterImageContainer}
+                  >
+                    <Image
+                      accessibilityIgnoresInvertColors
+                      onError={() => setLargeImageFailed(true)}
+                      resizeMode="contain"
+                      source={{ uri: characterImageUrl }}
+                      style={styles.characterImage}
+                    />
+                  </FadeInView>
+                ) : null}
+
+                <FadeInView
+                  key={selectedNpc.id}
+                  duration={250}
+                  style={styles.characterInfo}
+                >
+                  <ThemedText
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.72}
+                    numberOfLines={1}
+                    style={styles.characterName}
+                    type="title"
+                  >
+                    {selectedNpc.name}
+                  </ThemedText>
+                  {selectedNpc.tagline ? (
+                    <ThemedText
+                      style={styles.characterTagline}
+                      translateContent={false}
+                    >
+                      {selectedNpc.tagline.toLocaleUpperCase()}
+                    </ThemedText>
+                  ) : null}
+                  <ThemedText
+                    style={styles.characterDescription}
+                    translateContent={false}
+                    type="bigMuted"
+                  >
+                    {selectedNpc.description}
+                  </ThemedText>
+                </FadeInView>
+
+                <View style={styles.carouselNavigation}>
+                  <TouchableOpacity
+                    accessibilityLabel="Personaje anterior"
+                    disabled={npcs.length < 2}
+                    onPress={() => selectRelativeCharacter(-1)}
+                    style={styles.carouselButton}
+                    testID="previous-character"
+                  >
+                    <MaterialIcons
+                      color={TOKENS.muted}
+                      name="arrow-back"
+                      size={30}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    accessibilityLabel="Personaje siguiente"
+                    disabled={npcs.length < 2}
+                    onPress={() => selectRelativeCharacter(1)}
+                    style={styles.carouselButton}
+                    testID="next-character"
+                  >
+                    <MaterialIcons
+                      color={TOKENS.muted}
+                      name="arrow-forward"
+                      size={30}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+          </View>
+        </GestureDetector>
+      </ScrollView>
+
+      <FadeInView delay={400} style={styles.footer}>
+        <ThemedButton
+          disabled={!selectedNpc || hasLoadError}
+          loading={isCompleting}
+          onPress={() => setShowNotificationsPrompt(true)}
+          variant="primary"
+        >
+          Iniciar aventuras
+        </ThemedButton>
+      </FadeInView>
+
       <Modal
-        visible={showNotificationsPrompt}
-        transparent
         animationType="fade"
         onRequestClose={() => setShowNotificationsPrompt(false)}
+        transparent
+        visible={showNotificationsPrompt}
       >
         <View style={styles.modalBackdrop}>
           <View style={styles.modalContent}>
             <MaterialIcons
+              color={TOKENS.primary}
               name="notifications-active"
               size={36}
-              color={TOKENS.primary}
             />
             <ThemedText type="title" style={styles.modalTitle}>
               ¿Activar notificaciones?
@@ -173,19 +317,19 @@ const Choice = () => {
             </ThemedText>
             <View style={styles.modalActions}>
               <ThemedButton
-                variant="primary"
-                onPress={requestNotificationsAndFinish}
                 loading={isCompleting}
+                onPress={requestNotificationsAndFinish}
+                variant="primary"
               >
                 Sí, activar
               </ThemedButton>
               <ThemedButton
-                variant="ghost"
+                disabled={isCompleting}
                 onPress={() => {
                   setShowNotificationsPrompt(false);
-                  finishOnboarding();
+                  void finishOnboarding();
                 }}
-                disabled={isCompleting}
+                variant="ghost"
               >
                 Ahora no
               </ThemedButton>
@@ -200,61 +344,127 @@ const Choice = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "space-between",
-    alignItems: "center",
+    paddingInline: 0,
+    paddingTop: 30,
   },
   header: {
-    flexDirection: "row",
     alignItems: "center",
+    flexDirection: "row",
+    paddingHorizontal: 20,
     width: "100%",
-    paddingHorizontal: 20,
   },
-  actionBack: { flex: 1, height: 24 },
-  content: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "flex-start",
-    gap: 20,
-    paddingTop: 40,
-  },
-  title: {
-    textAlign: "center",
-    marginBottom: 20,
-  },
-  description: {
-    textAlign: "center",
-    paddingHorizontal: 20,
-  },
-  navigationContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingBottom: Platform.OS === "ios" ? 30 : 20,
-  },
+  actionBack: { flex: 1, height: 30, justifyContent: "center" },
+  actionNext: { flex: 1, height: 30 },
   progressBarContainer: {
-    width: 100,
-    height: 4,
-    borderRadius: 2,
     backgroundColor: TOKENS.primary,
+    borderRadius: 2,
+    height: 4,
+    width: 100,
   },
   progressBar: {
-    height: 4,
     backgroundColor: TOKENS.muted,
     borderRadius: 2,
-  },
-  grid: {
+    height: 4,
     width: "100%",
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
   },
-  actionNext: { flex: 1, height: 24 },
-  personButton: { marginBottom: 20, alignItems: "center", width: "30%" },
-  personImage: { width: 80, height: 80, borderRadius: 100 },
-  personName: { marginTop: 8 },
-  xImage: { width: 250, height: 250 },
-  modalBackdrop: {
+  scroll: { flex: 1, width: "100%" },
+  scrollContent: { flexGrow: 1 },
+  heading: {
+    alignItems: "center",
+    paddingHorizontal: 24,
+    paddingTop: 28,
+  },
+  title: {
+    fontSize: 27,
+    lineHeight: 34,
+    textAlign: "center",
+  },
+  subtitle: {
+    fontSize: 18,
+    lineHeight: 26,
+    marginTop: 4,
+    textAlign: "center",
+  },
+  stage: {
+    overflow: "hidden",
+    position: "relative",
+    width: "100%",
+  },
+  backgroundImage: {
+    left: 0,
+    position: "absolute",
+    top: 0,
+  },
+  characterImageContainer: {
+    bottom: 58,
+    height: "78%",
+    left: 0,
+    position: "absolute",
+    width: "54%",
+  },
+  characterImage: {
+    height: "100%",
+    width: "100%",
+  },
+  characterInfo: {
+    left: "48%",
+    position: "absolute",
+    right: 18,
+    top: "16%",
+  },
+  characterName: {
+    fontFamily: "ClashDisplayBold",
+    fontSize: 42,
+    lineHeight: 48,
+  },
+  characterTagline: {
+    color: TOKENS.accent,
+    fontFamily: "ClashDisplay",
+    fontSize: 15,
+    lineHeight: 20,
+    marginBottom: 10,
+  },
+  characterDescription: {
+    fontSize: 15,
+    lineHeight: 23,
+  },
+  carouselNavigation: {
+    alignItems: "center",
+    bottom: 16,
+    flexDirection: "row",
+    gap: 48,
+    justifyContent: "center",
+    left: 0,
+    position: "absolute",
+    right: 0,
+  },
+  carouselButton: {
+    alignItems: "center",
+    borderColor: "rgba(140, 188, 176, 0.45)",
+    borderRadius: 24,
+    borderWidth: 1,
+    height: 48,
+    justifyContent: "center",
+    width: 48,
+  },
+  stateContainer: {
+    alignItems: "center",
     flex: 1,
+    gap: 16,
+    justifyContent: "center",
+    paddingHorizontal: 40,
+  },
+  stateText: { textAlign: "center" },
+  retryButton: { width: 220 },
+  footer: {
+    paddingBottom: 16,
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    width: "100%",
+  },
+  modalBackdrop: {
     backgroundColor: "rgba(0, 0, 0, 0.55)",
+    flex: 1,
     justifyContent: "center",
     padding: 24,
   },
@@ -267,7 +477,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: { textAlign: "center" },
   modalDescription: { textAlign: "center" },
-  modalActions: { width: "100%", gap: 8 },
+  modalActions: { gap: 8, width: "100%" },
 });
 
 export default Choice;

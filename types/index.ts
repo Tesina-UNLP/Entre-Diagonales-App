@@ -3,6 +3,8 @@ export type CharacterApiResponse = {
   name: string;
   description: string;
   image_url: string;
+  tagline?: string | null;
+  large_image_url?: string | null;
 };
 
 export type LevelApiResponse = {

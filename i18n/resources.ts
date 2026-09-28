@@ -580,6 +580,21 @@ export const UI_COPY = {
       "Choose the character you'd most like to join you on your learning journey.",
       "Selecione o personagem que você mais gosta para acompanhá-lo em sua jornada de aprendizado.",
     ],
+    companionTitle: [
+      "¿Quién te acompaña?",
+      "Who will join you?",
+      "Quem vai acompanhar você?",
+    ],
+    companionDescription: [
+      "Deslizá y elegí tu personaje",
+      "Swipe and choose your character",
+      "Deslize e escolha seu personagem",
+    ],
+    characterLoadError: [
+      "No pudimos cargar los personajes.",
+      "We couldn't load the characters.",
+      "Não foi possível carregar os personagens.",
+    ],
     start: ["Iniciar aventuras", "Start adventuring", "Comece aventuras"],
     notificationTitle: [
       "¿Activar notificaciones?",
