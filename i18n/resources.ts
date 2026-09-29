@@ -685,6 +685,52 @@ export const UI_COPY = {
       "Don't forget to explore every corner.",
       "Não se esqueça de explorar cada canto.",
     ],
+    cityAwaits: [
+      "La ciudad te está esperando",
+      "The city is waiting for you",
+      "A cidade está esperando por você",
+    ],
+    cityAwaitsDescription: [
+      "Elegí una ruta y dejá que La Plata te sorprenda.",
+      "Choose a tour and let La Plata surprise you.",
+      "Escolha um passeio e deixe La Plata surpreender você.",
+    ],
+    lookUp: ["Mirá hacia arriba", "Look up", "Olhe para cima"],
+    lookUpDescription: [
+      "Cúpulas, torres y detalles cuentan historias que suelen pasar desapercibidas.",
+      "Domes, towers, and details tell stories that often go unnoticed.",
+      "Cúpulas, torres e detalhes contam histórias que muitas vezes passam despercebidas.",
+    ],
+    takeADiagonal: [
+      "Tomá una diagonal",
+      "Take a diagonal",
+      "Pegue uma diagonal",
+    ],
+    takeADiagonalDescription: [
+      "Tu próximo hallazgo puede estar a unas pocas cuadras.",
+      "Your next discovery may be just a few blocks away.",
+      "Sua próxima descoberta pode estar a poucos quarteirões.",
+    ],
+    exploreAtYourPace: [
+      "Explorá a tu ritmo",
+      "Explore at your own pace",
+      "Explore no seu ritmo",
+    ],
+    exploreAtYourPaceDescription: [
+      "No hace falta verlo todo hoy: elegí un lugar y empezá por ahí.",
+      "You don't have to see it all today: choose one place and start there.",
+      "Você não precisa ver tudo hoje: escolha um lugar e comece por lá.",
+    ],
+    continueYourTour: [
+      "Seguí tu recorrido",
+      "Continue your tour",
+      "Continue seu passeio",
+    ],
+    continueYourTourDescription: [
+      "Cada parada te acerca a nuevas historias y recompensas.",
+      "Every stop brings you closer to new stories and rewards.",
+      "Cada parada aproxima você de novas histórias e recompensas.",
+    ],
     xpFor: ["XP para", "XP for", "XP para"],
     firstToComplete: [
       "Puedes ser el primero en completarla!",

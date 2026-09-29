@@ -25,13 +25,15 @@ import Toast from "react-native-toast-message";
 export default function HomeScreen() {
   const { user, checkAuthState } = useAuth();
   const { fetchWeather, isLoading: isWeatherLoading } = useWeather();
-  const { refreshMessage } = useMessageOfTheDay();
   const { triggerTutorial, ready: tutorialReady } = useTutorial();
   const [routes, setRoutes] = useState<TourApiResponse[]>([]);
   const [currentRoute, setCurrentRoute] = useState<TourApiResponse | null>(
     null,
   );
   const [loading, setLoading] = useState(true);
+  const { messageOfTheDay, refreshMessage } = useMessageOfTheDay(
+    currentRoute !== null,
+  );
   const currentAccessRef = useRef<string | undefined>(user?.access);
 
   currentAccessRef.current = user?.access;
@@ -124,7 +126,7 @@ export default function HomeScreen() {
 
           {/* Cada componente aparece con un delay incremental para crear un efecto escalonado */}
           <FadeInView delay={250}>
-            <MessageOfTheDay />
+            <MessageOfTheDay message={messageOfTheDay} />
           </FadeInView>
 
           <FadeInView delay={300}>

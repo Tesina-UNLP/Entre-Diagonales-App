@@ -8,7 +8,7 @@ export const MessageOfTheDaySkeleton = () => {
   return (
     <View style={styles.container}>
       {/* Icono skeleton */}
-      <Skeleton width={44} height={44} borderRadius={12} />
+      <Skeleton width={28} height={28} borderRadius={14} />
 
       {/* Texto skeleton */}
       <View style={styles.textContainer}>
@@ -27,12 +27,12 @@ export const MessageOfTheDaySkeleton = () => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    gap: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    alignItems: "center",
-    backgroundColor: TOKENS.cardBackground,
-    borderRadius: 18,
+    gap: 14,
+    paddingVertical: 16,
+    alignItems: "flex-start",
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: TOKENS.tabBarInactive + "65",
     marginBottom: 20,
   },
   textContainer: {
