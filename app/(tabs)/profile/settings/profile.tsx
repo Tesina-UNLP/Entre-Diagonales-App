@@ -17,28 +17,36 @@ import Toast from "react-native-toast-message";
 const Profile = () => {
   const { user, checkAuthState } = useAuth();
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const [character, setCharacter] = useState<CharacterApiResponse | null>(null);
+  const [character, setCharacter] = useState<CharacterApiResponse | null>(
+    () => (user?.character as CharacterApiResponse | undefined) ?? null,
+  );
   const [characters, setCharacters] = useState<CharacterApiResponse[]>([]);
-  // Estados para los campos del formulario
-  const [fullName, setFullName] = useState("");
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState(() => user?.display_name ?? "");
+  const [username, setUsername] = useState(() => user?.username ?? "");
+  const [email, setEmail] = useState(() => user?.email ?? "");
 
   useEffect(() => {
-    if (user) {
-      setCharacter(user.character as CharacterApiResponse);
-      // Inicializar los campos del formulario con los datos del usuario
-      setFullName(user.display_name || "");
-      setUsername(user.username || "");
-      setEmail(user.email || "");
-    }
+    setCharacter((user?.character as CharacterApiResponse | undefined) ?? null);
+    setFullName(user?.display_name ?? "");
+    setUsername(user?.username ?? "");
+    setEmail(user?.email ?? "");
+  }, [user?.character, user?.display_name, user?.email, user?.username]);
 
+  useEffect(() => {
+    const accessToken = user?.access;
+    if (!accessToken) return;
+
+    let cancelled = false;
     const fetchCharacters = async () => {
-      const response = await api.getCharacters(user?.access || "");
-      setCharacters(response);
+      const response = await api.getCharacters(accessToken);
+      if (!cancelled) setCharacters(response);
     };
-    fetchCharacters();
-  }, [user]);
+    void fetchCharacters();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.access]);
 
   const openBottomSheet = () => {
     bottomSheetRef.current?.expand();

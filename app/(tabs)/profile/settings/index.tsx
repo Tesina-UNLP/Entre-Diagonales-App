@@ -5,7 +5,7 @@ import { ThemedText } from "@/components/themed-text";
 import { TOKENS } from "@/constants/colors";
 import { useAuth } from "@/hooks/use-auth";
 import { Ionicons } from "@expo/vector-icons";
-import { Href, router } from "expo-router";
+import { Href, Link, router } from "expo-router";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 
@@ -13,45 +13,44 @@ const sections = [
   {
     title: "Perfil",
     icon: "person",
-    onPress: () => router.navigate("/(tabs)/profile/settings/profile"),
+    href: "/(tabs)/profile/settings/profile",
   },
   {
     title: "Notificaciones",
     icon: "notifications",
-    onPress: () => router.navigate("/(tabs)/profile/settings/notifications"),
+    href: "/(tabs)/profile/settings/notifications",
   },
   {
     title: "Musica & efectos",
     icon: "musical-notes",
-    onPress: () => router.navigate("/(tabs)/profile/settings/sounds"),
+    href: "/(tabs)/profile/settings/sounds",
   },
   {
     title: "Apariencia",
     icon: "text",
-    onPress: () => router.navigate("/(tabs)/profile/settings/appearance"),
+    href: "/(tabs)/profile/settings/appearance",
   },
   {
     title: "Idioma",
     icon: "language",
-    onPress: () => router.navigate("/(tabs)/profile/settings/language" as Href),
+    href: "/(tabs)/profile/settings/language",
   },
   {
     title: "Centro de ayuda",
     icon: "help-circle",
-    onPress: () => router.navigate("/(tabs)/profile/settings/help"),
+    href: "/(tabs)/profile/settings/help",
   },
   {
     title: "Sobre nosotros",
     icon: "information-circle",
-    onPress: () => router.navigate("/(tabs)/profile/settings/about"),
+    href: "/(tabs)/profile/settings/about",
   },
   {
     title: "Usuarios bloqueados",
     icon: "eye-off-outline",
-    onPress: () =>
-      router.navigate("/(tabs)/profile/settings/blocked-users" as Href),
+    href: "/(tabs)/profile/settings/blocked-users",
   },
-];
+] satisfies { title: string; icon: string; href: Href }[];
 
 const Settings = () => {
   const { logout } = useAuth();
@@ -71,26 +70,27 @@ const Settings = () => {
       <View style={styles.content}>
         {sections.map((section, index) => (
           <FadeInView key={section.title} delay={100 * (index + 1)}>
-            <TouchableOpacity
-              onPress={section.onPress}
-              style={styles.sectionContainer}
-            >
-              <View style={styles.sectionLeft}>
-                <Ionicons
-                  name={section.icon as any}
-                  size={24}
-                  color={TOKENS.text}
-                />
-                <ThemedText type="defaultSemiBold">{section.title}</ThemedText>
-              </View>
-              <View style={styles.sectionRight}>
-                <Ionicons
-                  name="chevron-forward-outline"
-                  size={20}
-                  color={TOKENS.text}
-                />
-              </View>
-            </TouchableOpacity>
+            <Link href={section.href} asChild prefetch>
+              <TouchableOpacity style={styles.sectionContainer}>
+                <View style={styles.sectionLeft}>
+                  <Ionicons
+                    name={section.icon as any}
+                    size={24}
+                    color={TOKENS.text}
+                  />
+                  <ThemedText type="defaultSemiBold">
+                    {section.title}
+                  </ThemedText>
+                </View>
+                <View style={styles.sectionRight}>
+                  <Ionicons
+                    name="chevron-forward-outline"
+                    size={20}
+                    color={TOKENS.text}
+                  />
+                </View>
+              </TouchableOpacity>
+            </Link>
           </FadeInView>
         ))}
 

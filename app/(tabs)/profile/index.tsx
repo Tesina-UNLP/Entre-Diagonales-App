@@ -5,8 +5,7 @@ import SecretsProfile from "@/components/profile/secrets-profile";
 import StatsProfile from "@/components/profile/stats-profile";
 import ToursProfile from "@/components/profile/tours-profile";
 import { ThemedBackground } from "@/components/themed-background";
-import { router, useFocusEffect, usePathname } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { useAuth } from "@/hooks/use-auth";
 import { api } from "@/libs/api";
@@ -34,7 +33,6 @@ const getStartedToursPreview = async (accessToken: string) => {
 };
 
 export default function ProfileScreen() {
-  const pathname = usePathname();
   const { user } = useAuth();
   const accessToken = user?.access;
 
@@ -96,18 +94,6 @@ export default function ProfileScreen() {
       cancelled = true;
     };
   }, [accessToken]);
-
-  // Resetear el stack de navegación cuando el usuario vuelve a esta pantalla
-  // Optimizado para solo ejecutarse cuando realmente venimos de una sub-pantalla
-  useFocusEffect(
-    useCallback(() => {
-      // Solo hacer el replace si realmente estamos en una sub-pantalla de profile
-      // Ejemplo: /profile/settings o /profile/achievements/1
-      if (pathname.startsWith("/profile/") && pathname !== "/profile") {
-        router.replace("/(tabs)/profile");
-      }
-    }, [pathname]),
-  );
 
   return (
     <ThemedBackground style={styles.container} scrollable>

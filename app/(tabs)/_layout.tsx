@@ -31,13 +31,13 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      detachInactiveScreens={false}
       screenOptions={{
         tabBarActiveTintColor: Colors[themeName].tint,
         tabBarInactiveTintColor: Colors[themeName].tabIconDefault,
         headerShown: false,
         animation: "fade",
-        detachInactiveScreens: false,
-        freezeOnBlur: false,
+        freezeOnBlur: true,
         sceneStyle: {
           backgroundColor: TOKENS.background,
         },
@@ -46,22 +46,22 @@ export default function TabLayout() {
         tabBarStyle: hideTabs
           ? { display: "none" }
           : {
-            position: "absolute",
-            left: 0,
-            right: 0,
+              position: "absolute",
+              left: 0,
+              right: 0,
 
-            bottom: 0,
+              bottom: 0,
 
-            backgroundColor: "transparent",
-            borderColor: "transparent",
-            elevation: 0,
-            shadowOpacity: 0,
+              backgroundColor: "transparent",
+              borderColor: "transparent",
+              elevation: 0,
+              shadowOpacity: 0,
 
-            paddingTop: Platform.OS === "ios" ? 2 : 5,
+              paddingTop: Platform.OS === "ios" ? 2 : 5,
 
-            height: TAB_BAR_BASE_HEIGHT + insets.bottom,
-            paddingBottom: TAB_BAR_BOTTOM_PADDING,
-          },
+              height: TAB_BAR_BASE_HEIGHT + insets.bottom,
+              paddingBottom: TAB_BAR_BOTTOM_PADDING,
+            },
         tabBarItemStyle: {
           transform: [{ translateY: TAB_BAR_ITEM_TRANSLATE_Y }],
         },
