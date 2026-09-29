@@ -51,9 +51,12 @@ export default ({ config }: ConfigContext): ExpoConfig =>
     orientation: "portrait",
     icon: "./assets/images/icon.png",
     scheme: "entrediagonales",
-    userInterfaceStyle: "automatic",
+    userInterfaceStyle: "dark",
+    backgroundColor: "#004643",
     newArchEnabled: true,
     ios: {
+      backgroundColor: "#004643",
+      userInterfaceStyle: "dark",
       // El lanzamiento 1.0 está validado únicamente para iPhone.
       // Evita distribuir una interfaz de teléfono sin QA ni capturas de iPad.
       supportsTablet: false,

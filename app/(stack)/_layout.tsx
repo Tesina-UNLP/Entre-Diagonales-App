@@ -1,5 +1,14 @@
+import { TOKENS } from "@/constants/colors";
 import { Stack } from "expo-router";
 
 export default function StackLayout() {
-  return <Stack screenOptions={{ headerShown: false, presentation: "card" }} />;
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        presentation: "card",
+        contentStyle: { backgroundColor: TOKENS.background },
+      }}
+    />
+  );
 }

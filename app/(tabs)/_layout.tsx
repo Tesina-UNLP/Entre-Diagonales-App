@@ -10,7 +10,7 @@ import {
   TAB_BAR_BOTTOM_PADDING,
   TAB_BAR_ITEM_TRANSLATE_Y,
 } from "@/components/tab-bar/tab-bar-metrics";
-import Colors from "@/constants/colors";
+import Colors, { TOKENS } from "@/constants/colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Tabs, usePathname } from "expo-router";
 import { Platform, Text } from "react-native";
@@ -36,27 +36,32 @@ export default function TabLayout() {
         tabBarInactiveTintColor: Colors[themeName].tabIconDefault,
         headerShown: false,
         animation: "fade",
+        detachInactiveScreens: false,
+        freezeOnBlur: false,
+        sceneStyle: {
+          backgroundColor: TOKENS.background,
+        },
         tabBarButton: HapticTab,
         tabBarBackground: CustomTabBar,
         tabBarStyle: hideTabs
           ? { display: "none" }
           : {
-              position: "absolute",
-              left: 0,
-              right: 0,
+            position: "absolute",
+            left: 0,
+            right: 0,
 
-              bottom: 0,
+            bottom: 0,
 
-              backgroundColor: "transparent",
-              borderColor: "transparent",
-              elevation: 0,
-              shadowOpacity: 0,
+            backgroundColor: "transparent",
+            borderColor: "transparent",
+            elevation: 0,
+            shadowOpacity: 0,
 
-              paddingTop: Platform.OS === "ios" ? 2 : 5,
+            paddingTop: Platform.OS === "ios" ? 2 : 5,
 
-              height: TAB_BAR_BASE_HEIGHT + insets.bottom,
-              paddingBottom: TAB_BAR_BOTTOM_PADDING,
-            },
+            height: TAB_BAR_BASE_HEIGHT + insets.bottom,
+            paddingBottom: TAB_BAR_BOTTOM_PADDING,
+          },
         tabBarItemStyle: {
           transform: [{ translateY: TAB_BAR_ITEM_TRANSLATE_Y }],
         },

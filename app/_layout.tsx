@@ -1,7 +1,8 @@
 import { TOKENS } from "@/constants/colors";
 import { useFonts } from "expo-font";
-import { DarkTheme, DefaultTheme, Slot, ThemeProvider } from "expo-router";
+import { DarkTheme, Slot, ThemeProvider } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import * as SystemUI from "expo-system-ui";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
@@ -16,7 +17,6 @@ import { HapticsProvider } from "@/contexts/haptics";
 import { LanguageProvider } from "@/contexts/language";
 import { StartupProvider } from "@/contexts/startup";
 import { TutorialProvider } from "@/contexts/tutorial";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Observe, ObserveRoot } from "expo-observe";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ConfettiProvider } from "@/components/confetti";
@@ -31,6 +31,9 @@ import {
   trackProductEvent,
 } from "@/libs/telemetry";
 import { useEffect, useMemo } from "react";
+
+// Ensure native window background matches app dark theme to eliminate white flashes
+void SystemUI.setBackgroundColorAsync(TOKENS.background);
 
 Observe.configure({
   integrations: {
@@ -48,20 +51,18 @@ SplashScreen.setOptions({
 SplashScreen.preventAutoHideAsync();
 
 function AppContent() {
-  const colorScheme = useColorScheme();
   const { language } = useLanguage();
   const { t } = useTranslation();
   const navigationTheme = useMemo(() => {
-    const baseTheme = colorScheme === "dark" ? DarkTheme : DefaultTheme;
     return {
-      ...baseTheme,
+      ...DarkTheme,
       colors: {
-        ...baseTheme.colors,
+        ...DarkTheme.colors,
         background: TOKENS.background,
         card: TOKENS.background,
       },
     };
-  }, [colorScheme]);
+  }, []);
 
   useEffect(() => {
     setTelemetryLanguage(language);
@@ -132,7 +133,7 @@ function AppContent() {
                       initParticleAmount={0}
                       colorPalette={confettiPalette}
                     >
-                      <Slot screenOptions={{ animation: "fade" }} />
+                      <Slot />
                     </ConfettiProvider>
                   </StartupProvider>
                 </AuthProvider>
@@ -169,8 +170,10 @@ function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
+    <GestureHandlerRootView
+      style={{ flex: 1, backgroundColor: TOKENS.background }}
+    >
+      <SafeAreaProvider style={{ backgroundColor: TOKENS.background }}>
         <LanguageProvider>
           <AppContent />
         </LanguageProvider>
