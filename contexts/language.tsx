@@ -1,5 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getLocales } from "expo-localization";
 import React, {
   createContext,
   useCallback,
@@ -7,10 +5,14 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { i18n, localeFor } from "@/i18n";
+import { i18n } from "@/i18n";
 import { AppLanguage } from "@/i18n/resources";
-
-const STORAGE_KEY = "settings-language:v1";
+import {
+  getCurrentLanguagePreference,
+  initializeLanguagePreference,
+  localeFor,
+  saveLanguagePreference,
+} from "@/libs/language-preference";
 
 interface LanguageContextValue {
   language: AppLanguage;
@@ -26,29 +28,17 @@ export const LanguageContext = createContext<LanguageContextValue>({
   setLanguage: async () => {},
 });
 
-function getDeviceLanguage(): AppLanguage {
-  if (getLocales()[0]?.languageCode === "pt") return "pt";
-  return getLocales()[0]?.languageCode === "en" ? "en" : "es";
-}
-
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setCurrentLanguage] = useState<AppLanguage>("es");
+  const [language, setCurrentLanguage] = useState<AppLanguage>(
+    getCurrentLanguagePreference,
+  );
   const [isLanguageReady, setIsLanguageReady] = useState(false);
 
   useEffect(() => {
     let mounted = true;
 
     async function loadLanguage() {
-      let nextLanguage = getDeviceLanguage();
-      try {
-        const stored = await AsyncStorage.getItem(STORAGE_KEY);
-        if (stored === "es" || stored === "en" || stored === "pt") {
-          nextLanguage = stored;
-        }
-      } catch (error) {
-        console.warn("Could not load the saved language", error);
-      }
-
+      const nextLanguage = await initializeLanguagePreference();
       await i18n.changeLanguage(nextLanguage);
       if (mounted) {
         setCurrentLanguage(nextLanguage);
@@ -63,13 +53,9 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setLanguage = useCallback(async (nextLanguage: AppLanguage) => {
+    const savePreference = saveLanguagePreference(nextLanguage);
     setCurrentLanguage(nextLanguage);
-    await i18n.changeLanguage(nextLanguage);
-    try {
-      await AsyncStorage.setItem(STORAGE_KEY, nextLanguage);
-    } catch (error) {
-      console.warn("Could not save the selected language", error);
-    }
+    await Promise.all([i18n.changeLanguage(nextLanguage), savePreference]);
   }, []);
 
   const value = useMemo(

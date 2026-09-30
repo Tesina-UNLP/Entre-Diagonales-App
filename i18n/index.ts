@@ -1,6 +1,7 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import { AppLanguage, CopyPair, UI_COPY } from "./resources";
+export { localeFor } from "@/libs/language-preference";
 
 type CopyTree = { readonly [key: string]: CopyTree | CopyPair };
 
@@ -72,12 +73,6 @@ export function translateUiText(value: string): string {
   const leading = value.match(/^\s*/)?.[0] ?? "";
   const trailing = value.match(/\s*$/)?.[0] ?? "";
   return `${leading}${translated}${trailing}`;
-}
-
-export function localeFor(language: AppLanguage): "es-AR" | "en-US" | "pt-BR" {
-  if (language === "en") return "en-US";
-  if (language === "pt") return "pt-BR";
-  return "es-AR";
 }
 
 export { i18n, resources };

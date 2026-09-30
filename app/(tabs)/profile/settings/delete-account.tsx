@@ -25,7 +25,7 @@ import { useTranslation } from "react-i18next";
 import { useLocalizedAlert } from "@/hooks/use-localized-alert";
 
 const webFrontend =
-  process.env.EXPO_PUBLIC_WEB_FRONTEND || "https://entrediagonales.vercel.app";
+  process.env.EXPO_PUBLIC_WEB_FRONTEND || "https://entrediagonales.app";
 const deletionInfoUrl = `${webFrontend}/eliminar-cuenta`;
 
 export default function DeleteAccount() {

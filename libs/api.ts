@@ -18,6 +18,8 @@ import {
   UserAchievementApiResponse,
 } from "@/types";
 import { getPostHogCorrelationHeaders } from "@/libs/telemetry";
+import { getPreferredLocale } from "@/libs/language-preference";
+import { setDefaultAcceptLanguage } from "@/libs/language-preference-core";
 
 const apiBaseUrl =
   process.env.EXPO_PUBLIC_API_URL ||
@@ -28,6 +30,7 @@ async function posthogFetch(
   init: RequestInit = {},
 ) {
   const headers = new Headers(init.headers);
+  setDefaultAcceptLanguage(headers, await getPreferredLocale());
   Object.entries(getPostHogCorrelationHeaders()).forEach(([name, value]) => {
     headers.set(name, value);
   });

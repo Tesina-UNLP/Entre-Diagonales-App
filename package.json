@@ -9,6 +9,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
+    "test:language": "node --test scripts/language-preference.test.mjs",
     "lint": "expo lint",
     "check:i18n": "node scripts/check-translations.mjs",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\""
